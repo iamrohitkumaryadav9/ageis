@@ -1,0 +1,19 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.env
+# Downloaded / derived data is reproducible from scripts; only provenance + runbooks are versioned.
+data/raw/**/*.zip
+data/processed/
+data/scenarios/
+artifacts/
+mlruns/
+mlflow.db
+node_modules/
+apps/dashboard/dist/
+*.log
+.local/

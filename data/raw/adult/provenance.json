@@ -1,0 +1,9 @@
+{
+  "dataset": "adult",
+  "source_url": "https://archive.ics.uci.edu/static/public/2/adult.zip",
+  "sha256": "7537312dd56c2b98035880805ce99e68183a30ee468aa5329d6df0fbb3cc21bb",
+  "bytes": 620237,
+  "retrieved_at": "2026-11-11T07:42:35+00:00",
+  "citation": "Becker, B. & Kohavi, R. (1996). Adult. UCI ML Repository. doi:10.24432/C5XW20",
+  "license": "CC BY 4.0 (UCI Machine Learning Repository)"
+}
