@@ -47,6 +47,10 @@ class Settings(BaseSettings):
     ollama_max_retries: int = 1
     ollama_num_thread: int | None = None
 
+    # --- runbook retrieval ----------------------------------------------
+    # lexical | hybrid. Hybrid adds local embeddings; see docs/decisions.md (D10) for the measurement.
+    rag_method: str = "lexical"
+
     # --- agent bounds ----------------------------------------------------
     max_tool_calls: int = Field(default=5, ge=0, le=5)
     tool_timeout_s: float = 30.0

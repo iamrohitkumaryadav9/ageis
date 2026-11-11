@@ -61,6 +61,18 @@ def _fit(reference: np.ndarray, current: np.ndarray) -> dict:
     if nonzero.sum() >= 5:
         factor = float(np.median(c[nonzero] / r[nonzero]))
         scale_un = float(np.mean(np.abs(c - factor * r))) / total
+    else:
+        # Zero-inflated feature: most quantiles are 0 for both samples, so fit the factor on
+        # the non-zero values. A rescale keeps zeros at zero; a shift would have moved them.
+        ref_nz, cur_nz = reference[reference != 0], current[current != 0]
+        zeros_kept = abs((reference == 0).mean() - (current == 0).mean()) < 0.05
+        if zeros_kept and len(ref_nz) >= 30 and len(cur_nz) >= 30:
+            rq, cq = np.quantile(ref_nz, probs), np.quantile(cur_nz, probs)
+            ratios = cq[rq != 0] / rq[rq != 0]
+            if ratios.size >= 5:
+                factor = float(np.median(ratios))
+                spread = float(np.mean(np.abs(cq - rq))) or 1.0
+                scale_un = float(np.mean(np.abs(cq - factor * rq))) / spread
     out.update(
         shift_offset=offset,
         shift_unexplained=shift_un,

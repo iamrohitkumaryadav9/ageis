@@ -350,3 +350,14 @@ def test_diagnosis_does_not_mutate_inputs(ctx):
     )
     deterministic_diagnosis(inp, result)
     pd.testing.assert_frame_equal(result.current, before)
+
+
+def test_scale_fit_on_mostly_zero_feature_uses_nonzero_values():
+    """92% zeros: every central quantile is 0, so the factor must come from the non-zero tail."""
+    rng = np.random.default_rng(3)
+    ref = np.where(rng.random(8000) < 0.92, 0.0, rng.gamma(2, 4000, 8000))
+    cur = np.where(rng.random(2000) < 0.92, 0.0, rng.gamma(2, 4000, 2000))
+    scaled = _fit(ref, cur * 100)
+    assert scaled["pattern"] == "scale" and scaled["scale_factor"] == pytest.approx(100, rel=0.25)
+    assert _fit(ref, cur * 0.01)["pattern"] == "scale"
+    assert _fit(ref, cur + 3000)["pattern"] == "shift"

@@ -75,7 +75,8 @@ def shap_importances(
     transformed = preprocess.transform(sample[features])
     names = preprocess.get_feature_names_out()
     if hasattr(estimator, "coef_"):
-        explainer = shap.LinearExplainer(estimator, transformed)
+        background = shap.maskers.Independent(transformed, max_samples=len(sample))
+        explainer = shap.LinearExplainer(estimator, background)
         kind = "linear"
     else:
         explainer = shap.TreeExplainer(estimator)
