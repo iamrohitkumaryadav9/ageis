@@ -88,3 +88,71 @@ def adult_model(adult_splits, adult_contract, registry) -> ModelRecord:
 def adult_model_v0(adult_splits, adult_contract, registry) -> ModelRecord:
     """An older, weaker (heavily regularised) version, for version comparison and rollback."""
     return _register(ADULT, adult_splits, adult_contract, registry, "adult-test-v0", C=0.001)
+
+
+class MonitorContext:
+    """Bundles everything needed to build scenarios and monitor them for one dataset."""
+
+    def __init__(self, spec, splits, contract, registry, record, workdir):
+        self.spec, self.contract, self.registry, self.record = spec, contract, registry, record
+        self.reference = splits["validation"]
+        self.production = splits["production"]
+        self.workdir = workdir
+
+    def scenario(self, fault_id, severity="high", seed=1, n_rows=2000):
+        from aegis.faults.scenarios import build_scenario
+
+        return build_scenario(
+            self.spec,
+            self.production,
+            self.registry,
+            self.record.version,
+            fault_id=fault_id,
+            severity=severity,
+            seed=seed,
+            n_rows=n_rows,
+            workdir=self.workdir,
+        )
+
+    def clean(self, seed=1, n_rows=2000):
+        return self.scenario("CLEAN", "none", seed, n_rows)
+
+    def monitor(self, current, artifact_path=None, ingestion=None, cfg=None):
+        from aegis.monitoring.engine import MonitoringInput, run_monitoring
+        from aegis.schemas.deployment import IngestionConfig
+
+        return run_monitoring(
+            MonitoringInput(
+                self.spec,
+                self.contract,
+                self.reference,
+                current,
+                self.registry,
+                self.record.version,
+                artifact_path,
+                ingestion or IngestionConfig(),
+            ),
+            cfg,
+        )
+
+    def run(self, fault_id, severity="high", seed=1, n_rows=2000):
+        scenario = self.scenario(fault_id, severity, seed, n_rows)
+        return scenario, self.monitor(scenario.current, scenario.artifact_path)
+
+
+@pytest.fixture(scope="session")
+def ctx(adult_splits, adult_contract, registry, adult_model, adult_model_v0, tmp_path_factory):
+    return MonitorContext(
+        ADULT, adult_splits, adult_contract, registry, adult_model, tmp_path_factory.mktemp("scn")
+    )
+
+
+def triggered(result, check=None, monitor=None, feature=None):
+    """Triggered findings of a monitoring result, optionally filtered."""
+    return [
+        f
+        for f in result.report.triggered
+        if (check is None or f.check == check)
+        and (monitor is None or f.monitor == monitor)
+        and (feature is None or f.feature == feature)
+    ]
