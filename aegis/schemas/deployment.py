@@ -23,6 +23,9 @@ class DeploymentState(BaseModel):
     dataset: str
     model_version: str
     ingestion: IngestionConfig = Field(default_factory=IngestionConfig)
+    #: Artifact actually being served, relative to the artifacts directory. ``None`` means the
+    #: registry copy of ``model_version``. Only deployment tooling sets this; no API accepts a path.
+    serving_artifact: str | None = None
     quarantined: bool = False  # incoming batches are held and not used for decisions/training
     retraining_blocked: bool = False
 

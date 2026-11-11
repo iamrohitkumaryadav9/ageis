@@ -70,3 +70,7 @@ markers = [
 
 [tool.coverage.run]
 source = ["aegis"]
+
+[tool.ruff.lint.flake8-bugbear]
+# FastAPI's dependency markers are designed to be used as argument defaults.
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Query", "fastapi.File", "fastapi.Form", "fastapi.Header", "apps.api.deps.require"]

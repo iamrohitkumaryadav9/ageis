@@ -32,6 +32,8 @@ class Settings(BaseSettings):
     api_tokens: str = ""
     max_upload_bytes: int = 20 * 1024 * 1024
     max_upload_rows: int = 200_000
+    # Separation of duties: the approver must differ from whoever created the remediation.
+    require_distinct_approver: bool = False
 
     # --- local LLM (Ollama) ---------------------------------------------
     llm_enabled: bool = True

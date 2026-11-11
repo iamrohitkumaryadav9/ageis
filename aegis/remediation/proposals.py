@@ -30,6 +30,7 @@ def candidate_state(state: DeploymentState, proposal: RemediationProposal) -> De
     elif proposal.action in (A.RESTORE_MODEL_VERSION, A.RETRAIN_CANDIDATE):
         if p.get("version"):
             new.model_version = p["version"]
+        new.serving_artifact = None  # serve the registry copy of that version
     elif proposal.action is A.QUARANTINE_BATCH:
         new.quarantined = True
         new.retraining_blocked = bool(p.get("block_retraining", False))
