@@ -1,0 +1,119 @@
+# AEGIS local stack.
+#
+#   cp .env.example .env        # then edit the tokens
+#   docker compose up -d --build
+#
+#   dashboard  http://localhost:8080      API  http://localhost:8000/docs      MLflow  http://localhost:5000
+#
+# Optional profiles:
+#   --profile llm       run Ollama in a container (otherwise the API reports the LLM as unavailable
+#                       and uses its deterministic diagnosis path)
+#   --profile tracing   run Jaeger and export OpenTelemetry traces to it (http://localhost:16686)
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: aegis
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-aegis}
+      POSTGRES_DB: aegis
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aegis -d aegis"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/api.Dockerfile
+    image: aegis-api:local
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      AEGIS_DATABASE_URL: postgresql+psycopg://aegis:${POSTGRES_PASSWORD:-aegis}@postgres:5432/aegis
+      AEGIS_API_TOKENS: ${AEGIS_API_TOKENS:?set AEGIS_API_TOKENS in .env (see .env.example)}
+      AEGIS_OLLAMA_BASE_URL: ${AEGIS_OLLAMA_BASE_URL:-http://ollama:11434}
+      AEGIS_OLLAMA_MODEL: ${AEGIS_OLLAMA_MODEL:-qwen3:4b}
+      AEGIS_OLLAMA_TIMEOUT_S: ${AEGIS_OLLAMA_TIMEOUT_S:-180}
+      AEGIS_LLM_ENABLED: ${AEGIS_LLM_ENABLED:-true}
+      AEGIS_OTLP_ENDPOINT: ${AEGIS_OTLP_ENDPOINT:-}
+      AEGIS_MLFLOW_TRACKING_URI: sqlite:////app/artifacts/mlflow.db
+    volumes:
+      - aegis-data:/app/data
+      - aegis-artifacts:/app/artifacts
+      - aegis-mlruns:/app/mlruns
+      - ./data/runbooks:/app/data/runbooks:ro
+    ports:
+      - "127.0.0.1:8000:8000"
+    restart: unless-stopped
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/dashboard.Dockerfile
+    image: aegis-dashboard:local
+    depends_on:
+      - api
+    ports:
+      - "127.0.0.1:8080:80"
+    restart: unless-stopped
+
+  mlflow:
+    image: aegis-api:local
+    depends_on:
+      api:
+        condition: service_healthy
+    entrypoint: ["mlflow", "server", "--backend-store-uri", "sqlite:////app/artifacts/mlflow.db",
+                 "--host", "0.0.0.0", "--port", "5000"]
+    environment:
+      MLFLOW_SERVER_ALLOWED_HOSTS: "localhost:5000,127.0.0.1:5000"
+    volumes:
+      - aegis-artifacts:/app/artifacts
+      - aegis-mlruns:/app/mlruns
+    ports:
+      - "127.0.0.1:5000:5000"
+    healthcheck:
+      disable: true
+    restart: unless-stopped
+
+  ollama:
+    profiles: ["llm"]
+    image: ollama/ollama:latest
+    environment:
+      OLLAMA_NUM_PARALLEL: "1"
+      OLLAMA_MAX_LOADED_MODELS: "1"
+      OLLAMA_KEEP_ALIVE: 2m
+    volumes:
+      - ollama:/root/.ollama
+    restart: unless-stopped
+
+  ollama-pull:
+    profiles: ["llm"]
+    image: ollama/ollama:latest
+    depends_on:
+      - ollama
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+    entrypoint: ["sh", "-c", "sleep 3 && ollama pull ${AEGIS_OLLAMA_MODEL:-qwen3:4b}"]
+    restart: "no"
+
+  jaeger:
+    profiles: ["tracing"]
+    image: jaegertracing/all-in-one:1.62.0
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports:
+      - "127.0.0.1:16686:16686"
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  aegis-data:
+  aegis-artifacts:
+  aegis-mlruns:
+  ollama:

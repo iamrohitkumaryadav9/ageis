@@ -37,14 +37,26 @@ def inspection_evidence(inspection: FeatureInspection) -> Evidence:
 
 
 def features_worth_inspecting(evidence: list[Evidence], limit: int = MAX_INSPECTIONS) -> list[str]:
-    """Drifted numeric features, strongest first: the ones where shift-vs-scale matters."""
-    drifted = [
-        e
-        for e in evidence
-        if e.data.get("check") == "numeric_drift" and e.data.get("polarity") == "anomaly"
-    ]
-    drifted.sort(key=lambda e: -(e.data.get("observed") or 0.0))
-    return [e.feature for e in drifted if e.feature][:limit]
+    """Numeric features whose change needs characterising (shift or scale?), strongest first.
+
+    Drifted features come first, by PSI. Features with out-of-range values but no drift finding
+    follow: a rescaled sparse feature (mostly zeros) can leave the bulk of its distribution
+    untouched, so drift tests stay quiet while a few values land far outside the contract.
+    """
+
+    def anomalies(check: str) -> list[Evidence]:
+        return [
+            e
+            for e in evidence
+            if e.data.get("check") == check and e.data.get("polarity") == "anomaly"
+        ]
+
+    drifted = sorted(anomalies("numeric_drift"), key=lambda e: -(e.data.get("observed") or 0.0))
+    ranged = sorted(
+        anomalies("range_violation_rate"), key=lambda e: -(e.data.get("observed") or 0.0)
+    )
+    ordered = list(dict.fromkeys(e.feature for e in [*drifted, *ranged] if e.feature))
+    return ordered[:limit]
 
 
 def deterministic_diagnosis(

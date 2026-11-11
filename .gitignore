@@ -17,3 +17,4 @@ node_modules/
 apps/dashboard/dist/
 *.log
 .local/
+results/aegis-ir/smoke/

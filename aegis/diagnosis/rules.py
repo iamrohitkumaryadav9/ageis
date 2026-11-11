@@ -215,9 +215,25 @@ def _numeric(ix: EvidenceIndex) -> list[Hypothesis]:
             scale_sup += [e] + ([in_range] if in_range else [])
             scale_feats.append(e.feature)
     for feature, e in ranged.items():  # out-of-range values with no drift finding
-        if feature not in {d.feature for d in drifted}:
+        if feature in {d.feature for d in drifted}:
+            continue
+        pattern_ev = patterns.get(feature)
+        pattern = pattern_ev.data.get("pattern") if pattern_ev else None
+        if pattern == "scale":  # e.g. a sparse feature: few non-zero values, all multiplied
+            scale_fit, scale_sup = max(scale_fit, 0.88), [*scale_sup, e, pattern_ev]
+        elif pattern == "shift":
+            shift_fit, shift_sup = max(shift_fit, 0.7), [*shift_sup, e, pattern_ev]
+            shift_feats.append(feature)
+            scale_fit, scale_sup, scale_con = (
+                max(scale_fit, 0.2),
+                [*scale_sup, e],
+                [*scale_con, pattern_ev],
+            )
+        else:
             scale_fit, scale_sup = max(scale_fit, 0.5), [*scale_sup, e]
-            scale_feats.append(feature)
+            if pattern is None:
+                uninspected.append(feature)
+        scale_feats.append(feature)
     missing = [f"additive-vs-multiplicative pattern for {uninspected}"] if uninspected else []
     out = []
     if scale_fit:

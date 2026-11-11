@@ -1,0 +1,15 @@
+.git
+.venv
+.local
+node_modules
+apps/dashboard/node_modules
+apps/dashboard/dist
+artifacts
+mlruns
+data/raw
+data/processed
+data/scenarios
+results
+tests
+**/__pycache__
+.env

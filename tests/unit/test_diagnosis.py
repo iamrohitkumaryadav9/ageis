@@ -361,3 +361,35 @@ def test_scale_fit_on_mostly_zero_feature_uses_nonzero_values():
     assert scaled["pattern"] == "scale" and scaled["scale_factor"] == pytest.approx(100, rel=0.25)
     assert _fit(ref, cur * 0.01)["pattern"] == "scale"
     assert _fit(ref, cur + 3000)["pattern"] == "shift"
+
+
+def test_range_violation_without_drift_is_inspected_and_recognised_as_scaling(ctx):
+    """A x60 error on a ~95%-zero feature moves too little mass for drift tests, but the few
+    non-zero values land far outside the contracted range."""
+    batch = ctx.clean(seed=8).current.copy()
+    batch["capital_loss"] = batch["capital_loss"] * 60
+    result = ctx.monitor(batch)
+    checks = {(f.check, f.feature) for f in result.report.triggered}
+    assert ("range_violation_rate", "capital_loss") in checks and (
+        "numeric_drift",
+        "capital_loss",
+    ) not in checks
+    inp = MonitoringInput(
+        ctx.spec, ctx.contract, ctx.reference, batch, ctx.registry, ctx.record.version
+    )
+    evidence, diagnosis = deterministic_diagnosis(inp, result)
+    assert features_worth_inspecting(evidence) == ["capital_loss"]
+    assert diagnosis.top.root_cause is RootCause.SCALING_ERROR and diagnosis.top.confidence >= 0.85
+    pattern = next(e for e in evidence if e.data.get("check") == "feature_pattern")
+    assert pattern.data["pattern"] == "scale" and pattern.data["scale_factor"] == pytest.approx(
+        60, rel=0.2
+    )
+    assert pattern.evidence_id in diagnosis.top.supporting_evidence_ids
+
+
+def test_uninspected_range_violation_asks_for_inspection():
+    diagnosis = rank_hypotheses(
+        [ev("r1", "range_violation_rate", feature="capital_loss", observed=0.04)]
+    )
+    assert diagnosis.top.root_cause is RootCause.SCALING_ERROR and diagnosis.top.confidence == 0.5
+    assert any("additive-vs-multiplicative" in m for m in diagnosis.top.missing_evidence)
