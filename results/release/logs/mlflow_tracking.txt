@@ -5,4 +5,4 @@ tests/integration/test_tracking.py::test_run_is_created_logged_and_terminated
     _SESSION_TRACE_METADATA = aliased(SqlTraceMetadata)
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-18 passed, 1 warning in 53.43s
+18 passed, 1 warning in 43.76s

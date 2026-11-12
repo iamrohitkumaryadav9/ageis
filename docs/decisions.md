@@ -146,3 +146,14 @@ Frontend only: `vitest`, `jsdom`, `@testing-library/react`, `@testing-library/do
 `@testing-library/user-event` (component tests on the existing Vite configuration) and
 `playwright` (the browser check). No Python dependency and no runtime dependency was added;
 `uv.lock` is unchanged.
+
+
+### D24 - An LLM disagreement neither promotes nor vetoes
+Before: when the model ranked a cause the rule engine did not support, that cause was listed
+first (capped at 0.45), which made the diagnosis "insufficient" and stopped any proposal. The
+model could not cause an action, but it could block one, and it could push a well-supported rule
+hypothesis out of first place simply by omitting it. After: the merged ranking is ordered by
+evidence fit, so the rule engine's hypothesis leads whenever it is better supported and the
+decision is the deterministic one. The model's cause stays on record, capped, with
+`ranked_by = llm`. The reasoning: "the LLM is not the source of truth" has to hold in both
+directions, and every state-changing action still needs sandbox validation and a human.

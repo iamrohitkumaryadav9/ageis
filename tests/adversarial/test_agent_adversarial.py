@@ -234,28 +234,58 @@ def test_causal_overclaims_are_replaced_and_counted(ctx):
     assert top.confidence <= min(rules.top.confidence + 0.15, 0.99) < 1.0
 
 
-def test_llm_only_cause_is_capped_below_the_action_threshold_and_policy_blocks_it(ctx):
-    """The LLM insists on a cause the rules do not support, citing a real anomaly."""
+def test_llm_only_cause_is_capped_and_cannot_displace_or_block_the_rule_decision(ctx):
+    """The LLM insists on a cause the rules do not support, citing a real anomaly.
+
+    Its cause is kept on record, capped below the action threshold, and listed *below* the
+    rule engine's better-supported hypothesis. The deterministic decision is unchanged: the
+    model can neither promote its own cause nor veto the rule engine's.
+    """
 
     def stubborn(body):
         return ranking_from_prompt("artifact_mismatch", 0.99)(body)
 
+    expected = baseline(ctx)
     fake = FakeOllama({"plan": good_plan(), "rank": stubborn})
-    final, tools, _, _ = investigate(
+    final, _tools, _, _ = investigate(
         ctx, ctx.scenario("F04", "high", seed=4), llm=fake.client(), use_llm_explain=False
     )
-    top = final["diagnosis"]["hypotheses"][0]
-    assert top["root_cause"] == "artifact_mismatch" and top["confidence"] <= 0.45
-    assert final["diagnosis"]["sufficient_evidence"] is False
-    assert final["proposal"]["action"] == "investigate_further"
-    assert (
-        final["policy_decision"]["outcome"] == "INVESTIGATE_MORE"
-        and not final["approval_requested"]
-    )
-    assert "run_candidate_validation" not in [t.tool for t in tools.traces]
+    hypotheses = final["diagnosis"]["hypotheses"]
+    assert hypotheses[0]["root_cause"] == "scaling_error" and hypotheses[0]["ranked_by"] == "rules"
+    stubborn_cause = next(h for h in hypotheses if h["root_cause"] == "artifact_mismatch")
+    assert stubborn_cause["ranked_by"] == "llm" and stubborn_cause["confidence"] <= 0.45
+    assert hypotheses.index(stubborn_cause) > 0
+    confidences = [h["confidence"] for h in hypotheses]
+    assert confidences == sorted(confidences, reverse=True)
+    assert same_decision(final, expected)  # neither promoted nor vetoed by the model
+    assert final["proposal"]["target_root_cause"] == "scaling_error"
+    # the policy still refuses to act on the model's cause: it is below the action threshold
+    assert stubborn_cause["confidence"] < 0.60
     assert (
         final["rule_diagnosis"]["hypotheses"][0]["root_cause"] == "scaling_error"
     )  # disagreement is auditable
+
+
+def test_llm_only_cause_alone_stays_below_the_action_threshold(ctx):
+    """With no rule hypothesis to lead, an LLM-only cause cannot trigger an action."""
+    evidence, _ = evidence_for(ctx)
+    anomalies = [e.evidence_id for e in evidence if e.data.get("polarity") == "anomaly"]
+    ranking = LLMRanking.model_validate(
+        {
+            "ranking": [
+                {
+                    "root_cause": "scaling_error",
+                    "confidence": 0.99,
+                    "supporting_evidence_ids": anomalies[:3],
+                    "reasoning": "Consistent with a unit error.",
+                }
+            ]
+        }
+    )
+    validated, _ = validate_ranking(ranking, evidence, None)  # no rule engine at all
+    assert validated is not None
+    assert validated.hypotheses[0].confidence <= 0.45
+    assert validated.sufficient_evidence is False
 
 
 def test_explanation_claiming_approval_or_execution_is_discarded(ctx):
