@@ -10,6 +10,7 @@ from sqlalchemy import func, select
 
 from aegis.ingestion.datasets import DATASETS
 from aegis.observability.tracing import recent_spans
+from aegis.remediation.reconciliation import events_from_audit, reconcile
 from aegis.services.core import AegisService
 from aegis.services.errors import Principal
 from aegis.storage import models as m
@@ -141,6 +142,50 @@ def audit(
             limit=limit,
             offset=offset,
         )
+
+
+@router.get("/remediation-lifecycle/reconciliation")
+def lifecycle_reconciliation(
+    incident_id: str | None = Query(None, max_length=40),
+    service: AegisService = Depends(get_service),
+    _: Principal = Depends(require("viewer")),
+) -> dict:
+    """Account for every remediation record in the audit trail (optionally for one incident).
+
+    Missing, duplicated or out-of-order records are returned as ``failures``; ``reconciled`` is
+    true only when there are none. Proposals still waiting for a human are open, not failed.
+    """
+    filters = [m.AuditEvent.entity_type == "remediation"]
+    if incident_id:
+        filters.append(m.AuditEvent.incident_id == incident_id)
+    with service.db.session() as session:
+        rows = session.scalars(select(m.AuditEvent).where(*filters).order_by(m.AuditEvent.id)).all()
+        audit_rows = [
+            {
+                "id": r.id,
+                "action": r.action,
+                "entity_id": r.entity_id,
+                "incident_id": r.incident_id,
+                "outcome": r.outcome,
+                "actor": r.actor,
+                "detail": r.detail,
+            }
+            for r in rows
+        ]
+        remediations = session.scalar(
+            select(func.count())
+            .select_from(m.Remediation)
+            .where(*([m.Remediation.incident_id == incident_id] if incident_id else []))
+        )
+    report = reconcile(
+        events_from_audit(audit_rows),
+        expected_proposals=int(remediations or 0),
+        require_policy_events=False,
+    )
+    report["source"] = "audit_events"
+    report["scope"] = {"incident_id": incident_id}
+    report["denied_attempts_excluded"] = sum(r["outcome"] == "denied" for r in audit_rows)
+    return report
 
 
 @router.get("/models")

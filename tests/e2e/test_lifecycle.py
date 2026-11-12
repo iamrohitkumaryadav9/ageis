@@ -162,6 +162,19 @@ def test_full_lifecycle_approve_execute_audit_rollback(api, ctx):
         "incident_detected"
     ]  # the fault is visible again once the fix is removed
 
+    # Every remediation record in the audit trail is accounted for by the reconciler.
+    report = api.get(
+        f"/remediation-lifecycle/reconciliation?incident_id={incident['id']}",
+        headers=auth("viewer"),
+    ).json()
+    assert report["reconciled"], report["failures"]
+    assert report["proposals"] == 1
+    assert report["proposal_statuses"] == {remediation["id"]: "rolled_back"}
+    assert report["denied_attempts_excluded"] >= 1  # the operator's refused approval
+    assert report["stage_counts"]["EXECUTED"] == 1 and report["stage_counts"]["ROLLED_BACK"] == 1
+    assert report["rates"]["rollback_success_rate"]["denominator"] == 1
+    assert api.get("/remediation-lifecycle/reconciliation").status_code == 401
+
 
 def test_full_lifecycle_rejection_path(api, ctx):
     _, _, incident, _ = run_to_pending_approval(api, ctx, fault="F06")
@@ -193,6 +206,10 @@ def test_full_lifecycle_rejection_path(api, ctx):
         ]
     ]
     assert trail[-1] == "remediation.reject" and "remediation.execute" not in trail
+    report = api.get("/remediation-lifecycle/reconciliation", headers=auth("viewer")).json()
+    assert report["reconciled"], report["failures"]
+    assert report["proposal_statuses"][remediation["id"]] == "rejected_by_approver"
+    assert report["stage_counts"]["EXECUTED"] == 0
 
 
 def test_lifecycle_with_llm_offline_still_completes_and_says_so(api, ctx, service):
