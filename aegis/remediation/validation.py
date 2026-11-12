@@ -28,6 +28,7 @@ from aegis.models.metrics import best_f1_threshold
 from aegis.models.training import build_pipeline, candidate_estimators, predict_proba
 from aegis.monitoring.config import MonitoringConfig
 from aegis.monitoring.engine import MonitoringInput, MonitoringResult, run_monitoring
+from aegis.monitoring.relationship import hanley_mcneil_se
 from aegis.remediation.proposals import candidate_state
 from aegis.schemas.deployment import DeploymentState
 from aegis.schemas.findings import Severity
@@ -74,13 +75,22 @@ def _perf_checks(before: MonitoringResult, after: MonitoringResult) -> list[Vali
                 "regression",
             )
         ]
-    floor = min(ref_auc - PERFORMANCE_TOLERANCE, before_auc if before_auc is not None else 1.0)
+    # "Not worse than before" needs a noise allowance: two AUCs measured on the same few
+    # thousand rows differ by sampling error alone. Two Hanley-McNeil standard errors is the
+    # allowance; without it a correct fix is rejected for an AUC dip well inside the noise.
+    current = after.performance.get("current") or {}
+    n = int(current.get("n") or 0)
+    n_pos = round(n * float(current.get("positive_rate_true") or 0.0))
+    noise = 2 * hanley_mcneil_se(after_auc, n_pos, n - n_pos) if 0 < n_pos < n else 0.0
+    before_floor = before_auc - noise if before_auc is not None else 1.0
+    floor = min(ref_auc - PERFORMANCE_TOLERANCE, before_floor)
     return [
         _check(
             "performance_not_degraded",
             after_auc >= floor - 1e-9,
             f"ROC-AUC after {after_auc:.3f} vs before "
-            f"{'n/a' if before_auc is None else f'{before_auc:.3f}'}, reference {ref_auc:.3f}",
+            f"{'n/a' if before_auc is None else f'{before_auc:.3f}'}, reference {ref_auc:.3f} "
+            f"(floor {floor:.3f}; sampling-noise allowance {noise:.3f})",
             "regression",
         )
     ]

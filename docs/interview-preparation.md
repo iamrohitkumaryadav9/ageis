@@ -207,18 +207,28 @@ Weaknesses to volunteer before being asked:
 
 ## 13. Ablation findings
 
-Fill in from `docs/benchmark.md` after running it; the shape of the answer:
+Measured on AEGIS-IR run `main` (see `docs/benchmark.md`).
 
-- A -> B: where rules help is where symptoms overlap: scaling versus shift (quantile-fit
-  evidence), and performance loss explained away by an input change.
-- B -> D: the full agent should match B on accuracy; its cost is latency (seconds to minutes).
-  Report the unsupported-claim and fabricated-id counts as the evidence that validation works.
-- C: the LLM alone, without tools or rules, is the honest measure of what the model contributes
-  unaided.
+- **A -> B (alerts -> diagnostics + rules): Top-1 0.815 -> 0.966 on 119 detected faults**, intervals
+  0.74-0.88 and 0.92-0.99. This is the one difference the benchmark has the power to support. The
+  gain comes from overlapping symptoms: scaling against shift (quantile-fit evidence) and a
+  performance drop that an input change explains away.
+- **B -> D (add the LLM agent): 19/20 and 19/20.** No accuracy gain, and partly by construction,
+  because the LLM can move a rule score by at most 0.15. The cost is latency: p50 84 s against
+  under 1 s.
+- **C (the 4 GB model alone, no tools or rules): 11/20**, with three unusable outputs. Its typical
+  miss is naming concept drift at a stated confidence of 0.95. n=20, so the interval is 0.34-0.74.
+- **Validation counters in D**: 13 of 30 ranked claims dropped as unsupported, 17 fabricated
+  evidence ids stripped, 2 invalid tool arguments rejected, 0 unauthorized tool executions.
+- B's misses: three low-severity scaling errors and one medium leakage case.
 
-The useful sentence: "the LLM did not improve Top-1 over the rule engine on this benchmark; its
-value is in tool selection, explanation, and as a second ranking whose disagreement with the
-rules is recorded and can be reviewed."
+The useful sentence: "The LLM did not improve Top-1 over the rule engine on this benchmark. Its
+value is tool selection and explanation, and the validation counters show why it is not allowed to
+be the source of truth."
+
+What I would not claim: that D is "as good as" B in general (n=20), that the false-positive rate
+is zero (0/50 bounds it under about 7%), or that these synthetic faults represent production
+incidents.
 
 ## 14. Limitations and trade-offs
 

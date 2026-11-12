@@ -159,6 +159,16 @@ def collect_incident(state, runtime):
             f"LLM investigation unavailable: {health.detail or 'Ollama unreachable'}; "
             "continuing with deterministic diagnosis"
         ]
+    elif health.available:
+        # Load the model now, on its own time budget, so a cold start is not mistaken for a
+        # slow inference call by the per-request timeout.
+        loaded, seconds, detail = runtime.llm.warm(health.active_model)
+        if not loaded:
+            update["llm_status"] = "unavailable"
+            update["errors"] = [
+                f"LLM investigation unavailable: {detail} (after {seconds:.0f}s); "
+                "continuing with deterministic diagnosis"
+            ]
     return update
 
 

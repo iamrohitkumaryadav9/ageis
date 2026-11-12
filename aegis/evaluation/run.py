@@ -46,16 +46,28 @@ class ResourceSampler(threading.Thread):
         self._stop = threading.Event()
         self._me = psutil.Process()
 
+    @staticmethod
+    def _ollama_rss() -> int:
+        """RSS of the Ollama server and every descendant.
+
+        The model is held by a runner child process whose name is not guaranteed to
+        contain "ollama", so descendants are followed explicitly.
+        """
+        seen: dict[int, int] = {}
+        for proc in psutil.process_iter(["name"]):
+            try:
+                if "ollama" not in (proc.info["name"] or "").lower():
+                    continue
+                for member in [proc, *proc.children(recursive=True)]:
+                    seen[member.pid] = member.memory_info().rss
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                continue
+        return sum(seen.values())
+
     def run(self) -> None:
         psutil.cpu_percent(interval=None)
         while not self._stop.wait(1.0):
-            ollama = 0
-            for proc in psutil.process_iter(["name", "memory_info"]):
-                try:
-                    if "ollama" in (proc.info["name"] or "").lower() and proc.info["memory_info"]:
-                        ollama += proc.info["memory_info"].rss
-                except (psutil.NoSuchProcess, psutil.AccessDenied):
-                    continue
+            ollama = self._ollama_rss()
             memory = psutil.virtual_memory()
             self.samples.append(
                 {

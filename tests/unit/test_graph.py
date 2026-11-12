@@ -1,3 +1,4 @@
+import httpx
 import pytest
 
 from aegis.agents import graph as graph_module
@@ -262,3 +263,35 @@ def test_investigation_emits_nested_trace_spans(ctx):
     tool_span = next(s for s in in_trace if s["name"] == "tool.execute")
     assert tool_span["attributes"]["tool.status"] == "ok" and tool_span["parent_span_id"]
     assert root["attributes"]["investigation.status"] == final["status"] and root["duration_ms"] > 0
+
+
+def test_model_is_loaded_once_before_the_first_llm_request(ctx):
+    scenario = ctx.scenario("F04", "high", seed=4)
+    fake = FakeOllama(
+        {
+            "plan": good_plan(scenario.truth.affected_features[0]),
+            "rank": ranking_from_prompt("scaling_error"),
+            "explain": {
+                "summary": "Monitoring found a constant-factor change in one feature, which is "
+                "consistent with a unit error. A correction is proposed and awaits an approver.",
+                "operator_checks": ["Confirm the upstream unit with the feature owner."],
+            },
+        }
+    )
+    final, _, _, _ = investigate(ctx, scenario, llm=fake.client())
+    assert final["llm_status"] == "available"
+    assert [load["model"] for load in fake.loads] == ["qwen3:4b"]
+    assert "prompt" not in fake.loads[0]  # a pure load: nothing is generated
+    assert fake.loads[0]["options"]["num_ctx"] == fake.client().settings.ollama_num_ctx
+
+
+def test_model_that_cannot_be_loaded_degrades_to_the_deterministic_path(ctx):
+    scenario = ctx.scenario("F04", "high", seed=4)
+    fake = FakeOllama(load_error=httpx.ReadTimeout("model load timed out"))
+    final, _, _, _ = investigate(ctx, scenario, llm=fake.client())
+    assert final["status"] in {"completed", "awaiting_approval"}
+    assert final["llm_status"] == "unavailable"
+    assert fake.requests == []  # no chat request is attempted against a model that did not load
+    assert any("did not load" in e for e in final["errors"])
+    assert final["diagnosis"]["hypotheses"][0]["root_cause"] == "scaling_error"
+    assert final["diagnosis"]["hypotheses"][0]["ranked_by"] == "rules"

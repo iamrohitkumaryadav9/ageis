@@ -574,11 +574,14 @@ def write_charts(summary: dict, out_dir: Path) -> list[str]:
                 fontsize=9,
                 color="#0b0b0b",
             )
-        ax.set_xticks(range(len(present)), present)
+        ax.set_xticks(
+            range(len(present)),
+            [CONFIG_NAMES[c].replace("  ", "\n", 1).replace(" + ", "\n+ ") for c in present],
+            fontsize=8,
+        )
         ax.set_ylim(0, 1.18)
         ax.yaxis.grid(True, color="#ecebe7", linewidth=0.8)
         _style(ax, title)
-    axes[1].legend(frameon=False, fontsize=8, loc="lower right", labelcolor="#52514e")
     fig.suptitle(
         f"Diagnosis by configuration ({scope}; whiskers: 95% Wilson interval)",
         x=0.01,
@@ -750,8 +753,14 @@ def write_markdown(summary: dict, out_dir: Path, charts: list[str]) -> None:
             "Contradictory evidence cited when a rival exists",
             lambda s: _pct(s["diagnosis"]["contradictory_evidence_handling"]),
         )
-        row("Unsupported claim rate", lambda s: _pct(s["diagnosis"]["unsupported_claim_rate"]))
-        row("Fabricated evidence ids", lambda s: s["diagnosis"]["fabricated_evidence_ids"])
+        row(
+            "LLM claims rejected as unsupported (dropped before output)",
+            lambda s: _pct(s["diagnosis"]["unsupported_claim_rate"]),
+        )
+        row(
+            "Fabricated evidence ids stripped by the validator",
+            lambda s: s["diagnosis"]["fabricated_evidence_ids"],
+        )
         row("Causal over-claims caught", lambda s: s["diagnosis"]["causal_overclaims"])
         row("Validation success rate", lambda s: _pct(s["remediation"]["validation_success_rate"]))
         row(
@@ -824,12 +833,26 @@ def write_markdown(summary: dict, out_dir: Path, charts: list[str]) -> None:
             "Combined peak (MB) | System RAM used, peak (MB) | CPU mean / p95 (%) |",
             "|---|---|---|---|---|---|---|",
         ]
+        uncaptured = False
         for key, r in summary["resources"].items():
+            if r.get("llm") and (r.get("ollama_peak_rss_mb") or 0) < 500:
+                # The sampler of that run matched process names only and missed the runner
+                # child that holds the model. Say so instead of printing a wrong number.
+                uncaptured = True
+                r = {**r, "ollama_peak_rss_mb": "not captured*", "combined_peak_rss_mb": "n/a*"}
             lines.append(
                 f"| {key} | {r.get('duration_s')} | {r.get('python_peak_rss_mb')} | {r.get('ollama_peak_rss_mb')} | "
                 f"{r.get('combined_peak_rss_mb')} | {r.get('system_used_peak_mb')} | "
                 f"{r.get('cpu_percent_mean')} / {r.get('cpu_percent_p95')} |"
             )
+    if summary.get("resources") and uncaptured:
+        lines += [
+            "",
+            "\\* This run's sampler matched process names and missed the Ollama runner child "
+            "process that holds the model, so its figure is withheld. The system-wide column is "
+            "valid. The sampler now follows child processes; a separately measured runner "
+            "figure is in `docs/performance.md`.",
+        ]
     lines += ["", "## Charts", ""] + [f"![{c}](charts/{c})" for c in charts] + [""]
     (out_dir / "report.md").write_text("\n".join(lines))
 

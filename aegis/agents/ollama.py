@@ -133,6 +133,36 @@ class OllamaClient:
         )
         return LLMHealth(True, True, version, models, active, detail)
 
+    def warm(self, model: str) -> tuple[bool, float, str]:
+        """Load ``model`` into memory before the first real request.
+
+        Returns ``(loaded, seconds, detail)``. An empty-prompt generate call makes Ollama load
+        the model with the same context size the chat calls use, so no reload follows.
+        """
+        s = self.settings
+        started = time.perf_counter()
+        body = {
+            "model": model,
+            "keep_alive": s.ollama_keep_alive,
+            "options": {"num_ctx": s.ollama_num_ctx},
+        }
+        try:
+            response = self._client.post(
+                "/api/generate",
+                json=body,
+                timeout=httpx.Timeout(s.ollama_load_timeout_s, connect=3.0),
+            )
+        except httpx.TimeoutException:
+            seconds = time.perf_counter() - started
+            return False, seconds, f"model did not load within {s.ollama_load_timeout_s:.0f}s"
+        except httpx.HTTPError as exc:
+            return False, time.perf_counter() - started, type(exc).__name__
+        seconds = time.perf_counter() - started
+        if response.status_code >= 400:
+            return False, seconds, f"HTTP {response.status_code} while loading {model}"
+        log.info("llm_model_loaded", model=model, seconds=round(seconds, 1))
+        return True, seconds, ""
+
     # ------------------------------------------------------------ structured
     def chat_json(
         self,

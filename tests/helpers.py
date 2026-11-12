@@ -47,11 +47,14 @@ class FakeOllama:
         *,
         models: tuple[str, ...] = ("qwen3:4b",),
         reachable: bool = True,
+        load_error: Exception | None = None,
     ):
         self.replies = replies or {}
         self.models = models
         self.reachable = reachable
         self.requests: list[dict] = []
+        self.load_error = load_error
+        self.loads: list[dict] = []  # model warm-up calls, kept apart from chat requests
         self.hosts: set[str] = set()
 
     def _next(self, purpose: str, body: dict) -> Any:
@@ -71,6 +74,11 @@ class FakeOllama:
         if request.url.path == "/api/tags":
             return httpx.Response(200, json={"models": [{"name": m} for m in self.models]})
         body = json.loads(request.content)
+        if request.url.path == "/api/generate":
+            self.loads.append(body)
+            if self.load_error is not None:
+                raise self.load_error
+            return httpx.Response(200, json={"model": body["model"], "done": True})
         self.requests.append(body)
         if body["model"] not in self.models:
             return httpx.Response(404, json={"error": f"model '{body['model']}' not found"})

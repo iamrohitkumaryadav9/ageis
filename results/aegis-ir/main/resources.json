@@ -1,0 +1,24 @@
+{
+  "with_llm": {
+    "samples": 3986,
+    "python_peak_rss_mb": 421.0,
+    "ollama_peak_rss_mb": 25.2,
+    "combined_peak_rss_mb": 443.3,
+    "system_used_peak_mb": 7071.1,
+    "cpu_percent_mean": 63.5,
+    "cpu_percent_p95": 71.6,
+    "duration_s": 4067.8,
+    "llm": true
+  },
+  "deterministic": {
+    "samples": 344,
+    "python_peak_rss_mb": 402.4,
+    "ollama_peak_rss_mb": 25.2,
+    "combined_peak_rss_mb": 427.6,
+    "system_used_peak_mb": 1660.2,
+    "cpu_percent_mean": 35.2,
+    "cpu_percent_p95": 56.8,
+    "duration_s": 395.6,
+    "llm": false
+  }
+}

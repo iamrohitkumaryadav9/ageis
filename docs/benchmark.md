@@ -140,5 +140,106 @@ The run is resumable: finished scenario/configuration pairs are skipped.
 
 ## Results
 
-<!-- RESULTS -->
-_Pending: filled from `results/aegis-ir/main/report.md` once the run completes._
+Run `main`, 2026-11-11, on the build machine (Intel i5-10210U, 4 cores / 8 threads, 7.7 GB RAM,
+no GPU, WSL2). 170 scenarios: 120 faulty (10 faults x 3 severities x 2 datasets x 2 evaluation
+seeds) and 50 clean controls. The full generated report, with every table, is
+[results/aegis-ir/main/report.md](../results/aegis-ir/main/report.md); the per-scenario rows are in
+`scenarios.jsonl` next to it. The numbers below are copied from that report.
+
+### Engineering targets
+
+| Target | Goal | Observed | Met |
+|---|---|---|---|
+| Drift detection F1 (F01/F02/F04 vs clean controls) | >= 0.90 | 0.957 | yes |
+| Root-cause Recall@3 (configuration B, full grid) | >= 0.80 | 0.975 | yes |
+| Clean-control false-positive rate | <= 0.05 | 0.000 (0/50, 95% CI 0.00-0.07) | yes |
+| Unauthorized tool executions | 0 | 0 | yes |
+| Invalid promotions | 0 | 0 | yes |
+| Validation success on supported faults | >= 0.70 | 0.931 (67/72) | yes |
+
+With 50 clean controls, zero false positives bounds the true rate below about 7%, not at zero.
+
+### Detection
+
+Precision 1.000, recall 0.992 (119/120). The one miss is a low-severity categorical frequency shift
+on `education` in a 3,000-row bank batch: significant on no test after Benjamini-Hochberg
+adjustment. Requiring significance *and* a material effect size beat every single-test rule on
+the same data (F1 0.957 against 0.857 for PSI alone and 0.767 for an unadjusted KS test).
+
+In the windowed stream study, 47 of 54 faults were flagged in the first faulty 500-row window, 2
+were never flagged, and no clean-prefix window (0/126) raised an alarm.
+
+### Diagnosis and the ablation
+
+Full grid, deterministic configurations (119 detected faults):
+
+| | A: alerts only | B: diagnostics + rules |
+|---|---|---|
+| Root-cause Top-1 | 0.815 (97/119, CI 0.74-0.88) | 0.966 (115/119, CI 0.92-0.99) |
+| Recall@3 | 0.950 | 0.975 |
+| Contradicting evidence cited when a rival exists | 0/21 | 29/31 |
+| Investigation time p50 / p95 | under 1 ms | 0.93 s / 4.2 s |
+
+All four configurations on the same 20 scenarios (one per dataset x fault):
+
+| | A | B | C: local LLM alone | D: full AEGIS |
+|---|---|---|---|---|
+| Root-cause Top-1 | 17/20 | 19/20 | 11/20 | 19/20 |
+| Recall@3 | 19/20 | 19/20 | 14/20 | 19/20 |
+| Investigations that produced a diagnosis | 20/20 | 20/20 | 17/20 | 20/20 |
+| LLM claims dropped as unsupported | - | - | 6/31 | 13/30 |
+| Fabricated evidence ids stripped | - | - | 9 | 17 |
+| Investigation time p50 / p95 | under 1 ms | 0.87 s / 4.3 s | 79 s / 194 s | 84 s / 125 s |
+
+What this does and does not show:
+
+- **Rules over raw alerts (A -> B) is the supported result**: +15 points Top-1 on 119 scenarios,
+  with intervals that do not overlap. The gain is where symptoms overlap - scaling against shift,
+  and a performance drop that an input change explains.
+- **The LLM added no diagnostic accuracy (B = D, 19/20).** D's ranking is anchored to the rule
+  score (the LLM may move it by at most 0.15), so this is by construction as much as by
+  measurement. What the LLM contributes is tool selection and the written explanation, at a cost
+  of about 84 s per investigation on this CPU.
+- **The 4 GB model alone is unreliable (C, 11/20)**: it named concept drift as the top cause in
+  most of its misses with a stated confidence of 0.95, and returned unusable output three times.
+  With n=20 the interval is 0.34-0.74; it is clearly worse than B, but the size of the gap is not
+  pinned down.
+- **Validation is doing real work**: in D, 13 of the model's 30 ranked claims were dropped for
+  lacking anomaly evidence and 17 cited evidence ids did not exist. None reached the output. These
+  rows count what the model *attempted*, not what the system reported.
+- B's four misses: three low-severity scaling errors and one medium leakage case, each ranked
+  below concept drift or a plain shift.
+
+### Remediation (configuration B, full grid)
+
+Of 119 investigations: 68 reached a human approval request, 19 were rejected by policy (17 after a
+failed sandbox validation, 2 retraining proposals before validation), and 32 were deferred with no
+action proposed. Sandbox validation passed for 68 of 85 proposals; 16 of the 17 failures are
+retraining candidates that did not pass (12 of them for the relationship-reversal fault, where a
+model retrained on the reversed batch should not be promoted), and one is a scale fix. An executed fix cleared the incident in 67 of 68 cases and rollback restored the
+previous deployment state in 68 of 68. No approval request was raised on clean data.
+
+### Resources
+
+The LLM run took 68 minutes and peaked at 7.1 GB of system RAM in use on a 7.7 GB machine, with
+swap in use: this machine is at the lower limit for `qwen3:4b`. The deterministic run took 6.6
+minutes and about 0.4 GB. See [performance.md](performance.md).
+
+### Two corrections made after the first run
+
+Reported because they change what the numbers mean:
+
+1. The sandbox's "performance not degraded" check compared AUC before and after a fix with no
+   allowance for sampling noise, and rejected a correct scale fix over a 0.004 dip (found by the
+   demo on a non-benchmark seed). It now allows two Hanley-McNeil standard errors. Configuration B
+   was re-run in full with the corrected check; one validation changed from fail to pass (67 -> 68
+   of 85). Configuration D's remediation rows predate the change; all of D's non-retraining
+   validations had already passed and the allowance can only turn a fail into a pass, so its
+   figures are unaffected.
+2. The resource sampler matched process names and missed the `llama-server` child that holds the
+   model, so the Ollama memory figure for the LLM run is withheld rather than reported wrong. The
+   sampler now follows child processes; a separately measured figure is in `performance.md`.
+
+A model warm-up step (loading the model on its own time budget before the first request) was also
+added after the LLM run. It does not change any model output; D's latencies above were measured
+with the model already loaded for all but the first scenario.

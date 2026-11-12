@@ -570,3 +570,42 @@ def test_candidate_state_composes_with_existing_scale_and_is_pure():
         and state.ingestion.unit_scale["age"] == 2.0
     )
     assert np.isclose(candidate_state(new, proposal).ingestion.unit_scale["age"], 0.5)
+
+
+def _perf(auc: float | None, n: int = 2000, positive_rate: float = 0.25):
+    from types import SimpleNamespace
+
+    return SimpleNamespace(
+        performance={
+            "reference": {"roc_auc": 0.93},
+            "current": None
+            if auc is None
+            else {"roc_auc": auc, "n": n, "positive_rate_true": positive_rate},
+        }
+    )
+
+
+@pytest.mark.parametrize(
+    ("before", "after", "passes"),
+    [
+        (0.902, 0.898, True),  # a dip inside sampling noise must not reject a correct fix
+        (0.902, 0.870, False),  # a real regression below both floors is still rejected
+        (0.700, 0.905, True),  # recovery to within tolerance of the reference
+        (0.700, 0.650, False),  # the fix made a bad situation clearly worse
+        (0.950, 0.901, True),  # within the reference tolerance even though lower than before
+    ],
+)
+def test_performance_check_allows_noise_but_not_regression(before, after, passes):
+    from aegis.remediation.validation import _perf_checks
+
+    (check,) = _perf_checks(_perf(before), _perf(after))
+    assert check.name == "performance_not_degraded"
+    assert check.passed is passes, check.detail
+
+
+def test_performance_check_noise_allowance_shrinks_with_sample_size():
+    from aegis.remediation.validation import _perf_checks
+
+    (small,) = _perf_checks(_perf(0.80, n=500), _perf(0.775, n=500))
+    (large,) = _perf_checks(_perf(0.80, n=50000), _perf(0.775, n=50000))
+    assert small.passed and not large.passed

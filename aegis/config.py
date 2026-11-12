@@ -45,6 +45,9 @@ class Settings(BaseSettings):
     ollama_temperature: float = 0.1
     ollama_max_tokens: int = 700
     ollama_timeout_s: float = 120.0
+    # Loading a multi-GB model from a cold page cache can take minutes on a small machine;
+    # it is budgeted separately so it cannot eat the per-request inference timeout.
+    ollama_load_timeout_s: float = 300.0
     ollama_keep_alive: str = "2m"
     ollama_max_retries: int = 1
     ollama_num_thread: int | None = None
