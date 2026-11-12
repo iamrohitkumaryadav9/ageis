@@ -40,7 +40,7 @@ Two rules shape the whole system:
 | Dashboard | React + TypeScript + Vite |
 | Observability | OpenTelemetry traces, Prometheus metrics, structured logs, MLflow |
 | Benchmark | AEGIS-IR: 170 scenarios, four ablation configurations |
-| Tests | 360+ tests: unit, integration (real PostgreSQL), adversarial, end-to-end |
+| Tests | 368 tests (83% line coverage): unit, integration (real PostgreSQL), adversarial, end-to-end |
 
 ## Requirements
 

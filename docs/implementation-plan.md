@@ -61,7 +61,7 @@ is "verified" only if the command or check named next to it was executed and pas
 | 32 | Benchmark runs reproducibly | **partly verified** | full run completed and is resumable with fixed seeds; deterministic configurations were re-run and matched except for the one documented fix. The LLM configurations were run once; small-model output is not guaranteed identical across runs |
 | 33 | CPU/RAM measurements documented | verified with a gap | `docs/performance.md`; per-process Ollama memory was not captured during the benchmark's LLM run (measured separately) |
 | 34 | Docker Compose starts the application | verified | built and started from empty volumes; API, dashboard, MLflow and the `tracing` profile checked; deterministic demo passed against it. The `llm` profile (Ollama in a container) was **not started** |
-| 35 | README supports a fresh local installation | see below | |
+| 35 | README supports a fresh local installation | verified (LLM steps excepted) | fresh `git clone` into an empty directory, then the README quick start as written: `uv sync`, `make data`, `make train`, `make bootstrap` on an empty database, `.env` with generated tokens, `make api`, the demo with `--no-llm`, and `npm ci && npm run build`. The optional Ollama install steps were not repeated in the clone |
 
 Whole suite: 368 passed, 1 deselected (the real-model test), 83% line coverage over `aegis` and
 `apps` (the benchmark runner and report generator are exercised by running them, not by tests).
