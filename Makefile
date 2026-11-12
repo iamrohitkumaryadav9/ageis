@@ -1,4 +1,4 @@
-.PHONY: help setup data train bootstrap test-db-up test-db-down test lint fmt api dashboard ollama benchmark up down
+.PHONY: help setup data train bootstrap test-db-up test-db-down test lint fmt api dashboard ollama benchmark up down test-frontend browser-setup release-verify release-verify-mandatory
 
 PG_TEST := aegis-pg-dev
 DB_URL  ?= postgresql+psycopg://aegis:aegis@localhost:55432/aegis
@@ -58,3 +58,16 @@ up:              ## start the full stack with Docker Compose
 
 down:            ## stop the stack
 	docker compose down
+
+# --- verification -----------------------------------------------------------------
+test-frontend:   ## dashboard unit/component tests (Vitest)
+	cd apps/dashboard && npm test
+
+browser-setup:   ## headless Chromium for the browser check (see docs/release-readiness.md if this lacks system libraries)
+	cd apps/dashboard && npx playwright install chromium-headless-shell
+
+release-verify:  ## run every release gate; writes results/release/release-report.json
+	uv run python -m scripts.release_verify
+
+release-verify-mandatory: ## mandatory gates only (no local LLM needed)
+	uv run python -m scripts.release_verify --skip-optional
