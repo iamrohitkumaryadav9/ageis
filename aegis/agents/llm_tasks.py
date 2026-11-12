@@ -15,6 +15,8 @@ import re
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from aegis.agents import claims as claim_rules
+from aegis.agents.claims import Claim, ClaimCategory, ClaimVerdict, Intervention
 from aegis.agents.ollama import LLMResult, OllamaClient
 from aegis.agents.tools import LLM_SELECTABLE_TOOLS
 from aegis.diagnosis.rules import conclude
@@ -161,6 +163,8 @@ def request_ranking(
     )
 
 
+#: Kept for reference and for callers outside the validator: the original, narrow pattern.
+#: Claim validation no longer relies on it; see :mod:`aegis.agents.claims`.
 OVERCLAIM = re.compile(
     r"\b(caused by|is the cause|the root cause is|proves?|proven|definitely|certainly|undoubtedly|guarantee[sd]?)\b",
     re.IGNORECASE,
@@ -170,10 +174,22 @@ OVERCLAIM = re.compile(
 def validate_ranking(
     ranking: LLMRanking, evidence: list[Evidence], rule_diagnosis: Diagnosis | None
 ) -> tuple[Diagnosis | None, dict]:
-    """Keep only what the evidence store can back. Returns (diagnosis or None, statistics)."""
+    """Keep only what the evidence store can back. Returns (diagnosis or None, statistics).
+
+    Each ranked item is one claim, validated by :func:`aegis.agents.claims.evaluate_claim`:
+
+    * an unknown cause label, a claim with no relevant anomaly evidence, or one that leans on
+      contradicting evidence is dropped;
+    * causal or certain wording in ``reasoning`` is replaced (no intervention evidence can exist
+      at ranking time, so such wording is never supported here);
+    * fabricated, untrusted and irrelevant evidence ids are stripped from what remains.
+
+    ``statistics["claims"]`` holds the counters, ``statistics["claim_records"]`` every verdict,
+    and ``statistics["raw_items"]`` the model's text exactly as received, for later audit.
+    """
     known = {e.evidence_id: e for e in evidence}
     rules = {h.root_cause: h for h in (rule_diagnosis.hypotheses if rule_diagnosis else [])}
-    stats = {
+    stats: dict = {
         "proposed": len(ranking.ranking),
         "accepted": 0,
         "unknown_cause": 0,
@@ -182,37 +198,57 @@ def validate_ranking(
         "overclaims": 0,
         "duplicates": 0,
     }
+    counters = claim_rules.empty_counters()
+    records: list[Claim] = []
     accepted: list[Hypothesis] = []
     seen: set[RootCause] = set()
-    for item in ranking.ranking:
+    for position, item in enumerate(ranking.ranking, start=1):
         try:
             cause = RootCause(item.root_cause.strip().lower())
         except ValueError:
             stats["unknown_cause"] += 1
+            counters["invalid_cause_labels_rejected"] += 1
             continue
         if cause in seen:
             stats["duplicates"] += 1
             continue
-        support = [i for i in dict.fromkeys(item.supporting_evidence_ids) if i in known]
+        reasoning = item.reasoning.strip()
+        claim = claim_rules.evaluate_claim(
+            claim_id=f"RANK-{position}",
+            origin="llm:rank",
+            text=reasoning or cause.value.replace("_", " "),
+            evidence=evidence,
+            cited_ids=list(item.supporting_evidence_ids),
+            causes=[cause],
+            rule_diagnosis=rule_diagnosis,
+            intervention=None,
+            whole_text=True,
+        )
+        records.append(claim)
+        counters = claim_rules.add_counters(counters, claim_rules.count([claim]))
+        fabricated_contra = len(set(item.contradicting_evidence_ids) - set(known))
+        counters["fabricated_evidence_ids_generated"] += fabricated_contra
+        counters["fabricated_evidence_ids_stripped"] += fabricated_contra
+        stats["fabricated_evidence_ids"] += len(claim.fabricated_evidence_ids) + fabricated_contra
+        if claim.category in (ClaimCategory.UNSUPPORTED_CLAIM, ClaimCategory.CONTRADICTORY_CLAIM):
+            stats["unsupported"] += 1  # dropped: nothing relevant and anomalous stands behind it
+            continue
+        support = [i for i in claim.valid_evidence_ids if i in set(item.supporting_evidence_ids)]
         contra = [
             i
             for i in dict.fromkeys(item.contradicting_evidence_ids)
             if i in known and i not in support
         ]
-        stats["fabricated_evidence_ids"] += len(
-            set(item.supporting_evidence_ids) - set(known)
-        ) + len(set(item.contradicting_evidence_ids) - set(known))
-        if not any(known[i].data.get("polarity") == "anomaly" for i in support):
-            stats["unsupported"] += 1  # a claim with no real anomaly evidence behind it is dropped
-            continue
         rule = rules.get(cause)
-        reasoning = item.reasoning.strip()
-        if OVERCLAIM.search(reasoning):
+        if (
+            claim.category is ClaimCategory.CAUSAL_CLAIM
+            and claim.verdict is not ClaimVerdict.SUPPORTED
+        ):
             stats["overclaims"] += 1
             reasoning = (
                 rule.reasoning
                 if rule
-                else (f"The cited evidence is consistent with {cause.value.replace('_', ' ')}.")
+                else claim_rules.hedged_rewrite([cause.value], claim.subject_features)
             )
         # Confidence may move only a little from the deterministic score, and a cause the
         # rules do not support at all stays below the level at which anything may act on it.
@@ -241,6 +277,18 @@ def validate_ranking(
             )
         )
     stats["accepted"] = len(accepted)
+    stats["claims"] = counters
+    stats["claim_records"] = [c.model_dump(mode="json") for c in records]
+    stats["raw_items"] = [
+        {
+            "root_cause": item.root_cause[:40],
+            "confidence": item.confidence,
+            "supporting_evidence_ids": item.supporting_evidence_ids,
+            "contradicting_evidence_ids": item.contradicting_evidence_ids,
+            "reasoning": item.reasoning[:600],
+        }
+        for item in ranking.ranking
+    ]
     if not accepted:
         return None, stats
     accepted += [
@@ -288,10 +336,102 @@ def request_explanation(
     )
 
 
-def validate_explanation(explanation: LLMExplanation) -> tuple[bool, str]:
+class ExplanationReview(BaseModel):
+    """Outcome of validating an LLM-written explanation."""
+
+    ok: bool
+    reason: str = ""
+    summary: str = ""
+    operator_checks: list[str] = Field(default_factory=list)
+    claims: list[Claim] = Field(default_factory=list)
+    counters: dict[str, int] = Field(default_factory=dict)
+    escalated_claim_ids: list[str] = Field(default_factory=list)
+    raw_summary: str = ""
+
+
+def review_explanation(
+    explanation: LLMExplanation,
+    evidence: list[Evidence] | None = None,
+    rule_diagnosis: Diagnosis | None = None,
+    intervention: Intervention | None = None,
+) -> ExplanationReview:
+    """Validate every sentence of an explanation against the evidence.
+
+    * A false status claim ("has been approved") discards the explanation, as before.
+    * A rejected claim (causal wording without intervention evidence, a contradiction, a
+      reference to a performance change nobody measured) discards the explanation; the caller
+      falls back to the deterministic statement of facts.
+    * An escalated claim (causal wording backed by mechanism-level evidence only) has its
+      sentence replaced by a hedged one and is flagged for the human reviewer.
+    """
+    evidence = evidence or []
     text = explanation.summary + " " + " ".join(explanation.operator_checks)
+    review = ExplanationReview(ok=True, raw_summary=explanation.summary[:1200])
     if FALSE_STATUS.search(text):
-        return False, "claims an approval/execution status the LLM cannot know or grant"
-    if OVERCLAIM.search(text):
-        return False, "states causation as established"
-    return True, ""
+        review.ok = False
+        review.reason = "claims an approval/execution status the LLM cannot know or grant"
+        review.counters = claim_rules.empty_counters()
+        return review
+    summary_claims = claim_rules.validate_text(
+        explanation.summary,
+        origin="llm:explain",
+        id_prefix="EXP",
+        evidence=evidence,
+        rule_diagnosis=rule_diagnosis,
+        intervention=intervention,
+    )
+    check_claims = [
+        claim
+        for index, check in enumerate(explanation.operator_checks, start=1)
+        for claim in claim_rules.validate_text(
+            check,
+            origin="llm:explain",
+            id_prefix=f"CHK{index}",
+            evidence=evidence,
+            rule_diagnosis=rule_diagnosis,
+            intervention=intervention,
+        )
+    ]
+    review.claims = [*summary_claims, *check_claims]
+    review.counters = claim_rules.count(review.claims)
+    rejected = [c for c in review.claims if c.verdict is ClaimVerdict.REJECTED]
+    if rejected:
+        review.ok = False
+        first = rejected[0]
+        review.reason = (
+            "states causation as established"
+            if first.category is ClaimCategory.CAUSAL_CLAIM
+            else f"{first.category.value.replace('_', ' ')}: {'; '.join(first.reasons)[:200]}"
+        )
+        return review
+    sentences = []
+    for claim in summary_claims:
+        if claim.verdict is ClaimVerdict.ESCALATED:
+            review.escalated_claim_ids.append(claim.claim_id)
+            sentences.append(
+                claim_rules.hedged_rewrite(claim.subject_causes, claim.subject_features)
+            )
+        else:
+            sentences.append(claim.text)
+    review.summary = " ".join(sentences)
+    escalated_checks = {
+        c.claim_id.split("-")[0] for c in check_claims if c.verdict is ClaimVerdict.ESCALATED
+    }
+    review.escalated_claim_ids += [
+        c.claim_id for c in check_claims if c.verdict is ClaimVerdict.ESCALATED
+    ]
+    review.operator_checks = [
+        check
+        for index, check in enumerate(explanation.operator_checks, start=1)
+        if f"CHK{index}" not in escalated_checks
+    ]
+    return review
+
+
+def validate_explanation(explanation: LLMExplanation) -> tuple[bool, str]:
+    """Evidence-free check, kept for callers that have no evidence at hand.
+
+    With no evidence, any causal wording is rejected. Prefer :func:`review_explanation`.
+    """
+    review = review_explanation(explanation)
+    return review.ok and not review.escalated_claim_ids, review.reason

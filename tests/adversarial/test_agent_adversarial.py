@@ -170,7 +170,8 @@ def test_fabricated_evidence_ids_and_unknown_causes_are_dropped(ctx):
     )
     validated, stats = validate_ranking(ranking, evidence, rules)
     assert validated is None
-    assert stats == {
+    legacy = {k: stats[k] for k in stats if k not in ("claims", "claim_records", "raw_items")}
+    assert legacy == {
         "proposed": 3,
         "accepted": 0,
         "unknown_cause": 1,
@@ -179,6 +180,13 @@ def test_fabricated_evidence_ids_and_unknown_causes_are_dropped(ctx):
         "overclaims": 0,
         "duplicates": 0,
     }
+    # The same facts through the explicit counters: nothing generated here survives.
+    assert stats["claims"]["invalid_cause_labels_rejected"] == 1
+    assert stats["claims"]["unsupported_claims_generated"] == 2
+    assert stats["claims"]["unsupported_claims_rejected"] == 2
+    assert stats["claims"]["fabricated_evidence_ids_generated"] == 2
+    assert stats["claims"]["fabricated_evidence_ids_stripped"] == 2
+    assert len(stats["raw_items"]) == 3 and len(stats["claim_records"]) == 2
 
 
 def test_normal_evidence_alone_cannot_support_a_hypothesis(ctx):

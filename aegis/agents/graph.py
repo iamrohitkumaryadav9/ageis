@@ -25,6 +25,7 @@ from typing import Annotated, Any, TypedDict
 from langchain_core.runnables import RunnableConfig
 from langgraph.graph import END, START, StateGraph
 
+from aegis.agents import claims as claim_rules
 from aegis.agents import llm_tasks
 from aegis.agents.ollama import OllamaClient
 from aegis.agents.tools import LLM_SELECTABLE_TOOLS, ToolExecutor
@@ -62,6 +63,7 @@ class InvestigationState(TypedDict, total=False):
     runbook_passages: list[dict]
     proposal: dict | None
     validation: dict | None
+    policy_pre_decision: dict | None  # the decision taken before sandbox validation
     policy_decision: dict | None
     approval_requested: bool
     explanation: dict | None
@@ -371,8 +373,11 @@ def _policy(state, runtime, validation=None):
 def validate_remediation(state, runtime):
     if not state.get("proposal"):
         return {"validation": None}
-    if _policy(state, runtime).outcome is not PolicyOutcome.PROPOSE_ACTION:
-        return {"validation": None}  # policy does not allow this action to reach the sandbox
+    pre = _policy(state, runtime)
+    recorded = {"policy_pre_decision": pre.model_dump(mode="json")}
+    if pre.outcome is not PolicyOutcome.PROPOSE_ACTION:
+        # policy does not allow this action to reach the sandbox
+        return {"validation": None, **recorded}
     trace, _ = runtime.tools.execute("run_candidate_validation", {})
     validation = runtime.tools.ctx.sandbox.get("validation")
     if trace.status != "ok" or validation is None:
@@ -381,7 +386,7 @@ def validate_remediation(state, runtime):
         runtime.tools.execute(
             "rollback_candidate", {"reason": f"validation failed: {validation.summary}"[:300]}
         )
-    return {"validation": validation.model_dump(mode="json")}
+    return {"validation": validation.model_dump(mode="json"), **recorded}
 
 
 @node("policy_check")
@@ -426,6 +431,13 @@ def request_approval(state, runtime):
             ),
         ]
     )
+    evidence = _evidence(state)
+    rule_diagnosis = (
+        Diagnosis.model_validate(state["rule_diagnosis"]) if state.get("rule_diagnosis") else None
+    )
+    intervention = claim_rules.Intervention.from_validation(
+        state.get("proposal"), state.get("validation")
+    )
     update: dict = {
         "approval_requested": requested,
         "status": "awaiting_approval" if requested else "completed",
@@ -436,18 +448,43 @@ def request_approval(state, runtime):
         result = llm_tasks.request_explanation(runtime.llm, facts[:900], safe_passages)
         update["llm_calls"] = [result.audit()]
         if result.ok:
-            ok, why = llm_tasks.validate_explanation(result.parsed)
-            if ok:
+            review = llm_tasks.review_explanation(
+                result.parsed, evidence, rule_diagnosis, intervention
+            )
+            claim_validation = {
+                "counters": review.counters,
+                "claims": [c.model_dump(mode="json") for c in review.claims],
+                "escalated_claim_ids": review.escalated_claim_ids,
+                "raw_summary": review.raw_summary,
+                "accepted": review.ok,
+                "reason": review.reason,
+            }
+            if review.ok:
                 update["explanation"] = {
                     "source": f"llm:{result.model}",
-                    "summary": result.parsed.summary,
-                    "operator_checks": result.parsed.operator_checks,
+                    "summary": review.summary,
+                    "operator_checks": review.operator_checks,
                     "deterministic_facts": facts,
                 }
+                if review.escalated_claim_ids:
+                    update["explanation"]["review_flags"] = [
+                        "Causal wording in the model's summary was replaced: the evidence shows "
+                        "how the data changed but no intervention confirms the cause."
+                    ]
             else:
-                update["errors"] = [f"LLM explanation discarded: {why}"]
+                update["errors"] = [f"LLM explanation discarded: {review.reason}"]
+            update["explanation"]["claim_validation"] = claim_validation
         else:
             update["llm_status"] = _degrade(result)
+    # Re-scan what actually leaves the investigation. Non-zero here means the pipeline let
+    # something through that its own validator recognises: a defect, reported not hidden.
+    update["explanation"]["output_audit"] = claim_rules.audit_final_output(
+        diagnosis=diagnosis,
+        explanation=update["explanation"],
+        evidence=evidence,
+        rule_diagnosis=rule_diagnosis,
+        intervention=intervention,
+    )
     return update
 
 
