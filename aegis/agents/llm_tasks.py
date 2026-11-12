@@ -347,6 +347,8 @@ class ExplanationReview(BaseModel):
     counters: dict[str, int] = Field(default_factory=dict)
     escalated_claim_ids: list[str] = Field(default_factory=list)
     raw_summary: str = ""
+    raw_operator_checks: list[str] = Field(default_factory=list)
+    dropped_operator_checks: int = 0
 
 
 def review_explanation(
@@ -358,11 +360,12 @@ def review_explanation(
     """Validate every sentence of an explanation against the evidence.
 
     * A false status claim ("has been approved") discards the explanation, as before.
-    * A rejected claim (causal wording without intervention evidence, a contradiction, a
-      reference to a performance change nobody measured) discards the explanation; the caller
-      falls back to the deterministic statement of facts.
-    * An escalated claim (causal wording backed by mechanism-level evidence only) has its
-      sentence replaced by a hedged one and is flagged for the human reviewer.
+    * A rejected claim in the summary (causal wording without intervention evidence, a
+      contradiction, a reference to a performance change nobody measured) discards the
+      explanation; the caller falls back to the deterministic statement of facts.
+    * An escalated claim in the summary (causal wording backed by mechanism-level evidence
+      only) has its sentence replaced by a hedged one and is flagged for the human reviewer.
+    * An operator check that is not supported is dropped individually.
     """
     evidence = evidence or []
     text = explanation.summary + " " + " ".join(explanation.operator_checks)
@@ -394,7 +397,9 @@ def review_explanation(
     ]
     review.claims = [*summary_claims, *check_claims]
     review.counters = claim_rules.count(review.claims)
-    rejected = [c for c in review.claims if c.verdict is ClaimVerdict.REJECTED]
+    review.raw_operator_checks = [c[:300] for c in explanation.operator_checks]
+    # The summary is the statement of what happened: one rejected sentence discards it.
+    rejected = [c for c in summary_claims if c.verdict is ClaimVerdict.REJECTED]
     if rejected:
         review.ok = False
         first = rejected[0]
@@ -414,17 +419,17 @@ def review_explanation(
         else:
             sentences.append(claim.text)
     review.summary = " ".join(sentences)
-    escalated_checks = {
-        c.claim_id.split("-")[0] for c in check_claims if c.verdict is ClaimVerdict.ESCALATED
+    # Operator checks are suggestions to a human. One that does not pass is dropped on its own;
+    # it does not take the summary down with it.
+    bad_checks = {
+        c.claim_id.split("-")[0] for c in check_claims if c.verdict is not ClaimVerdict.SUPPORTED
     }
-    review.escalated_claim_ids += [
-        c.claim_id for c in check_claims if c.verdict is ClaimVerdict.ESCALATED
-    ]
     review.operator_checks = [
         check
         for index, check in enumerate(explanation.operator_checks, start=1)
-        if f"CHK{index}" not in escalated_checks
+        if f"CHK{index}" not in bad_checks
     ]
+    review.dropped_operator_checks = len(explanation.operator_checks) - len(review.operator_checks)
     return review
 
 
@@ -434,4 +439,5 @@ def validate_explanation(explanation: LLMExplanation) -> tuple[bool, str]:
     With no evidence, any causal wording is rejected. Prefer :func:`review_explanation`.
     """
     review = review_explanation(explanation)
-    return review.ok and not review.escalated_claim_ids, review.reason
+    clean = review.ok and not review.escalated_claim_ids and not review.dropped_operator_checks
+    return clean, review.reason or ("states causation as established" if not clean else "")

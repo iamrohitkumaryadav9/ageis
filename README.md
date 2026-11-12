@@ -40,17 +40,18 @@ Two rules shape the whole system:
 | Dashboard | React + TypeScript + Vite |
 | Observability | OpenTelemetry traces, Prometheus metrics, structured logs, MLflow |
 | Benchmark | AEGIS-IR: 170 scenarios, four ablation configurations |
-| Tests | 368 tests (83% line coverage): unit, integration (real PostgreSQL), adversarial, end-to-end |
+| Tests | backend unit, integration (real PostgreSQL, real MLflow), adversarial and end-to-end tests; dashboard component tests; a real-browser check; one release-verification command |
 
 ## Requirements
 
-- Linux or WSL2 (developed on Ubuntu under WSL2, Intel i5-10210U, 4 cores, 8 GB visible to WSL)
+- Linux or WSL2 (developed on Ubuntu under WSL2: Intel i5-10210U, 4 physical cores, 7.65 GiB visible to the guest)
 - [uv](https://docs.astral.sh/uv/) (it installs Python 3.12 for you)
 - Docker with Compose (PostgreSQL; and the full stack if you want it)
 - Optional: Node.js 20+ (dashboard development), Ollama (LLM path)
 
 No GPU. No hosted inference API. About 3 GB of disk for the Python environment and models, plus
-2.5 GB if you pull `qwen3:4b`.
+2.5 GB if you pull `qwen3:4b`. The LLM path needs about 3.7 GB of free RAM for one investigation
+and more for long runs; see [docs/performance.md](docs/performance.md).
 
 ## Quick start (local development)
 
@@ -132,7 +133,7 @@ database and registers the reference windows (about three minutes; watch `docker
 Optional profiles:
 
 ```bash
-docker compose --profile llm up -d        # Ollama in a container; pulls qwen3:4b on first run
+docker compose --profile llm up -d        # Ollama in a container; pulls qwen3:4b once it is healthy (2.5 GB)
 docker compose --profile tracing up -d    # Jaeger at http://localhost:16686; set AEGIS_OTLP_ENDPOINT=http://jaeger:4318
 ```
 
@@ -143,45 +144,69 @@ and set `AEGIS_OLLAMA_BASE_URL=http://host.docker.internal:11434`.
 ## Tests and checks
 
 ```bash
-make test-db-up                                  # integration, adversarial-approval and e2e tests need PostgreSQL
-uv run pytest tests/unit -v
-uv run pytest tests/integration -v
-uv run pytest tests/adversarial -v
-uv run pytest tests/e2e -v
-uv run pytest --cov=aegis --cov-report=term-missing
-uv run ruff check .
-uv run ruff format --check .
+make test-db-up                                  # PostgreSQL for integration, adversarial and e2e tests
+uv run pytest tests/unit tests/integration tests/adversarial tests/e2e -m "not ollama"
+make test-frontend                               # dashboard tests (Vitest)
+uv run ruff check . && uv run ruff format --check .
 ```
 
-Tests run on the real datasets and a real PostgreSQL 17; the only test double is a scripted
-Ollama HTTP endpoint, so the real client code is exercised. One end-to-end test (`-m ollama`)
-uses the real local model and skips itself if the model is not available.
+One command runs every release gate and writes a machine-readable report:
+
+```bash
+export AEGIS_API_TOKENS=...                      # or .env
+make release-verify                              # all gates; the optional ones need a local LLM
+make release-verify-mandatory                    # mandatory gates only
+```
+
+It runs the backend suites, the frontend tests and build, starts the Docker Compose stack and
+drives the dashboard in a real browser, checks benchmark integrity, and (optionally) verifies
+both local models and the Compose `llm` profile. Gates end as passed, failed, blocked or skipped;
+only passed counts. What each gate does and the last result:
+[docs/release-readiness.md](docs/release-readiness.md),
+[results/release/release-report.md](results/release/release-report.md).
+
+Tests run on the real datasets, a real PostgreSQL 17 and real MLflow backends. The test double
+for the LLM is a scripted Ollama HTTP endpoint, so the real client code is exercised; the real
+models are exercised by `scripts.verify_llm` and the `-m ollama` tests.
 
 ## Benchmark: AEGIS-IR
 
 ```bash
-uv run python -m aegis.evaluation.run --name main          # A and B on 170 scenarios, ~10 minutes
-uv run python -m aegis.evaluation.run --name main --llm    # adds C and D on a 20-scenario subset
-uv run python -m aegis.evaluation.report --name main       # summary.json, scenarios.csv, report.md, charts
+uv run python -m aegis.evaluation.run --name myrun          # A and B on 170 scenarios, ~7 minutes
+uv run python -m aegis.evaluation.run --name myrun --llm    # adds C and D on a 20-scenario subset, ~80 minutes
+uv run python -m aegis.evaluation.report --name myrun       # summary.json, report.md, lifecycle reconciliation, charts
 ```
 
 Methodology, limitations and results: [docs/benchmark.md](docs/benchmark.md).
 
-Measured on a 4-core laptop CPU with 7.7 GB RAM and no GPU (170 scenarios, evaluation seeds
-never used for tuning):
+AEGIS achieved 0.996 overall fault-detection F1 across ten injected ML failure categories and
+0.9565 drift-detection F1 across numerical, categorical, and scaling drift scenarios.
+
+Those are two different metrics and are never interchangeable:
+
+| Metric | Positives | Clean controls | A detection is | TP / FP / TN / FN | F1 |
+|---|---|---|---|---|---|
+| `overall_fault_detection_f1` | 120 scenarios, all ten fault categories | 50 | an incident opened by any monitor | 119 / 0 / 50 / 1 | 0.9958 |
+| `drift_detection_f1` | 36 scenarios: F01, F02, F04 only | 50 | the drift monitor itself triggering | 33 / 0 / 50 / 3 | 0.9565 |
+
+Measured on an Intel i5-10210U (4 physical cores, 8 logical), 7.65 GiB of RAM visible to WSL2
+(the host has 15.8 GiB), no GPU; 170 scenarios; evaluation seeds never used for tuning.
 
 | | Result |
 |---|---|
-| Detection | recall 0.992 (119/120 faults), 0 false alarms on 50 clean batches |
-| Root cause, rules (B) vs alerts only (A) | Top-1 0.966 vs 0.815; Recall@3 0.975 |
+| Overall fault detection | recall 0.992 (119/120 faults); 0 false alarms on 50 clean batches (95% CI 0.00-0.07) |
+| Root cause, rules (B) vs alerts only (A) | Top-1 0.966 vs 0.815 on 119 diagnosed scenarios; Recall@3 0.975 |
 | Root cause, local LLM alone (C) | Top-1 11/20 - the reason the LLM is not the source of truth |
-| Full agent (D) vs rules (B) | same accuracy (19/20); about 84 s per investigation instead of 1 s |
-| Sandbox-validated fixes | 68 approval requests; executed fix cleared the incident 67/68; rollback 68/68 |
+| Full agent (D) vs rules (B) | same accuracy (19/20), at tens of seconds per investigation instead of about one |
+| Remediation lifecycle | 119 proposals: 32 no-action, 2 rejected before validation, 85 validated (68 passed), 68 approval requests; every record reconciles |
+| Executed fixes (simulated approval) | incident cleared 67/68; rollback restored state 68/68 |
 | Safety counters | 0 unauthorized tool executions, 0 invalid promotions |
 
 The LLM did not improve diagnostic accuracy over the rule engine. Its measured contribution is
-tool selection and the written explanation; its unsupported claims (13 of 30) and invented
-evidence ids (17) were removed by validation before output.
+tool selection and the written explanation. What it claims is validated sentence by sentence
+against the evidence; see [docs/evidence-and-claim-validation.md](docs/evidence-and-claim-validation.md).
+Every count above is derived in [docs/benchmark.md](docs/benchmark.md) and
+[docs/remediation-lifecycle.md](docs/remediation-lifecycle.md).
 
 ## Repository layout
 
@@ -216,6 +241,9 @@ docs/             architecture, decisions, threat model, API, benchmark, intervi
 - [Threat model](docs/threat-model.md)
 - [API reference](docs/api.md)
 - [Benchmark](docs/benchmark.md) and [performance report](docs/performance.md)
+- [Remediation lifecycle and its accounting](docs/remediation-lifecycle.md)
+- [Evidence and claim validation](docs/evidence-and-claim-validation.md)
+- [Release readiness](docs/release-readiness.md) and the [audit that led to it](docs/remediation-audit.md)
 - [Implementation plan and verification status](docs/implementation-plan.md)
 - [Interview preparation](docs/interview-preparation.md)
 

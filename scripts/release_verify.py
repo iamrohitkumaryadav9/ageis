@@ -518,6 +518,9 @@ GATES: list[Gate] = [
 ]
 
 
+LLM_GATES = frozenset({"ollama_qwen3_4b", "ollama_llama3_2_3b", "e2e_real_llm", "compose_llm"})
+
+
 def _both(ctx: Context, first: list[str], second: list[str]) -> GateResult:
     a, b = command(first)(ctx), command(second)(ctx)
     status = "passed" if a.status == b.status == "passed" else "failed"
@@ -575,8 +578,10 @@ def main() -> None:
                     status="skipped", detail={"reason": "excluded on the command line"}, seconds=0.0
                 )
             else:
-                if gate.id == "compose_llm" and ctx.compose_up:
-                    compose_down(ctx)  # the llm profile check starts and stops its own stack
+                if ctx.compose_up and gate.id in LLM_GATES:
+                    # Free the memory before a local model is loaded; the llm profile check
+                    # starts and stops its own stack.
+                    compose_down(ctx)
                 reason = next((r for r in (ctx.has(n) for n in gate.needs) if r), None)
                 if reason:
                     entry.update(status="blocked", detail={"reason": reason}, seconds=0.0)

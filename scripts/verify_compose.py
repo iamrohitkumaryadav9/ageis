@@ -150,7 +150,8 @@ def main() -> None:
     if args.clean:
         compose("down", "-v", "--remove-orphans", profiles=["tracing", "llm"])
     started = time.time()
-    up = compose("up", "-d", profiles=profiles, timeout=3600)
+    # --build: verify the code in this checkout, not whatever image an earlier build left behind
+    up = compose("up", "-d", "--build", profiles=profiles, timeout=3600)
     record(
         "compose_up",
         up.returncode == 0,

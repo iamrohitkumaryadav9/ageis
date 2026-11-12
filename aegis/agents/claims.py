@@ -65,6 +65,7 @@ class ClaimLanguage(StrEnum):
     ASSOCIATIVE = "associative"
     ASSERTIVE = "assertive"
     NEGATED_CAUSAL = "negated_causal"
+    PROCEDURAL = "procedural"
 
 
 class EvidenceStrength(IntEnum):
@@ -231,6 +232,12 @@ _DENIES_ANOMALY = re.compile(
     r"|\bunchanged\b|\bnot\s+(?:drifted|changed|shifted|affected)\b|\bwithin\s+tolerance\b",
     re.IGNORECASE,
 )
+_PROCEDURAL = re.compile(
+    r"^\W*(?:proposed\s+action|recommended\s+action|recommendation|action|sandbox(?:\s+validation)?"
+    r"|validation|policy(?:\s+(?:outcome|decision))?|status|approval)\b\s*[:\-]?",
+    re.IGNORECASE,
+)
+_CAUSE_WORD = re.compile(r"\bcaus(?:e|ed|es|ing|al|ally|ality|ation)\b", re.IGNORECASE)
 _SENTENCE = re.compile(r"(?<=[.!?;])\s+|\n+")
 
 #: Checks that can speak to each root cause (from the rule engine's own definitions).
@@ -293,6 +300,12 @@ def classify_language(sentence: str) -> ClaimLanguage:
     remainder = _ROOT_CAUSE_NOUN.sub(" ", remainder)  # the noun phrase alone asserts nothing
     if _CERTAIN.search(remainder):
         return ClaimLanguage.CERTAIN
+    # A sentence labelled as one of the workflow's own decided facts ("Proposed action: ...",
+    # "Sandbox validation: ...") states why the system decided something, not what caused the
+    # incident. "due to" / "because" there is a rationale. An explicit cause-word is still a
+    # causal claim, so nothing can be smuggled through behind such a label.
+    if _PROCEDURAL.search(sentence) and not explicit and not _CAUSE_WORD.search(remainder):
+        return ClaimLanguage.PROCEDURAL
     causal = explicit or bool(_CAUSAL.search(remainder))
     hedged = bool(_HEDGE.search(remainder))
     if causal and not hedged:
@@ -312,6 +325,7 @@ _LANGUAGE_PRIORITY = (
     ClaimLanguage.HEDGED,
     ClaimLanguage.ASSOCIATIVE,
     ClaimLanguage.NEGATED_CAUSAL,
+    ClaimLanguage.PROCEDURAL,
     ClaimLanguage.ASSERTIVE,
 )
 

@@ -99,6 +99,22 @@ PROPOSED -> VALIDATING -> VALIDATED -> PENDING_APPROVAL -> APPROVED -> EXECUTED 
 | GET | `/observability/latency` | p50/p95/max and failure rate per span name; process RSS and CPU |
 | GET | `/observability/traces?trace_id&prefix&limit` | recent spans from the in-process buffer |
 
+### Lifecycle reconciliation and benchmark results (viewer)
+
+| Method | Path | Returns |
+|---|---|---|
+| GET | `/remediation-lifecycle/reconciliation?incident_id` | every remediation record in the audit trail accounted for: `reconciled`, stage and terminal-status counts, rates with numerator / denominator / definition, and `failures` (missing, duplicated or out-of-order records). Denied attempts are excluded and counted in `denied_attempts_excluded`. See `docs/remediation-lifecycle.md` |
+| GET | `/evaluation/runs` | names of benchmark runs with a generated summary under `AEGIS_RESULTS_DIR` |
+| GET | `/evaluation/runs/{name}` | one run: the two detection metrics, each under its own name (`overall_fault_detection_*`, `drift_detection_*`) with definition, population and confusion counts; engineering targets; diagnosis rates; remediation counts, rates and reconciliation status; claim-validation counters (or `available: false`). 404 for an unknown or malformed name; 409 if the summary was written by an older report version |
+
+The API serves these numbers; it never computes or edits them. They are written by
+`python -m aegis.evaluation.report`.
+
+Investigation responses now also carry, inside `llm_ranking_stats` and `explanation`: the model's
+raw text (`raw_items`, `claim_validation.raw_summary`), one record per validated claim, the claim
+counters, and `explanation.output_audit` (a re-scan of the final output). See
+`docs/evidence-and-claim-validation.md`.
+
 ## Example
 
 ```bash

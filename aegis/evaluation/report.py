@@ -523,6 +523,7 @@ def summarise(out_dir: Path) -> dict:
                 "faults",
                 "model_versions",
                 "llm_model",
+                "llm_model_identity",
                 "llm_options",
                 "machine",
                 "environment",

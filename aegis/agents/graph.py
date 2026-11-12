@@ -456,6 +456,8 @@ def request_approval(state, runtime):
                 "claims": [c.model_dump(mode="json") for c in review.claims],
                 "escalated_claim_ids": review.escalated_claim_ids,
                 "raw_summary": review.raw_summary,
+                "raw_operator_checks": review.raw_operator_checks,
+                "dropped_operator_checks": review.dropped_operator_checks,
                 "accepted": review.ok,
                 "reason": review.reason,
             }

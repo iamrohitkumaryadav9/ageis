@@ -1,0 +1,958 @@
+{
+  "benchmark": "AEGIS-IR",
+  "name": "v2",
+  "seeds": [
+    201,
+    202
+  ],
+  "dev_seeds_excluded": [
+    101,
+    102
+  ],
+  "clean_controls_per_dataset": 25,
+  "datasets": [
+    "adult",
+    "bank"
+  ],
+  "faults": [
+    "F01",
+    "F02",
+    "F03",
+    "F04",
+    "F05",
+    "F06",
+    "F07",
+    "F08",
+    "F09",
+    "F10"
+  ],
+  "n_scenarios": 170,
+  "llm_subset": [
+    "SCN-0d8c95ba24",
+    "SCN-1517cb9f82",
+    "SCN-1dafa1432f",
+    "SCN-38304ac8d9",
+    "SCN-3d42b0aaf9",
+    "SCN-4b1eeccf1f",
+    "SCN-55b1f492fb",
+    "SCN-621b33e7dd",
+    "SCN-7124e7432b",
+    "SCN-996fb5c5dd",
+    "SCN-a16dd6f2c1",
+    "SCN-a411f70e56",
+    "SCN-b22a34ae31",
+    "SCN-b543d6cf67",
+    "SCN-c2bd3ad4f8",
+    "SCN-c7323ab3ad",
+    "SCN-cd9e51b76d",
+    "SCN-ce4cd733ea",
+    "SCN-da5a2c4b25",
+    "SCN-e3a8d53de0"
+  ],
+  "scenarios": [
+    {
+      "scenario_id": "SCN-996fb5c5dd",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-64ee8172b1",
+      "dataset": "adult",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-3c5e0fa1a3",
+      "dataset": "adult",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-82f0a8404b",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-a76579a138",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-1977a819f6",
+      "dataset": "adult",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-68d44acbeb",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-44b8080d0d",
+      "dataset": "adult",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-3d42b0aaf9",
+      "dataset": "adult",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-ab38b213e0",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-6a44c998e7",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-e01ac97e50",
+      "dataset": "adult",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-076703e29f",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-8047d955f4",
+      "dataset": "adult",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-584669cc42",
+      "dataset": "adult",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-b9507f0454",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-0d8c95ba24",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-d0476b760a",
+      "dataset": "adult",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-7124e7432b",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-bdbdb42e52",
+      "dataset": "adult",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-e4d44d0b7c",
+      "dataset": "adult",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-b62e5fa02e",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-f69e87a47c",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-e4069e3bd7",
+      "dataset": "adult",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-a5f019f45a",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-04b3bd4768",
+      "dataset": "adult",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-a411f70e56",
+      "dataset": "adult",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-6964168d8c",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-4614dbeb00",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-e3b5e39eb9",
+      "dataset": "adult",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-2c1da991df",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-d7067c12d1",
+      "dataset": "adult",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-bd74dfc02b",
+      "dataset": "adult",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-376d16ab6f",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-e3a8d53de0",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-e99dbac53b",
+      "dataset": "adult",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-c2bd3ad4f8",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-6633b9cc6d",
+      "dataset": "adult",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-fcb7caa545",
+      "dataset": "adult",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-9cfe85365f",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-af91754360",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-f9a3a890b1",
+      "dataset": "adult",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-b69e14f4d3",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-db09c4d500",
+      "dataset": "adult",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-1517cb9f82",
+      "dataset": "adult",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-03f3d042f5",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-d3613d756b",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-c9102a3674",
+      "dataset": "adult",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-443436dc07",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-38f2aa4ae9",
+      "dataset": "adult",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-3122331d52",
+      "dataset": "adult",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-4456aa654e",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-c7323ab3ad",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-c7022dc055",
+      "dataset": "adult",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-621b33e7dd",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-05a605ff0e",
+      "dataset": "adult",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-769ea31ad5",
+      "dataset": "adult",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-01c93b32b1",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-b914670a77",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-3a0a6f4157",
+      "dataset": "adult",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-f9e8249573",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-2f5f6d6128",
+      "dataset": "adult",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-9ec23e2986",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-08a7853b1b",
+      "dataset": "adult",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-24ae4665cb",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-b6db379fc7",
+      "dataset": "adult",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-c27d2d574c",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-315280d033",
+      "dataset": "adult",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-14c3e87c45",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-e796562309",
+      "dataset": "adult",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-4cb5e12569",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-e652d59d06",
+      "dataset": "adult",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-8241fb3811",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-c03c43b7ba",
+      "dataset": "adult",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-0c5110f937",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-cbfb757a5c",
+      "dataset": "adult",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-0db20bf522",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-fbff374821",
+      "dataset": "adult",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-2f4a048d78",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-7d7333f9da",
+      "dataset": "adult",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-ca7c753409",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-350ded027b",
+      "dataset": "adult",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-488c84ec41",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-37ab4c88c5",
+      "dataset": "adult",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-fd839ad491",
+      "dataset": "adult",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-464051eb8f",
+      "dataset": "bank",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-da99b96179",
+      "dataset": "bank",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-a16dd6f2c1",
+      "dataset": "bank",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-34b9a6dda0",
+      "dataset": "bank",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-412222cca6",
+      "dataset": "bank",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-baa76dcaf1",
+      "dataset": "bank",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-fd5c4f3635",
+      "dataset": "bank",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-ba41f0d0dc",
+      "dataset": "bank",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-32292515b9",
+      "dataset": "bank",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-a69beb7e07",
+      "dataset": "bank",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-da5a2c4b25",
+      "dataset": "bank",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-97ca9a3c7a",
+      "dataset": "bank",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-cd9e51b76d",
+      "dataset": "bank",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-525521b5f3",
+      "dataset": "bank",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-94c6446424",
+      "dataset": "bank",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-9276855b88",
+      "dataset": "bank",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-1ac0007fbc",
+      "dataset": "bank",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-a39e461d6a",
+      "dataset": "bank",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-a7bd8c9c2c",
+      "dataset": "bank",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-86b8241ff6",
+      "dataset": "bank",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-38304ac8d9",
+      "dataset": "bank",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-c195beabea",
+      "dataset": "bank",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-9790971d6c",
+      "dataset": "bank",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-2934ffcdfb",
+      "dataset": "bank",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-330fe33170",
+      "dataset": "bank",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-18ef158457",
+      "dataset": "bank",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-9485798387",
+      "dataset": "bank",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-cdd4ed8ab6",
+      "dataset": "bank",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-b22a34ae31",
+      "dataset": "bank",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-dddc2752c1",
+      "dataset": "bank",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-b543d6cf67",
+      "dataset": "bank",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-662afffd3e",
+      "dataset": "bank",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-938d2bd811",
+      "dataset": "bank",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-a7a678c3df",
+      "dataset": "bank",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-26231fea8c",
+      "dataset": "bank",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-86f1264802",
+      "dataset": "bank",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-234cd9484d",
+      "dataset": "bank",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-8581d15ad4",
+      "dataset": "bank",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-ce4cd733ea",
+      "dataset": "bank",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-93ae41556d",
+      "dataset": "bank",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-5ff4dbb334",
+      "dataset": "bank",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-f6b841893f",
+      "dataset": "bank",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-8e4a10f7f9",
+      "dataset": "bank",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-0be83f2e4d",
+      "dataset": "bank",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-7d14525f0c",
+      "dataset": "bank",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-e675942422",
+      "dataset": "bank",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-1dafa1432f",
+      "dataset": "bank",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-60aedbf5b5",
+      "dataset": "bank",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-55b1f492fb",
+      "dataset": "bank",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-d259eda79a",
+      "dataset": "bank",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-7cddfb7f8a",
+      "dataset": "bank",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-c26d321487",
+      "dataset": "bank",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-1d0c63e609",
+      "dataset": "bank",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-244aa6515a",
+      "dataset": "bank",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-84193cf386",
+      "dataset": "bank",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-f784785461",
+      "dataset": "bank",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-4b1eeccf1f",
+      "dataset": "bank",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-4fbfb9df56",
+      "dataset": "bank",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-3b4f17104f",
+      "dataset": "bank",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-9ef20469b1",
+      "dataset": "bank",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-82e50eb03b",
+      "dataset": "bank",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-ad7cd65463",
+      "dataset": "bank",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-c6a20af225",
+      "dataset": "bank",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-5ae9263fc4",
+      "dataset": "bank",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-3339bfdfd7",
+      "dataset": "bank",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-e43d382336",
+      "dataset": "bank",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-cd7cbf0263",
+      "dataset": "bank",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-5f512ce2cd",
+      "dataset": "bank",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-62d102cc98",
+      "dataset": "bank",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-fb18f9390d",
+      "dataset": "bank",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-9f0998c16c",
+      "dataset": "bank",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-7287077666",
+      "dataset": "bank",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-13c9a7b1dd",
+      "dataset": "bank",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-2c52d42705",
+      "dataset": "bank",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-c56b807abf",
+      "dataset": "bank",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-6850181fd9",
+      "dataset": "bank",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-3d3cb19b67",
+      "dataset": "bank",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-9474fc73d4",
+      "dataset": "bank",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-845a47e8c0",
+      "dataset": "bank",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-6a171603ac",
+      "dataset": "bank",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-e8bd735754",
+      "dataset": "bank",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-6d8806e5b7",
+      "dataset": "bank",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-dd09413bbd",
+      "dataset": "bank",
+      "n_rows": 1000
+    },
+    {
+      "scenario_id": "SCN-37a6c9d827",
+      "dataset": "bank",
+      "n_rows": 3000
+    },
+    {
+      "scenario_id": "SCN-5a92998f19",
+      "dataset": "bank",
+      "n_rows": 1000
+    }
+  ],
+  "model_versions": {
+    "adult": "adult-hgb-f0f7dd8c",
+    "bank": "bank-hgb-f52dd403"
+  },
+  "llm_model": "qwen3:4b",
+  "llm_options": {
+    "num_ctx": 4096,
+    "temperature": 0.1,
+    "timeout_s": 180.0,
+    "max_retries": 1
+  },
+  "llm_model_identity": {
+    "name": "qwen3:4b",
+    "available": true,
+    "digest": "359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7",
+    "size_bytes": 2497293931,
+    "family": "qwen3",
+    "parameter_size": "4.0B",
+    "quantization_level": "Q4_K_M",
+    "format": "gguf",
+    "modified_at": "2026-11-11T10:19:00.990504924Z"
+  },
+  "environment": {
+    "platform": "Linux-6.18.58.1-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+    "python": "3.12.16",
+    "cpu_model": "Intel(R) Core(TM) i5-10210U CPU @ 1.60GHz",
+    "logical_cpus": 8,
+    "physical_cores": 4,
+    "guest_memory_total_bytes": 8216276992,
+    "guest_memory_total_gib": 7.65,
+    "guest_memory_total_gb_decimal": 8.22,
+    "guest_swap_total_gib": 2.0,
+    "is_wsl": true,
+    "limitations": [
+      "Running under WSL2: 'guest' memory is the VM's allocation, not the physical host's.",
+      "WSL2 returns freed guest memory to Windows lazily, and the Linux page cache counts toward the VM's footprint on the host; system-wide 'used' excludes cache.",
+      "Windows-side memory pressure is invisible from inside the guest."
+    ],
+    "host": {
+      "virtualised": true,
+      "physical_ram_bytes": 16957034496,
+      "physical_ram_source": "Windows host, Win32_ComputerSystem.TotalPhysicalMemory",
+      "wslconfig": "absent (WSL2 defaults apply: half of host memory, all logical processors)",
+      "wslconfig_source": "Windows host, %USERPROFILE%\\.wslconfig",
+      "physical_ram_gib": 15.79
+    }
+  },
+  "methodology": [
+    "Detection metrics are reported under explicit names with their populations (overall_fault_detection_*, drift_detection_*).",
+    "Remediation lifecycle events are recorded per proposal and reconciled.",
+    "LLM text is validated claim by claim; the raw text and the counters are stored.",
+    "Configuration D includes the LLM explanation step (run 'main' did not), so its latency is not comparable with 'main'.",
+    "Resources are sampled by the process-tree sampler every 0.5 s; each invocation is a separate record."
+  ]
+}

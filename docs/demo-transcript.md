@@ -1,7 +1,7 @@
 # Demo transcript
 
 Unedited output of `uv run python -m scripts.demo` against a locally running API
-(PostgreSQL 17 in Docker, Ollama 0.40.16 with `qwen3:4b`, Intel i5-10210U, 4 cores, 7.7 GB RAM, no GPU),
+(PostgreSQL 17 in Docker, Ollama 0.40.16 with `qwen3:4b`, Intel i5-10210U, 4 physical cores, 7.65 GiB RAM visible to WSL2, no GPU),
 recorded on 2026-11-12. The only post-processing is removal of the repeated
 `... running (Ns)` progress markers. IDs and timings will differ on every run.
 
@@ -29,7 +29,51 @@ Add `--no-llm` for the deterministic path, which completes in a few seconds.
   incident INC-196d44cf8466 opened: 4.4% of 'capital_loss' values are non-finite or outside the tolerated reference range [-368.3, 4051] (observed min 0, max 2.614e+05)
 
 === 3. investigate (local LLM; this takes minutes on a CPU) ===
-  ... completed (221s)  status=completed llm_status=available model=qwen3:4b duration=219.2s
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  ... completed (221s)
+  status=completed llm_status=available model=qwen3:4b duration=219.2s
     llm plan     ok=True 61.8s error=None
     llm rank     ok=True 70.0s error=None
     llm explain  ok=True 63.1s error=None

@@ -1,0 +1,3228 @@
+{
+  "benchmark": "AEGIS-IR",
+  "name": "v2",
+  "n_scenarios": 170,
+  "design": {
+    "seeds": [
+      201,
+      202
+    ],
+    "dev_seeds_excluded": [
+      101,
+      102
+    ],
+    "clean_controls_per_dataset": 25,
+    "datasets": [
+      "adult",
+      "bank"
+    ],
+    "faults": [
+      "F01",
+      "F02",
+      "F03",
+      "F04",
+      "F05",
+      "F06",
+      "F07",
+      "F08",
+      "F09",
+      "F10"
+    ],
+    "model_versions": {
+      "adult": "adult-hgb-f0f7dd8c",
+      "bank": "bank-hgb-f52dd403"
+    },
+    "llm_model": "qwen3:4b",
+    "llm_model_identity": {
+      "name": "qwen3:4b",
+      "available": true,
+      "digest": "359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7",
+      "size_bytes": 2497293931,
+      "family": "qwen3",
+      "parameter_size": "4.0B",
+      "quantization_level": "Q4_K_M",
+      "format": "gguf",
+      "modified_at": "2026-11-11T10:19:00.990504924Z"
+    },
+    "llm_options": {
+      "num_ctx": 4096,
+      "temperature": 0.1,
+      "timeout_s": 180.0,
+      "max_retries": 1
+    },
+    "machine": null,
+    "environment": {
+      "platform": "Linux-6.18.58.1-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+      "python": "3.12.16",
+      "cpu_model": "Intel(R) Core(TM) i5-10210U CPU @ 1.60GHz",
+      "logical_cpus": 8,
+      "physical_cores": 4,
+      "guest_memory_total_bytes": 8216276992,
+      "guest_memory_total_gib": 7.65,
+      "guest_memory_total_gb_decimal": 8.22,
+      "guest_swap_total_gib": 2.0,
+      "is_wsl": true,
+      "limitations": [
+        "Running under WSL2: 'guest' memory is the VM's allocation, not the physical host's.",
+        "WSL2 returns freed guest memory to Windows lazily, and the Linux page cache counts toward the VM's footprint on the host; system-wide 'used' excludes cache.",
+        "Windows-side memory pressure is invisible from inside the guest."
+      ],
+      "host": {
+        "virtualised": true,
+        "physical_ram_bytes": 16957034496,
+        "physical_ram_source": "Windows host, Win32_ComputerSystem.TotalPhysicalMemory",
+        "wslconfig": "absent (WSL2 defaults apply: half of host memory, all logical processors)",
+        "wslconfig_source": "Windows host, %USERPROFILE%\\.wslconfig",
+        "physical_ram_gib": 15.79
+      }
+    },
+    "methodology": [
+      "Detection metrics are reported under explicit names with their populations (overall_fault_detection_*, drift_detection_*).",
+      "Remediation lifecycle events are recorded per proposal and reconciled.",
+      "LLM text is validated claim by claim; the raw text and the counters are stored.",
+      "Configuration D includes the LLM explanation step (run 'main' did not), so its latency is not comparable with 'main'.",
+      "Resources are sampled by the process-tree sampler every 0.5 s; each invocation is a separate record."
+    ]
+  },
+  "detection": {
+    "overall_fault_detection": {
+      "metric_prefix": "overall_fault_detection",
+      "definition": "Was an incident opened? Positives: every injected-fault scenario, all fault categories. Negatives: clean control batches. A scenario counts as detected when the monitoring run reports an incident, raised by any monitor.",
+      "positive_condition": "detection.incident_detected (any monitor)",
+      "population": {
+        "included_fault_categories": [
+          "F01",
+          "F02",
+          "F03",
+          "F04",
+          "F05",
+          "F06",
+          "F07",
+          "F08",
+          "F09",
+          "F10"
+        ],
+        "n_positive_scenarios": 120,
+        "n_clean_scenarios": 50,
+        "n_scenarios": 170
+      },
+      "confusion": {
+        "tp": 119,
+        "fp": 0,
+        "tn": 50,
+        "fn": 1
+      },
+      "overall_fault_detection_precision": {
+        "value": 1.0,
+        "k": 119,
+        "n": 119,
+        "ci95": [
+          0.969,
+          1.0
+        ],
+        "definition": "TP / (TP + FP)"
+      },
+      "overall_fault_detection_recall": {
+        "value": 0.9917,
+        "k": 119,
+        "n": 120,
+        "ci95": [
+          0.954,
+          0.999
+        ],
+        "definition": "TP / (TP + FN)"
+      },
+      "overall_fault_detection_false_positive_rate": {
+        "value": 0.0,
+        "k": 0,
+        "n": 50,
+        "ci95": [
+          0.0,
+          0.071
+        ],
+        "definition": "FP / (FP + TN)"
+      },
+      "overall_fault_detection_f1": {
+        "value": 0.9958,
+        "ci95": [
+          0.987,
+          1.0
+        ],
+        "ci_method": "percentile bootstrap over scenarios, 2000 resamples, fixed seed",
+        "definition": "2 TP / (2 TP + FP + FN)"
+      }
+    },
+    "recall_by_fault_id": {
+      "F01": {
+        "value": 1.0,
+        "k": 12,
+        "n": 12,
+        "ci95": [
+          0.757,
+          1.0
+        ]
+      },
+      "F02": {
+        "value": 0.9167,
+        "k": 11,
+        "n": 12,
+        "ci95": [
+          0.646,
+          0.985
+        ]
+      },
+      "F03": {
+        "value": 1.0,
+        "k": 12,
+        "n": 12,
+        "ci95": [
+          0.757,
+          1.0
+        ]
+      },
+      "F04": {
+        "value": 1.0,
+        "k": 12,
+        "n": 12,
+        "ci95": [
+          0.757,
+          1.0
+        ]
+      },
+      "F05": {
+        "value": 1.0,
+        "k": 12,
+        "n": 12,
+        "ci95": [
+          0.757,
+          1.0
+        ]
+      },
+      "F06": {
+        "value": 1.0,
+        "k": 12,
+        "n": 12,
+        "ci95": [
+          0.757,
+          1.0
+        ]
+      },
+      "F07": {
+        "value": 1.0,
+        "k": 12,
+        "n": 12,
+        "ci95": [
+          0.757,
+          1.0
+        ]
+      },
+      "F08": {
+        "value": 1.0,
+        "k": 12,
+        "n": 12,
+        "ci95": [
+          0.757,
+          1.0
+        ]
+      },
+      "F09": {
+        "value": 1.0,
+        "k": 12,
+        "n": 12,
+        "ci95": [
+          0.757,
+          1.0
+        ]
+      },
+      "F10": {
+        "value": 1.0,
+        "k": 12,
+        "n": 12,
+        "ci95": [
+          0.757,
+          1.0
+        ]
+      }
+    },
+    "recall_by_severity": {
+      "high": {
+        "value": 1.0,
+        "k": 40,
+        "n": 40,
+        "ci95": [
+          0.912,
+          1.0
+        ]
+      },
+      "low": {
+        "value": 0.975,
+        "k": 39,
+        "n": 40,
+        "ci95": [
+          0.871,
+          0.996
+        ]
+      },
+      "medium": {
+        "value": 1.0,
+        "k": 40,
+        "n": 40,
+        "ci95": [
+          0.912,
+          1.0
+        ]
+      }
+    },
+    "recall_by_difficulty": {
+      "easy": {
+        "value": 1.0,
+        "k": 20,
+        "n": 20,
+        "ci95": [
+          0.839,
+          1.0
+        ]
+      },
+      "hard": {
+        "value": 0.9833,
+        "k": 59,
+        "n": 60,
+        "ci95": [
+          0.911,
+          0.997
+        ]
+      },
+      "medium": {
+        "value": 1.0,
+        "k": 40,
+        "n": 40,
+        "ci95": [
+          0.912,
+          1.0
+        ]
+      }
+    },
+    "recall_by_dataset": {
+      "adult": {
+        "value": 1.0,
+        "k": 60,
+        "n": 60,
+        "ci95": [
+          0.94,
+          1.0
+        ]
+      },
+      "bank": {
+        "value": 0.9833,
+        "k": 59,
+        "n": 60,
+        "ci95": [
+          0.911,
+          0.997
+        ]
+      }
+    },
+    "false_positive_triggers": [],
+    "missed": [
+      {
+        "scenario_id": "SCN-ba41f0d0dc",
+        "fault_id": "F02",
+        "severity": "low",
+        "dataset": "bank",
+        "n_rows": 3000,
+        "affected_features": [
+          "education"
+        ]
+      }
+    ],
+    "drift_detection": {
+      "metric_prefix": "drift_detection",
+      "definition": "Did the drift monitor flag a distribution change? Positives: only the covariate-drift scenarios (numerical shift F01, categorical shift F02, scaling error F04). Negatives: the same clean control batches. A scenario counts as detected only when the drift monitor itself triggers; an incident raised by another monitor does not count.",
+      "positive_condition": "detection.drift_flagged (the drift monitor specifically)",
+      "population": {
+        "included_fault_categories": [
+          "F01",
+          "F02",
+          "F04"
+        ],
+        "n_positive_scenarios": 36,
+        "n_clean_scenarios": 50,
+        "n_scenarios": 86
+      },
+      "confusion": {
+        "tp": 33,
+        "fp": 0,
+        "tn": 50,
+        "fn": 3
+      },
+      "drift_detection_precision": {
+        "value": 1.0,
+        "k": 33,
+        "n": 33,
+        "ci95": [
+          0.896,
+          1.0
+        ],
+        "definition": "TP / (TP + FP)"
+      },
+      "drift_detection_recall": {
+        "value": 0.9167,
+        "k": 33,
+        "n": 36,
+        "ci95": [
+          0.782,
+          0.971
+        ],
+        "definition": "TP / (TP + FN)"
+      },
+      "drift_detection_false_positive_rate": {
+        "value": 0.0,
+        "k": 0,
+        "n": 50,
+        "ci95": [
+          0.0,
+          0.071
+        ],
+        "definition": "FP / (FP + TN)"
+      },
+      "drift_detection_f1": {
+        "value": 0.9565,
+        "ci95": [
+          0.892,
+          1.0
+        ],
+        "ci_method": "percentile bootstrap over scenarios, 2000 resamples, fixed seed",
+        "definition": "2 TP / (2 TP + FP + FN)"
+      },
+      "methods_compared": {
+        "note": "same population as drift_detection; 'monitor' is the shipped rule",
+        "methods": {
+          "monitor": {
+            "precision": 1.0,
+            "recall": 0.9167,
+            "f1": 0.9565,
+            "tp": 33,
+            "fp": 0,
+            "fn": 3,
+            "tn": 50,
+            "false_positive_rate": 0.0
+          },
+          "ks": {
+            "precision": 0.9583,
+            "recall": 0.6389,
+            "f1": 0.7667,
+            "tp": 23,
+            "fp": 1,
+            "fn": 13,
+            "tn": 49,
+            "false_positive_rate": 0.02
+          },
+          "ks_bh": {
+            "precision": 1.0,
+            "recall": 0.6111,
+            "f1": 0.7586,
+            "tp": 22,
+            "fp": 0,
+            "fn": 14,
+            "tn": 50,
+            "false_positive_rate": 0.0
+          },
+          "chi2": {
+            "precision": 0.9286,
+            "recall": 0.3611,
+            "f1": 0.52,
+            "tp": 13,
+            "fp": 1,
+            "fn": 23,
+            "tn": 49,
+            "false_positive_rate": 0.02
+          },
+          "chi2_bh": {
+            "precision": 1.0,
+            "recall": 0.3333,
+            "f1": 0.5,
+            "tp": 12,
+            "fp": 0,
+            "fn": 24,
+            "tn": 50,
+            "false_positive_rate": 0.0
+          },
+          "psi_effect": {
+            "precision": 1.0,
+            "recall": 0.75,
+            "f1": 0.8571,
+            "tp": 27,
+            "fp": 0,
+            "fn": 9,
+            "tn": 50,
+            "false_positive_rate": 0.0
+          },
+          "wasserstein_effect": {
+            "precision": 1.0,
+            "recall": 0.6389,
+            "f1": 0.7797,
+            "tp": 23,
+            "fp": 0,
+            "fn": 13,
+            "tn": 50,
+            "false_positive_rate": 0.0
+          },
+          "ks_effect": {
+            "precision": 1.0,
+            "recall": 0.5556,
+            "f1": 0.7143,
+            "tp": 20,
+            "fp": 0,
+            "fn": 16,
+            "tn": 50,
+            "false_positive_rate": 0.0
+          }
+        }
+      }
+    },
+    "monitoring_ms": {
+      "p50": 703.9,
+      "p95": 1186.4,
+      "max": 2801.5
+    }
+  },
+  "full_grid": {
+    "A": {
+      "diagnosis": {
+        "scenarios_diagnosed": 119,
+        "scenarios_in_scope": 120,
+        "crashed": 0,
+        "top1": {
+          "value": 0.8151,
+          "k": 97,
+          "n": 119,
+          "ci95": [
+            0.736,
+            0.875
+          ]
+        },
+        "recall_at_3": {
+          "value": 0.9496,
+          "k": 113,
+          "n": 119,
+          "ci95": [
+            0.894,
+            0.977
+          ]
+        },
+        "top1_end_to_end": {
+          "value": 0.8083,
+          "k": 97,
+          "n": 120,
+          "ci95": [
+            0.729,
+            0.869
+          ]
+        },
+        "recall_at_3_end_to_end": {
+          "value": 0.9417,
+          "k": 113,
+          "n": 120,
+          "ci95": [
+            0.884,
+            0.971
+          ]
+        },
+        "evidence_coverage_mean": 0.889,
+        "contradictory_evidence_handling": {
+          "value": 0.0,
+          "k": 0,
+          "n": 21,
+          "ci95": [
+            0.0,
+            0.155
+          ]
+        },
+        "unsupported_claim_rate": {
+          "value": 0.0,
+          "k": 0,
+          "n": 148,
+          "ci95": [
+            0.0,
+            0.025
+          ]
+        },
+        "fabricated_evidence_ids": 0,
+        "causal_overclaims": 0,
+        "claim_validation": {
+          "available": false,
+          "reason": "this run recorded no claim-validation counters (no LLM text was produced, or the run predates claim validation and did not store the model's text)"
+        },
+        "insufficient_evidence_answers": 0,
+        "top1_by_fault": {
+          "F01": {
+            "value": 0.6667,
+            "k": 8,
+            "n": 12,
+            "ci95": [
+              0.391,
+              0.862
+            ]
+          },
+          "F02": {
+            "value": 1.0,
+            "k": 11,
+            "n": 11,
+            "ci95": [
+              0.741,
+              1.0
+            ]
+          },
+          "F03": {
+            "value": 0.8333,
+            "k": 10,
+            "n": 12,
+            "ci95": [
+              0.552,
+              0.953
+            ]
+          },
+          "F04": {
+            "value": 0.0,
+            "k": 0,
+            "n": 12,
+            "ci95": [
+              0.0,
+              0.243
+            ]
+          },
+          "F05": {
+            "value": 1.0,
+            "k": 12,
+            "n": 12,
+            "ci95": [
+              0.757,
+              1.0
+            ]
+          },
+          "F06": {
+            "value": 0.9167,
+            "k": 11,
+            "n": 12,
+            "ci95": [
+              0.646,
+              0.985
+            ]
+          },
+          "F07": {
+            "value": 0.75,
+            "k": 9,
+            "n": 12,
+            "ci95": [
+              0.468,
+              0.911
+            ]
+          },
+          "F08": {
+            "value": 1.0,
+            "k": 12,
+            "n": 12,
+            "ci95": [
+              0.757,
+              1.0
+            ]
+          },
+          "F09": {
+            "value": 1.0,
+            "k": 12,
+            "n": 12,
+            "ci95": [
+              0.757,
+              1.0
+            ]
+          },
+          "F10": {
+            "value": 1.0,
+            "k": 12,
+            "n": 12,
+            "ci95": [
+              0.757,
+              1.0
+            ]
+          }
+        }
+      },
+      "remediation": null,
+      "agent": {
+        "investigations": 119,
+        "crashed": 0,
+        "completion_rate": {
+          "value": 1.0,
+          "k": 119,
+          "n": 119,
+          "ci95": [
+            0.969,
+            1.0
+          ]
+        },
+        "tool_calls_mean": 0.0,
+        "tool_calls_max": 0,
+        "invalid_tool_arguments": 0,
+        "unauthorized_tool_executions": 0,
+        "latency_ms": {
+          "p50": 0.2,
+          "p95": 0.4
+        }
+      }
+    },
+    "B": {
+      "diagnosis": {
+        "scenarios_diagnosed": 119,
+        "scenarios_in_scope": 120,
+        "crashed": 0,
+        "top1": {
+          "value": 0.9664,
+          "k": 115,
+          "n": 119,
+          "ci95": [
+            0.917,
+            0.987
+          ]
+        },
+        "recall_at_3": {
+          "value": 0.9748,
+          "k": 116,
+          "n": 119,
+          "ci95": [
+            0.928,
+            0.991
+          ]
+        },
+        "top1_end_to_end": {
+          "value": 0.9583,
+          "k": 115,
+          "n": 120,
+          "ci95": [
+            0.906,
+            0.982
+          ]
+        },
+        "recall_at_3_end_to_end": {
+          "value": 0.9667,
+          "k": 116,
+          "n": 120,
+          "ci95": [
+            0.917,
+            0.987
+          ]
+        },
+        "evidence_coverage_mean": 0.8999,
+        "contradictory_evidence_handling": {
+          "value": 0.9355,
+          "k": 29,
+          "n": 31,
+          "ci95": [
+            0.793,
+            0.982
+          ]
+        },
+        "unsupported_claim_rate": {
+          "value": 0.0,
+          "k": 0,
+          "n": 161,
+          "ci95": [
+            0.0,
+            0.023
+          ]
+        },
+        "fabricated_evidence_ids": 0,
+        "causal_overclaims": 0,
+        "claim_validation": {
+          "available": false,
+          "reason": "this run recorded no claim-validation counters (no LLM text was produced, or the run predates claim validation and did not store the model's text)"
+        },
+        "insufficient_evidence_answers": 0,
+        "top1_by_fault": {
+          "F01": {
+            "value": 1.0,
+            "k": 12,
+            "n": 12,
+            "ci95": [
+              0.757,
+              1.0
+            ]
+          },
+          "F02": {
+            "value": 1.0,
+            "k": 11,
+            "n": 11,
+            "ci95": [
+              0.741,
+              1.0
+            ]
+          },
+          "F03": {
+            "value": 1.0,
+            "k": 12,
+            "n": 12,
+            "ci95": [
+              0.757,
+              1.0
+            ]
+          },
+          "F04": {
+            "value": 0.75,
+            "k": 9,
+            "n": 12,
+            "ci95": [
+              0.468,
+              0.911
+            ]
+          },
+          "F05": {
+            "value": 1.0,
+            "k": 12,
+            "n": 12,
+            "ci95": [
+              0.757,
+              1.0
+            ]
+          },
+          "F06": {
+            "value": 1.0,
+            "k": 12,
+            "n": 12,
+            "ci95": [
+              0.757,
+              1.0
+            ]
+          },
+          "F07": {
+            "value": 0.9167,
+            "k": 11,
+            "n": 12,
+            "ci95": [
+              0.646,
+              0.985
+            ]
+          },
+          "F08": {
+            "value": 1.0,
+            "k": 12,
+            "n": 12,
+            "ci95": [
+              0.757,
+              1.0
+            ]
+          },
+          "F09": {
+            "value": 1.0,
+            "k": 12,
+            "n": 12,
+            "ci95": [
+              0.757,
+              1.0
+            ]
+          },
+          "F10": {
+            "value": 1.0,
+            "k": 12,
+            "n": 12,
+            "ci95": [
+              0.757,
+              1.0
+            ]
+          }
+        }
+      },
+      "remediation": {
+        "counts": {
+          "investigations": 119,
+          "investigations_crashed": 0,
+          "investigations_without_remediation_record": 0,
+          "proposals_total": 119,
+          "proposals_no_state_change": 32,
+          "proposals_actionable": 87,
+          "rejected_by_policy_before_validation": 2,
+          "validation_attempts": 85,
+          "validation_passed": 68,
+          "validation_failed": 17,
+          "approval_requests": 68,
+          "executed_fixes": 68,
+          "executed_fixes_resolving_incident": 67,
+          "rollback_attempts": 68,
+          "rollbacks_succeeded": 68,
+          "supported_fault_scenarios_detected": 72
+        },
+        "simulation_note": "In the benchmark, approval, execution and rollback are simulated in-process (no human, API or database). The API/database path is exercised by the end-to-end tests.",
+        "proposals": 119,
+        "actions": {
+          "enable_deduplication": 12,
+          "fix_ingestion_scale": 9,
+          "no_action": 32,
+          "quarantine_batch": 35,
+          "restore_model_version": 12,
+          "retrain_candidate": 19
+        },
+        "policy_outcomes": {
+          "DEFER": 32,
+          "REJECT": 19,
+          "REQUEST_HUMAN_APPROVAL": 68
+        },
+        "validation_success_rate": {
+          "value": 0.8,
+          "k": 68,
+          "n": 85,
+          "ci95": [
+            0.703,
+            0.871
+          ],
+          "definition": "validation attempts that passed / all validation attempts"
+        },
+        "regression_failure_rate": {
+          "value": 0.1647,
+          "k": 14,
+          "n": 85,
+          "ci95": [
+            0.101,
+            0.258
+          ],
+          "definition": "validation attempts with a failed regression check / all validation attempts"
+        },
+        "supported_fault_remediation_success": {
+          "value": 0.9306,
+          "k": 67,
+          "n": 72,
+          "ci95": [
+            0.848,
+            0.97
+          ],
+          "definition": "detected scenarios of a fault with an automatable fix where the expected action was proposed AND its validation passed / all detected scenarios of such faults. The denominator is scenarios, not validation attempts: a wrong or missing proposal counts as a failure."
+        },
+        "execution_resolution_rate": {
+          "value": 0.9853,
+          "k": 67,
+          "n": 68,
+          "ci95": [
+            0.921,
+            0.997
+          ],
+          "definition": "executed fixes after which the incident batch was healthy / executed fixes"
+        },
+        "rollback_success_rate": {
+          "value": 1.0,
+          "k": 68,
+          "n": 68,
+          "ci95": [
+            0.947,
+            1.0
+          ],
+          "definition": "rollbacks that restored the previous state / rollback attempts"
+        },
+        "invalid_promotions": 0,
+        "unauthorized_actions": 0,
+        "approval_requests_on_clean_data": 0,
+        "validation_ms_p50": 915.6,
+        "lifecycle": {
+          "coverage": {
+            "config": "B",
+            "investigated": 119,
+            "recorded": 119,
+            "derived_from_legacy_fields": 0,
+            "crashed": [],
+            "without_remediation": []
+          },
+          "schema_version": "lifecycle-1.0",
+          "reconciled": true,
+          "events": 748,
+          "simulated_events": 272,
+          "derived_events": 0,
+          "proposals": 119,
+          "stage_counts": {
+            "PROPOSED": 119,
+            "POLICY_DECIDED": 204,
+            "VALIDATION": 85,
+            "APPROVAL_REQUESTED": 68,
+            "APPROVAL_DECIDED": 68,
+            "EXECUTED": 68,
+            "VERIFIED": 68,
+            "ROLLED_BACK": 68,
+            "CANCELLED": 0
+          },
+          "outcome_counts": {
+            "APPROVAL_DECIDED:approved": 68,
+            "APPROVAL_REQUESTED:requested": 68,
+            "EXECUTED:succeeded": 68,
+            "POLICY_DECIDED:DEFER": 32,
+            "POLICY_DECIDED:PROPOSE_ACTION": 85,
+            "POLICY_DECIDED:REJECT": 19,
+            "POLICY_DECIDED:REQUEST_HUMAN_APPROVAL": 68,
+            "PROPOSED:actionable": 87,
+            "PROPOSED:no_action": 32,
+            "ROLLED_BACK:succeeded": 68,
+            "VALIDATION:failed": 17,
+            "VALIDATION:passed": 68,
+            "VERIFIED:resolved": 67,
+            "VERIFIED:unresolved": 1
+          },
+          "terminal_status_counts": {
+            "deferred_no_action": 32,
+            "rejected_by_policy_before_validation": 2,
+            "rejected_validation_failed": 17,
+            "rolled_back": 68
+          },
+          "accounting_identities": [
+            {
+              "name": "every proposal has exactly one terminal status",
+              "left": 119,
+              "right": 119,
+              "holds": true
+            },
+            {
+              "name": "proposals = actionable + no_action + investigate_further",
+              "left": 119,
+              "right": 119,
+              "holds": true
+            },
+            {
+              "name": "validation attempts = passed + failed",
+              "left": 85,
+              "right": 85,
+              "holds": true
+            },
+            {
+              "name": "approval requests = approved + rejected + still pending",
+              "left": 68,
+              "right": 68,
+              "holds": true
+            },
+            {
+              "name": "execution attempts = approvals granted",
+              "left": 68,
+              "right": 68,
+              "holds": true
+            },
+            {
+              "name": "actionable proposals = rejected before validation + investigate-more + cancelled before validation + validation attempts",
+              "left": 87,
+              "right": 87,
+              "holds": true
+            }
+          ],
+          "rates": {
+            "validation_success_rate": {
+              "numerator": 68,
+              "denominator": 85,
+              "value": 0.8,
+              "definition": "validation attempts that passed / all validation attempts"
+            },
+            "approval_grant_rate": {
+              "numerator": 68,
+              "denominator": 68,
+              "value": 1.0,
+              "definition": "approval decisions that approved / all approval decisions"
+            },
+            "execution_success_rate": {
+              "numerator": 68,
+              "denominator": 68,
+              "value": 1.0,
+              "definition": "executions that succeeded / execution attempts"
+            },
+            "execution_resolution_rate": {
+              "numerator": 67,
+              "denominator": 68,
+              "value": 0.9853,
+              "definition": "executed fixes after which the incident batch was healthy / executed fixes"
+            },
+            "rollback_success_rate": {
+              "numerator": 68,
+              "denominator": 68,
+              "value": 1.0,
+              "definition": "rollbacks that restored the previous state / rollback attempts"
+            }
+          },
+          "failures": [],
+          "failure_counts": {}
+        }
+      },
+      "agent": {
+        "investigations": 119,
+        "crashed": 0,
+        "completion_rate": {
+          "value": 1.0,
+          "k": 119,
+          "n": 119,
+          "ci95": [
+            0.969,
+            1.0
+          ]
+        },
+        "tool_calls_mean": 2.21,
+        "tool_calls_max": 4,
+        "invalid_tool_arguments": 0,
+        "unauthorized_tool_executions": 0,
+        "latency_ms": {
+          "p50": 782.4,
+          "p95": 3161.1
+        }
+      }
+    }
+  },
+  "llm_subset": {
+    "n": 20,
+    "configs": {
+      "A": {
+        "diagnosis": {
+          "scenarios_diagnosed": 20,
+          "scenarios_in_scope": 20,
+          "crashed": 0,
+          "top1": {
+            "value": 0.85,
+            "k": 17,
+            "n": 20,
+            "ci95": [
+              0.64,
+              0.948
+            ]
+          },
+          "recall_at_3": {
+            "value": 0.95,
+            "k": 19,
+            "n": 20,
+            "ci95": [
+              0.764,
+              0.991
+            ]
+          },
+          "top1_end_to_end": {
+            "value": 0.85,
+            "k": 17,
+            "n": 20,
+            "ci95": [
+              0.64,
+              0.948
+            ]
+          },
+          "recall_at_3_end_to_end": {
+            "value": 0.95,
+            "k": 19,
+            "n": 20,
+            "ci95": [
+              0.764,
+              0.991
+            ]
+          },
+          "evidence_coverage_mean": 0.87,
+          "contradictory_evidence_handling": {
+            "value": 0.0,
+            "k": 0,
+            "n": 4,
+            "ci95": [
+              0.0,
+              0.49
+            ]
+          },
+          "unsupported_claim_rate": {
+            "value": 0.0,
+            "k": 0,
+            "n": 25,
+            "ci95": [
+              0.0,
+              0.133
+            ]
+          },
+          "fabricated_evidence_ids": 0,
+          "causal_overclaims": 0,
+          "claim_validation": {
+            "available": false,
+            "reason": "this run recorded no claim-validation counters (no LLM text was produced, or the run predates claim validation and did not store the model's text)"
+          },
+          "insufficient_evidence_answers": 0,
+          "top1_by_fault": {
+            "F01": {
+              "value": 1.0,
+              "k": 2,
+              "n": 2,
+              "ci95": [
+                0.342,
+                1.0
+              ]
+            },
+            "F02": {
+              "value": 1.0,
+              "k": 2,
+              "n": 2,
+              "ci95": [
+                0.342,
+                1.0
+              ]
+            },
+            "F03": {
+              "value": 1.0,
+              "k": 2,
+              "n": 2,
+              "ci95": [
+                0.342,
+                1.0
+              ]
+            },
+            "F04": {
+              "value": 0.0,
+              "k": 0,
+              "n": 2,
+              "ci95": [
+                0.0,
+                0.658
+              ]
+            },
+            "F05": {
+              "value": 1.0,
+              "k": 2,
+              "n": 2,
+              "ci95": [
+                0.342,
+                1.0
+              ]
+            },
+            "F06": {
+              "value": 0.5,
+              "k": 1,
+              "n": 2,
+              "ci95": [
+                0.095,
+                0.905
+              ]
+            },
+            "F07": {
+              "value": 1.0,
+              "k": 2,
+              "n": 2,
+              "ci95": [
+                0.342,
+                1.0
+              ]
+            },
+            "F08": {
+              "value": 1.0,
+              "k": 2,
+              "n": 2,
+              "ci95": [
+                0.342,
+                1.0
+              ]
+            },
+            "F09": {
+              "value": 1.0,
+              "k": 2,
+              "n": 2,
+              "ci95": [
+                0.342,
+                1.0
+              ]
+            },
+            "F10": {
+              "value": 1.0,
+              "k": 2,
+              "n": 2,
+              "ci95": [
+                0.342,
+                1.0
+              ]
+            }
+          }
+        },
+        "remediation": null,
+        "agent": {
+          "investigations": 20,
+          "crashed": 0,
+          "completion_rate": {
+            "value": 1.0,
+            "k": 20,
+            "n": 20,
+            "ci95": [
+              0.839,
+              1.0
+            ]
+          },
+          "tool_calls_mean": 0.0,
+          "tool_calls_max": 0,
+          "invalid_tool_arguments": 0,
+          "unauthorized_tool_executions": 0,
+          "latency_ms": {
+            "p50": 0.2,
+            "p95": 0.4
+          }
+        }
+      },
+      "B": {
+        "diagnosis": {
+          "scenarios_diagnosed": 20,
+          "scenarios_in_scope": 20,
+          "crashed": 0,
+          "top1": {
+            "value": 0.95,
+            "k": 19,
+            "n": 20,
+            "ci95": [
+              0.764,
+              0.991
+            ]
+          },
+          "recall_at_3": {
+            "value": 0.95,
+            "k": 19,
+            "n": 20,
+            "ci95": [
+              0.764,
+              0.991
+            ]
+          },
+          "top1_end_to_end": {
+            "value": 0.95,
+            "k": 19,
+            "n": 20,
+            "ci95": [
+              0.764,
+              0.991
+            ]
+          },
+          "recall_at_3_end_to_end": {
+            "value": 0.95,
+            "k": 19,
+            "n": 20,
+            "ci95": [
+              0.764,
+              0.991
+            ]
+          },
+          "evidence_coverage_mean": 0.87,
+          "contradictory_evidence_handling": {
+            "value": 1.0,
+            "k": 6,
+            "n": 6,
+            "ci95": [
+              0.61,
+              1.0
+            ]
+          },
+          "unsupported_claim_rate": {
+            "value": 0.0,
+            "k": 0,
+            "n": 27,
+            "ci95": [
+              0.0,
+              0.125
+            ]
+          },
+          "fabricated_evidence_ids": 0,
+          "causal_overclaims": 0,
+          "claim_validation": {
+            "available": false,
+            "reason": "this run recorded no claim-validation counters (no LLM text was produced, or the run predates claim validation and did not store the model's text)"
+          },
+          "insufficient_evidence_answers": 0,
+          "top1_by_fault": {
+            "F01": {
+              "value": 1.0,
+              "k": 2,
+              "n": 2,
+              "ci95": [
+                0.342,
+                1.0
+              ]
+            },
+            "F02": {
+              "value": 1.0,
+              "k": 2,
+              "n": 2,
+              "ci95": [
+                0.342,
+                1.0
+              ]
+            },
+            "F03": {
+              "value": 1.0,
+              "k": 2,
+              "n": 2,
+              "ci95": [
+                0.342,
+                1.0
+              ]
+            },
+            "F04": {
+              "value": 0.5,
+              "k": 1,
+              "n": 2,
+              "ci95": [
+                0.095,
+                0.905
+              ]
+            },
+            "F05": {
+              "value": 1.0,
+              "k": 2,
+              "n": 2,
+              "ci95": [
+                0.342,
+                1.0
+              ]
+            },
+            "F06": {
+              "value": 1.0,
+              "k": 2,
+              "n": 2,
+              "ci95": [
+                0.342,
+                1.0
+              ]
+            },
+            "F07": {
+              "value": 1.0,
+              "k": 2,
+              "n": 2,
+              "ci95": [
+                0.342,
+                1.0
+              ]
+            },
+            "F08": {
+              "value": 1.0,
+              "k": 2,
+              "n": 2,
+              "ci95": [
+                0.342,
+                1.0
+              ]
+            },
+            "F09": {
+              "value": 1.0,
+              "k": 2,
+              "n": 2,
+              "ci95": [
+                0.342,
+                1.0
+              ]
+            },
+            "F10": {
+              "value": 1.0,
+              "k": 2,
+              "n": 2,
+              "ci95": [
+                0.342,
+                1.0
+              ]
+            }
+          }
+        },
+        "remediation": {
+          "counts": {
+            "investigations": 20,
+            "investigations_crashed": 0,
+            "investigations_without_remediation_record": 0,
+            "proposals_total": 20,
+            "proposals_no_state_change": 6,
+            "proposals_actionable": 14,
+            "rejected_by_policy_before_validation": 1,
+            "validation_attempts": 13,
+            "validation_passed": 11,
+            "validation_failed": 2,
+            "approval_requests": 11,
+            "executed_fixes": 11,
+            "executed_fixes_resolving_incident": 11,
+            "rollback_attempts": 11,
+            "rollbacks_succeeded": 11,
+            "supported_fault_scenarios_detected": 12
+          },
+          "simulation_note": "In the benchmark, approval, execution and rollback are simulated in-process (no human, API or database). The API/database path is exercised by the end-to-end tests.",
+          "proposals": 20,
+          "actions": {
+            "enable_deduplication": 2,
+            "fix_ingestion_scale": 1,
+            "no_action": 6,
+            "quarantine_batch": 6,
+            "restore_model_version": 2,
+            "retrain_candidate": 3
+          },
+          "policy_outcomes": {
+            "DEFER": 6,
+            "REJECT": 3,
+            "REQUEST_HUMAN_APPROVAL": 11
+          },
+          "validation_success_rate": {
+            "value": 0.8462,
+            "k": 11,
+            "n": 13,
+            "ci95": [
+              0.578,
+              0.957
+            ],
+            "definition": "validation attempts that passed / all validation attempts"
+          },
+          "regression_failure_rate": {
+            "value": 0.1538,
+            "k": 2,
+            "n": 13,
+            "ci95": [
+              0.043,
+              0.422
+            ],
+            "definition": "validation attempts with a failed regression check / all validation attempts"
+          },
+          "supported_fault_remediation_success": {
+            "value": 0.9167,
+            "k": 11,
+            "n": 12,
+            "ci95": [
+              0.646,
+              0.985
+            ],
+            "definition": "detected scenarios of a fault with an automatable fix where the expected action was proposed AND its validation passed / all detected scenarios of such faults. The denominator is scenarios, not validation attempts: a wrong or missing proposal counts as a failure."
+          },
+          "execution_resolution_rate": {
+            "value": 1.0,
+            "k": 11,
+            "n": 11,
+            "ci95": [
+              0.741,
+              1.0
+            ],
+            "definition": "executed fixes after which the incident batch was healthy / executed fixes"
+          },
+          "rollback_success_rate": {
+            "value": 1.0,
+            "k": 11,
+            "n": 11,
+            "ci95": [
+              0.741,
+              1.0
+            ],
+            "definition": "rollbacks that restored the previous state / rollback attempts"
+          },
+          "invalid_promotions": 0,
+          "unauthorized_actions": 0,
+          "approval_requests_on_clean_data": 0,
+          "validation_ms_p50": 632.1,
+          "lifecycle": {
+            "coverage": {
+              "config": "B",
+              "investigated": 20,
+              "recorded": 20,
+              "derived_from_legacy_fields": 0,
+              "crashed": [],
+              "without_remediation": []
+            },
+            "schema_version": "lifecycle-1.0",
+            "reconciled": true,
+            "events": 121,
+            "simulated_events": 44,
+            "derived_events": 0,
+            "proposals": 20,
+            "stage_counts": {
+              "PROPOSED": 20,
+              "POLICY_DECIDED": 33,
+              "VALIDATION": 13,
+              "APPROVAL_REQUESTED": 11,
+              "APPROVAL_DECIDED": 11,
+              "EXECUTED": 11,
+              "VERIFIED": 11,
+              "ROLLED_BACK": 11,
+              "CANCELLED": 0
+            },
+            "outcome_counts": {
+              "APPROVAL_DECIDED:approved": 11,
+              "APPROVAL_REQUESTED:requested": 11,
+              "EXECUTED:succeeded": 11,
+              "POLICY_DECIDED:DEFER": 6,
+              "POLICY_DECIDED:PROPOSE_ACTION": 13,
+              "POLICY_DECIDED:REJECT": 3,
+              "POLICY_DECIDED:REQUEST_HUMAN_APPROVAL": 11,
+              "PROPOSED:actionable": 14,
+              "PROPOSED:no_action": 6,
+              "ROLLED_BACK:succeeded": 11,
+              "VALIDATION:failed": 2,
+              "VALIDATION:passed": 11,
+              "VERIFIED:resolved": 11
+            },
+            "terminal_status_counts": {
+              "deferred_no_action": 6,
+              "rejected_by_policy_before_validation": 1,
+              "rejected_validation_failed": 2,
+              "rolled_back": 11
+            },
+            "accounting_identities": [
+              {
+                "name": "every proposal has exactly one terminal status",
+                "left": 20,
+                "right": 20,
+                "holds": true
+              },
+              {
+                "name": "proposals = actionable + no_action + investigate_further",
+                "left": 20,
+                "right": 20,
+                "holds": true
+              },
+              {
+                "name": "validation attempts = passed + failed",
+                "left": 13,
+                "right": 13,
+                "holds": true
+              },
+              {
+                "name": "approval requests = approved + rejected + still pending",
+                "left": 11,
+                "right": 11,
+                "holds": true
+              },
+              {
+                "name": "execution attempts = approvals granted",
+                "left": 11,
+                "right": 11,
+                "holds": true
+              },
+              {
+                "name": "actionable proposals = rejected before validation + investigate-more + cancelled before validation + validation attempts",
+                "left": 14,
+                "right": 14,
+                "holds": true
+              }
+            ],
+            "rates": {
+              "validation_success_rate": {
+                "numerator": 11,
+                "denominator": 13,
+                "value": 0.8462,
+                "definition": "validation attempts that passed / all validation attempts"
+              },
+              "approval_grant_rate": {
+                "numerator": 11,
+                "denominator": 11,
+                "value": 1.0,
+                "definition": "approval decisions that approved / all approval decisions"
+              },
+              "execution_success_rate": {
+                "numerator": 11,
+                "denominator": 11,
+                "value": 1.0,
+                "definition": "executions that succeeded / execution attempts"
+              },
+              "execution_resolution_rate": {
+                "numerator": 11,
+                "denominator": 11,
+                "value": 1.0,
+                "definition": "executed fixes after which the incident batch was healthy / executed fixes"
+              },
+              "rollback_success_rate": {
+                "numerator": 11,
+                "denominator": 11,
+                "value": 1.0,
+                "definition": "rollbacks that restored the previous state / rollback attempts"
+              }
+            },
+            "failures": [],
+            "failure_counts": {}
+          }
+        },
+        "agent": {
+          "investigations": 20,
+          "crashed": 0,
+          "completion_rate": {
+            "value": 1.0,
+            "k": 20,
+            "n": 20,
+            "ci95": [
+              0.839,
+              1.0
+            ]
+          },
+          "tool_calls_mean": 2.2,
+          "tool_calls_max": 4,
+          "invalid_tool_arguments": 0,
+          "unauthorized_tool_executions": 0,
+          "latency_ms": {
+            "p50": 542.5,
+            "p95": 2794.3
+          }
+        }
+      },
+      "C": {
+        "diagnosis": {
+          "scenarios_diagnosed": 20,
+          "scenarios_in_scope": 20,
+          "crashed": 0,
+          "top1": {
+            "value": 0.55,
+            "k": 11,
+            "n": 20,
+            "ci95": [
+              0.342,
+              0.742
+            ]
+          },
+          "recall_at_3": {
+            "value": 0.6,
+            "k": 12,
+            "n": 20,
+            "ci95": [
+              0.387,
+              0.781
+            ]
+          },
+          "top1_end_to_end": {
+            "value": 0.55,
+            "k": 11,
+            "n": 20,
+            "ci95": [
+              0.342,
+              0.742
+            ]
+          },
+          "recall_at_3_end_to_end": {
+            "value": 0.6,
+            "k": 12,
+            "n": 20,
+            "ci95": [
+              0.387,
+              0.781
+            ]
+          },
+          "evidence_coverage_mean": 0.6107,
+          "contradictory_evidence_handling": {
+            "value": 1.0,
+            "k": 1,
+            "n": 1,
+            "ci95": [
+              0.207,
+              1.0
+            ]
+          },
+          "unsupported_claim_rate": {
+            "value": 0.5,
+            "k": 14,
+            "n": 28,
+            "ci95": [
+              0.326,
+              0.674
+            ]
+          },
+          "fabricated_evidence_ids": 21,
+          "causal_overclaims": 0,
+          "claim_validation": {
+            "available": true,
+            "investigations_with_llm_text": 20,
+            "counters": {
+              "claims_evaluated": 28,
+              "causal_claims_generated": 0,
+              "causal_claims_supported": 0,
+              "causal_claims_rejected": 0,
+              "causal_claims_escalated": 0,
+              "unsupported_claims_generated": 14,
+              "unsupported_claims_rejected": 14,
+              "invalid_cause_labels_rejected": 0,
+              "contradictory_claims_generated": 0,
+              "contradictory_claims_rejected": 0,
+              "fabricated_evidence_ids_generated": 21,
+              "fabricated_evidence_ids_stripped": 21,
+              "irrelevant_evidence_ids_stripped": 5,
+              "untrusted_evidence_ids_stripped": 0,
+              "causal_claims_escaped": 0,
+              "unsupported_claims_escaped": 0,
+              "fabricated_evidence_ids_escaped": 0
+            },
+            "rates": {
+              "causal_claims_not_supported_rate": {
+                "value": null,
+                "k": 0,
+                "n": 0,
+                "ci95": [
+                  0.0,
+                  1.0
+                ],
+                "definition": "(causal claims rejected + escalated) / causal claims generated"
+              },
+              "causal_claims_escaped_rate": {
+                "value": null,
+                "k": 0,
+                "n": 0,
+                "ci95": [
+                  0.0,
+                  1.0
+                ],
+                "definition": "causal claims the validator still recognises in final output / causal claims generated"
+              },
+              "unsupported_claims_escaped_rate": {
+                "value": 0.0,
+                "k": 0,
+                "n": 14,
+                "ci95": [
+                  0.0,
+                  0.215
+                ],
+                "definition": "LLM-ranked hypotheses in final output with no anomaly evidence / unsupported claims generated"
+              },
+              "fabricated_evidence_ids_escaped_rate": {
+                "value": 0.0,
+                "k": 0,
+                "n": 21,
+                "ci95": [
+                  0.0,
+                  0.155
+                ],
+                "definition": "non-existent evidence ids in final output / fabricated ids generated"
+              },
+              "claims_with_causal_language_rate": {
+                "value": 0.0,
+                "k": 0,
+                "n": 28,
+                "ci95": [
+                  0.0,
+                  0.121
+                ],
+                "definition": "causal claims generated / all LLM claims evaluated"
+              }
+            },
+            "limits": "Generated counts are what a fixed lexicon recognises; an over-claim phrased outside it is not counted as generated and cannot be counted as escaped."
+          },
+          "insufficient_evidence_answers": 20,
+          "top1_by_fault": {
+            "F01": {
+              "value": 0.5,
+              "k": 1,
+              "n": 2,
+              "ci95": [
+                0.095,
+                0.905
+              ]
+            },
+            "F02": {
+              "value": 1.0,
+              "k": 2,
+              "n": 2,
+              "ci95": [
+                0.342,
+                1.0
+              ]
+            },
+            "F03": {
+              "value": 0.5,
+              "k": 1,
+              "n": 2,
+              "ci95": [
+                0.095,
+                0.905
+              ]
+            },
+            "F04": {
+              "value": 0.0,
+              "k": 0,
+              "n": 2,
+              "ci95": [
+                0.0,
+                0.658
+              ]
+            },
+            "F05": {
+              "value": 1.0,
+              "k": 2,
+              "n": 2,
+              "ci95": [
+                0.342,
+                1.0
+              ]
+            },
+            "F06": {
+              "value": 0.5,
+              "k": 1,
+              "n": 2,
+              "ci95": [
+                0.095,
+                0.905
+              ]
+            },
+            "F07": {
+              "value": 0.5,
+              "k": 1,
+              "n": 2,
+              "ci95": [
+                0.095,
+                0.905
+              ]
+            },
+            "F08": {
+              "value": 1.0,
+              "k": 2,
+              "n": 2,
+              "ci95": [
+                0.342,
+                1.0
+              ]
+            },
+            "F09": {
+              "value": 0.5,
+              "k": 1,
+              "n": 2,
+              "ci95": [
+                0.095,
+                0.905
+              ]
+            },
+            "F10": {
+              "value": 0.0,
+              "k": 0,
+              "n": 2,
+              "ci95": [
+                0.0,
+                0.658
+              ]
+            }
+          }
+        },
+        "remediation": null,
+        "agent": {
+          "investigations": 20,
+          "crashed": 0,
+          "completion_rate": {
+            "value": 0.85,
+            "k": 17,
+            "n": 20,
+            "ci95": [
+              0.64,
+              0.948
+            ]
+          },
+          "tool_calls_mean": 0.0,
+          "tool_calls_max": 0,
+          "invalid_tool_arguments": 0,
+          "unauthorized_tool_executions": 0,
+          "latency_ms": {
+            "p50": 84530.3,
+            "p95": 196893.3
+          },
+          "llm_requests": 20,
+          "structured_output_failure_rate": {
+            "value": 0.15,
+            "k": 3,
+            "n": 20,
+            "ci95": [
+              0.052,
+              0.36
+            ]
+          },
+          "invalid_json_or_schema_attempts": 6,
+          "llm_timeouts_or_unavailable": 0,
+          "llm_ms_per_investigation": {
+            "p50": 84528.9,
+            "p95": 196892.4
+          },
+          "llm_ms_per_request_mean": 98852.7,
+          "prompt_tokens_mean": 766.0,
+          "completion_tokens_mean": 221.0
+        }
+      },
+      "D": {
+        "diagnosis": {
+          "scenarios_diagnosed": 20,
+          "scenarios_in_scope": 20,
+          "crashed": 0,
+          "top1": {
+            "value": 0.95,
+            "k": 19,
+            "n": 20,
+            "ci95": [
+              0.764,
+              0.991
+            ]
+          },
+          "recall_at_3": {
+            "value": 0.95,
+            "k": 19,
+            "n": 20,
+            "ci95": [
+              0.764,
+              0.991
+            ]
+          },
+          "top1_end_to_end": {
+            "value": 0.95,
+            "k": 19,
+            "n": 20,
+            "ci95": [
+              0.764,
+              0.991
+            ]
+          },
+          "recall_at_3_end_to_end": {
+            "value": 0.95,
+            "k": 19,
+            "n": 20,
+            "ci95": [
+              0.764,
+              0.991
+            ]
+          },
+          "evidence_coverage_mean": 0.8575,
+          "contradictory_evidence_handling": {
+            "value": 1.0,
+            "k": 6,
+            "n": 6,
+            "ci95": [
+              0.61,
+              1.0
+            ]
+          },
+          "unsupported_claim_rate": {
+            "value": 0.3793,
+            "k": 11,
+            "n": 29,
+            "ci95": [
+              0.227,
+              0.56
+            ]
+          },
+          "fabricated_evidence_ids": 19,
+          "causal_overclaims": 0,
+          "claim_validation": {
+            "available": true,
+            "investigations_with_llm_text": 20,
+            "counters": {
+              "claims_evaluated": 185,
+              "causal_claims_generated": 7,
+              "causal_claims_supported": 0,
+              "causal_claims_rejected": 7,
+              "causal_claims_escalated": 0,
+              "unsupported_claims_generated": 11,
+              "unsupported_claims_rejected": 11,
+              "invalid_cause_labels_rejected": 0,
+              "contradictory_claims_generated": 2,
+              "contradictory_claims_rejected": 2,
+              "fabricated_evidence_ids_generated": 19,
+              "fabricated_evidence_ids_stripped": 19,
+              "irrelevant_evidence_ids_stripped": 0,
+              "untrusted_evidence_ids_stripped": 0,
+              "causal_claims_escaped": 0,
+              "unsupported_claims_escaped": 0,
+              "fabricated_evidence_ids_escaped": 0
+            },
+            "rates": {
+              "causal_claims_not_supported_rate": {
+                "value": 1.0,
+                "k": 7,
+                "n": 7,
+                "ci95": [
+                  0.646,
+                  1.0
+                ],
+                "definition": "(causal claims rejected + escalated) / causal claims generated"
+              },
+              "causal_claims_escaped_rate": {
+                "value": 0.0,
+                "k": 0,
+                "n": 7,
+                "ci95": [
+                  0.0,
+                  0.354
+                ],
+                "definition": "causal claims the validator still recognises in final output / causal claims generated"
+              },
+              "unsupported_claims_escaped_rate": {
+                "value": 0.0,
+                "k": 0,
+                "n": 11,
+                "ci95": [
+                  0.0,
+                  0.259
+                ],
+                "definition": "LLM-ranked hypotheses in final output with no anomaly evidence / unsupported claims generated"
+              },
+              "fabricated_evidence_ids_escaped_rate": {
+                "value": 0.0,
+                "k": 0,
+                "n": 19,
+                "ci95": [
+                  0.0,
+                  0.168
+                ],
+                "definition": "non-existent evidence ids in final output / fabricated ids generated"
+              },
+              "claims_with_causal_language_rate": {
+                "value": 0.0378,
+                "k": 7,
+                "n": 185,
+                "ci95": [
+                  0.018,
+                  0.076
+                ],
+                "definition": "causal claims generated / all LLM claims evaluated"
+              }
+            },
+            "limits": "Generated counts are what a fixed lexicon recognises; an over-claim phrased outside it is not counted as generated and cannot be counted as escaped."
+          },
+          "insufficient_evidence_answers": 0,
+          "top1_by_fault": {
+            "F01": {
+              "value": 1.0,
+              "k": 2,
+              "n": 2,
+              "ci95": [
+                0.342,
+                1.0
+              ]
+            },
+            "F02": {
+              "value": 1.0,
+              "k": 2,
+              "n": 2,
+              "ci95": [
+                0.342,
+                1.0
+              ]
+            },
+            "F03": {
+              "value": 1.0,
+              "k": 2,
+              "n": 2,
+              "ci95": [
+                0.342,
+                1.0
+              ]
+            },
+            "F04": {
+              "value": 0.5,
+              "k": 1,
+              "n": 2,
+              "ci95": [
+                0.095,
+                0.905
+              ]
+            },
+            "F05": {
+              "value": 1.0,
+              "k": 2,
+              "n": 2,
+              "ci95": [
+                0.342,
+                1.0
+              ]
+            },
+            "F06": {
+              "value": 1.0,
+              "k": 2,
+              "n": 2,
+              "ci95": [
+                0.342,
+                1.0
+              ]
+            },
+            "F07": {
+              "value": 1.0,
+              "k": 2,
+              "n": 2,
+              "ci95": [
+                0.342,
+                1.0
+              ]
+            },
+            "F08": {
+              "value": 1.0,
+              "k": 2,
+              "n": 2,
+              "ci95": [
+                0.342,
+                1.0
+              ]
+            },
+            "F09": {
+              "value": 1.0,
+              "k": 2,
+              "n": 2,
+              "ci95": [
+                0.342,
+                1.0
+              ]
+            },
+            "F10": {
+              "value": 1.0,
+              "k": 2,
+              "n": 2,
+              "ci95": [
+                0.342,
+                1.0
+              ]
+            }
+          }
+        },
+        "remediation": {
+          "counts": {
+            "investigations": 20,
+            "investigations_crashed": 0,
+            "investigations_without_remediation_record": 0,
+            "proposals_total": 20,
+            "proposals_no_state_change": 6,
+            "proposals_actionable": 14,
+            "rejected_by_policy_before_validation": 1,
+            "validation_attempts": 13,
+            "validation_passed": 11,
+            "validation_failed": 2,
+            "approval_requests": 11,
+            "executed_fixes": 11,
+            "executed_fixes_resolving_incident": 11,
+            "rollback_attempts": 11,
+            "rollbacks_succeeded": 11,
+            "supported_fault_scenarios_detected": 12
+          },
+          "simulation_note": "In the benchmark, approval, execution and rollback are simulated in-process (no human, API or database). The API/database path is exercised by the end-to-end tests.",
+          "proposals": 20,
+          "actions": {
+            "enable_deduplication": 2,
+            "fix_ingestion_scale": 1,
+            "no_action": 6,
+            "quarantine_batch": 6,
+            "restore_model_version": 2,
+            "retrain_candidate": 3
+          },
+          "policy_outcomes": {
+            "DEFER": 6,
+            "REJECT": 3,
+            "REQUEST_HUMAN_APPROVAL": 11
+          },
+          "validation_success_rate": {
+            "value": 0.8462,
+            "k": 11,
+            "n": 13,
+            "ci95": [
+              0.578,
+              0.957
+            ],
+            "definition": "validation attempts that passed / all validation attempts"
+          },
+          "regression_failure_rate": {
+            "value": 0.1538,
+            "k": 2,
+            "n": 13,
+            "ci95": [
+              0.043,
+              0.422
+            ],
+            "definition": "validation attempts with a failed regression check / all validation attempts"
+          },
+          "supported_fault_remediation_success": {
+            "value": 0.9167,
+            "k": 11,
+            "n": 12,
+            "ci95": [
+              0.646,
+              0.985
+            ],
+            "definition": "detected scenarios of a fault with an automatable fix where the expected action was proposed AND its validation passed / all detected scenarios of such faults. The denominator is scenarios, not validation attempts: a wrong or missing proposal counts as a failure."
+          },
+          "execution_resolution_rate": {
+            "value": 1.0,
+            "k": 11,
+            "n": 11,
+            "ci95": [
+              0.741,
+              1.0
+            ],
+            "definition": "executed fixes after which the incident batch was healthy / executed fixes"
+          },
+          "rollback_success_rate": {
+            "value": 1.0,
+            "k": 11,
+            "n": 11,
+            "ci95": [
+              0.741,
+              1.0
+            ],
+            "definition": "rollbacks that restored the previous state / rollback attempts"
+          },
+          "invalid_promotions": 0,
+          "unauthorized_actions": 0,
+          "approval_requests_on_clean_data": 0,
+          "validation_ms_p50": 661.0,
+          "lifecycle": {
+            "coverage": {
+              "config": "D",
+              "investigated": 20,
+              "recorded": 20,
+              "derived_from_legacy_fields": 0,
+              "crashed": [],
+              "without_remediation": []
+            },
+            "schema_version": "lifecycle-1.0",
+            "reconciled": true,
+            "events": 121,
+            "simulated_events": 44,
+            "derived_events": 0,
+            "proposals": 20,
+            "stage_counts": {
+              "PROPOSED": 20,
+              "POLICY_DECIDED": 33,
+              "VALIDATION": 13,
+              "APPROVAL_REQUESTED": 11,
+              "APPROVAL_DECIDED": 11,
+              "EXECUTED": 11,
+              "VERIFIED": 11,
+              "ROLLED_BACK": 11,
+              "CANCELLED": 0
+            },
+            "outcome_counts": {
+              "APPROVAL_DECIDED:approved": 11,
+              "APPROVAL_REQUESTED:requested": 11,
+              "EXECUTED:succeeded": 11,
+              "POLICY_DECIDED:DEFER": 6,
+              "POLICY_DECIDED:PROPOSE_ACTION": 13,
+              "POLICY_DECIDED:REJECT": 3,
+              "POLICY_DECIDED:REQUEST_HUMAN_APPROVAL": 11,
+              "PROPOSED:actionable": 14,
+              "PROPOSED:no_action": 6,
+              "ROLLED_BACK:succeeded": 11,
+              "VALIDATION:failed": 2,
+              "VALIDATION:passed": 11,
+              "VERIFIED:resolved": 11
+            },
+            "terminal_status_counts": {
+              "deferred_no_action": 6,
+              "rejected_by_policy_before_validation": 1,
+              "rejected_validation_failed": 2,
+              "rolled_back": 11
+            },
+            "accounting_identities": [
+              {
+                "name": "every proposal has exactly one terminal status",
+                "left": 20,
+                "right": 20,
+                "holds": true
+              },
+              {
+                "name": "proposals = actionable + no_action + investigate_further",
+                "left": 20,
+                "right": 20,
+                "holds": true
+              },
+              {
+                "name": "validation attempts = passed + failed",
+                "left": 13,
+                "right": 13,
+                "holds": true
+              },
+              {
+                "name": "approval requests = approved + rejected + still pending",
+                "left": 11,
+                "right": 11,
+                "holds": true
+              },
+              {
+                "name": "execution attempts = approvals granted",
+                "left": 11,
+                "right": 11,
+                "holds": true
+              },
+              {
+                "name": "actionable proposals = rejected before validation + investigate-more + cancelled before validation + validation attempts",
+                "left": 14,
+                "right": 14,
+                "holds": true
+              }
+            ],
+            "rates": {
+              "validation_success_rate": {
+                "numerator": 11,
+                "denominator": 13,
+                "value": 0.8462,
+                "definition": "validation attempts that passed / all validation attempts"
+              },
+              "approval_grant_rate": {
+                "numerator": 11,
+                "denominator": 11,
+                "value": 1.0,
+                "definition": "approval decisions that approved / all approval decisions"
+              },
+              "execution_success_rate": {
+                "numerator": 11,
+                "denominator": 11,
+                "value": 1.0,
+                "definition": "executions that succeeded / execution attempts"
+              },
+              "execution_resolution_rate": {
+                "numerator": 11,
+                "denominator": 11,
+                "value": 1.0,
+                "definition": "executed fixes after which the incident batch was healthy / executed fixes"
+              },
+              "rollback_success_rate": {
+                "numerator": 11,
+                "denominator": 11,
+                "value": 1.0,
+                "definition": "rollbacks that restored the previous state / rollback attempts"
+              }
+            },
+            "failures": [],
+            "failure_counts": {}
+          }
+        },
+        "agent": {
+          "investigations": 20,
+          "crashed": 0,
+          "completion_rate": {
+            "value": 1.0,
+            "k": 20,
+            "n": 20,
+            "ci95": [
+              0.839,
+              1.0
+            ]
+          },
+          "tool_calls_mean": 4.1,
+          "tool_calls_max": 5,
+          "invalid_tool_arguments": 3,
+          "unauthorized_tool_executions": 0,
+          "latency_ms": {
+            "p50": 139160.5,
+            "p95": 177797.2
+          },
+          "llm_requests": 60,
+          "structured_output_failure_rate": {
+            "value": 0.0167,
+            "k": 1,
+            "n": 60,
+            "ci95": [
+              0.003,
+              0.089
+            ]
+          },
+          "invalid_json_or_schema_attempts": 2,
+          "llm_timeouts_or_unavailable": 0,
+          "llm_ms_per_investigation": {
+            "p50": 137830.8,
+            "p95": 175072.8
+          },
+          "llm_ms_per_request_mean": 47016.5,
+          "prompt_tokens_mean": 2054.0,
+          "completion_tokens_mean": 365.0
+        }
+      }
+    },
+    "planned": 20
+  },
+  "delay": [
+    {
+      "scenario_id": "SCN-996fb5c5dd",
+      "fault_id": "F01",
+      "severity": "low",
+      "dataset": "adult",
+      "window_rows": 500,
+      "clean_windows": 2,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 2,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-3c5e0fa1a3",
+      "fault_id": "F01",
+      "severity": "medium",
+      "dataset": "adult",
+      "window_rows": 500,
+      "clean_windows": 3,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 6,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-a76579a138",
+      "fault_id": "F01",
+      "severity": "high",
+      "dataset": "adult",
+      "window_rows": 500,
+      "clean_windows": 2,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 2,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-68d44acbeb",
+      "fault_id": "F02",
+      "severity": "low",
+      "dataset": "adult",
+      "window_rows": 500,
+      "clean_windows": 2,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 2,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-3d42b0aaf9",
+      "fault_id": "F02",
+      "severity": "medium",
+      "dataset": "adult",
+      "window_rows": 500,
+      "clean_windows": 3,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 6,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-6a44c998e7",
+      "fault_id": "F02",
+      "severity": "high",
+      "dataset": "adult",
+      "window_rows": 500,
+      "clean_windows": 2,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 2,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-076703e29f",
+      "fault_id": "F03",
+      "severity": "low",
+      "dataset": "adult",
+      "window_rows": 500,
+      "clean_windows": 2,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 2,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-584669cc42",
+      "fault_id": "F03",
+      "severity": "medium",
+      "dataset": "adult",
+      "window_rows": 500,
+      "clean_windows": 3,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 6,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-0d8c95ba24",
+      "fault_id": "F03",
+      "severity": "high",
+      "dataset": "adult",
+      "window_rows": 500,
+      "clean_windows": 2,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 2,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-7124e7432b",
+      "fault_id": "F04",
+      "severity": "low",
+      "dataset": "adult",
+      "window_rows": 500,
+      "clean_windows": 2,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 2,
+      "delay_windows": 1
+    },
+    {
+      "scenario_id": "SCN-e4d44d0b7c",
+      "fault_id": "F04",
+      "severity": "medium",
+      "dataset": "adult",
+      "window_rows": 500,
+      "clean_windows": 3,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 6,
+      "delay_windows": null
+    },
+    {
+      "scenario_id": "SCN-f69e87a47c",
+      "fault_id": "F04",
+      "severity": "high",
+      "dataset": "adult",
+      "window_rows": 500,
+      "clean_windows": 2,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 2,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-a5f019f45a",
+      "fault_id": "F05",
+      "severity": "low",
+      "dataset": "adult",
+      "window_rows": 500,
+      "clean_windows": 2,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 2,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-a411f70e56",
+      "fault_id": "F05",
+      "severity": "medium",
+      "dataset": "adult",
+      "window_rows": 500,
+      "clean_windows": 3,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 6,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-4614dbeb00",
+      "fault_id": "F05",
+      "severity": "high",
+      "dataset": "adult",
+      "window_rows": 500,
+      "clean_windows": 2,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 2,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-2c1da991df",
+      "fault_id": "F06",
+      "severity": "low",
+      "dataset": "adult",
+      "window_rows": 500,
+      "clean_windows": 2,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 2,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-bd74dfc02b",
+      "fault_id": "F06",
+      "severity": "medium",
+      "dataset": "adult",
+      "window_rows": 500,
+      "clean_windows": 3,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 6,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-e3a8d53de0",
+      "fault_id": "F06",
+      "severity": "high",
+      "dataset": "adult",
+      "window_rows": 500,
+      "clean_windows": 2,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 2,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-c2bd3ad4f8",
+      "fault_id": "F07",
+      "severity": "low",
+      "dataset": "adult",
+      "window_rows": 500,
+      "clean_windows": 2,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 2,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-fcb7caa545",
+      "fault_id": "F07",
+      "severity": "medium",
+      "dataset": "adult",
+      "window_rows": 500,
+      "clean_windows": 3,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 6,
+      "delay_windows": null
+    },
+    {
+      "scenario_id": "SCN-af91754360",
+      "fault_id": "F07",
+      "severity": "high",
+      "dataset": "adult",
+      "window_rows": 500,
+      "clean_windows": 2,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 2,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-b69e14f4d3",
+      "fault_id": "F08",
+      "severity": "low",
+      "dataset": "adult",
+      "window_rows": 500,
+      "clean_windows": 2,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 2,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-1517cb9f82",
+      "fault_id": "F08",
+      "severity": "medium",
+      "dataset": "adult",
+      "window_rows": 500,
+      "clean_windows": 3,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 6,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-d3613d756b",
+      "fault_id": "F08",
+      "severity": "high",
+      "dataset": "adult",
+      "window_rows": 500,
+      "clean_windows": 2,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 2,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-443436dc07",
+      "fault_id": "F09",
+      "severity": "low",
+      "dataset": "adult",
+      "window_rows": 500,
+      "clean_windows": 2,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 2,
+      "delay_windows": 1
+    },
+    {
+      "scenario_id": "SCN-3122331d52",
+      "fault_id": "F09",
+      "severity": "medium",
+      "dataset": "adult",
+      "window_rows": 500,
+      "clean_windows": 3,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 6,
+      "delay_windows": 1
+    },
+    {
+      "scenario_id": "SCN-c7323ab3ad",
+      "fault_id": "F09",
+      "severity": "high",
+      "dataset": "adult",
+      "window_rows": 500,
+      "clean_windows": 2,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 2,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-464051eb8f",
+      "fault_id": "F01",
+      "severity": "low",
+      "dataset": "bank",
+      "window_rows": 500,
+      "clean_windows": 2,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 2,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-a16dd6f2c1",
+      "fault_id": "F01",
+      "severity": "medium",
+      "dataset": "bank",
+      "window_rows": 500,
+      "clean_windows": 3,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 6,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-412222cca6",
+      "fault_id": "F01",
+      "severity": "high",
+      "dataset": "bank",
+      "window_rows": 500,
+      "clean_windows": 2,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 2,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-fd5c4f3635",
+      "fault_id": "F02",
+      "severity": "low",
+      "dataset": "bank",
+      "window_rows": 500,
+      "clean_windows": 2,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 2,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-32292515b9",
+      "fault_id": "F02",
+      "severity": "medium",
+      "dataset": "bank",
+      "window_rows": 500,
+      "clean_windows": 3,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 6,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-da5a2c4b25",
+      "fault_id": "F02",
+      "severity": "high",
+      "dataset": "bank",
+      "window_rows": 500,
+      "clean_windows": 2,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 2,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-cd9e51b76d",
+      "fault_id": "F03",
+      "severity": "low",
+      "dataset": "bank",
+      "window_rows": 500,
+      "clean_windows": 2,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 2,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-94c6446424",
+      "fault_id": "F03",
+      "severity": "medium",
+      "dataset": "bank",
+      "window_rows": 500,
+      "clean_windows": 3,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 6,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-1ac0007fbc",
+      "fault_id": "F03",
+      "severity": "high",
+      "dataset": "bank",
+      "window_rows": 500,
+      "clean_windows": 2,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 2,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-a7bd8c9c2c",
+      "fault_id": "F04",
+      "severity": "low",
+      "dataset": "bank",
+      "window_rows": 500,
+      "clean_windows": 2,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 2,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-38304ac8d9",
+      "fault_id": "F04",
+      "severity": "medium",
+      "dataset": "bank",
+      "window_rows": 500,
+      "clean_windows": 3,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 6,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-9790971d6c",
+      "fault_id": "F04",
+      "severity": "high",
+      "dataset": "bank",
+      "window_rows": 500,
+      "clean_windows": 2,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 2,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-330fe33170",
+      "fault_id": "F05",
+      "severity": "low",
+      "dataset": "bank",
+      "window_rows": 500,
+      "clean_windows": 2,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 2,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-9485798387",
+      "fault_id": "F05",
+      "severity": "medium",
+      "dataset": "bank",
+      "window_rows": 500,
+      "clean_windows": 3,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 6,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-b22a34ae31",
+      "fault_id": "F05",
+      "severity": "high",
+      "dataset": "bank",
+      "window_rows": 500,
+      "clean_windows": 2,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 2,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-b543d6cf67",
+      "fault_id": "F06",
+      "severity": "low",
+      "dataset": "bank",
+      "window_rows": 500,
+      "clean_windows": 2,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 2,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-938d2bd811",
+      "fault_id": "F06",
+      "severity": "medium",
+      "dataset": "bank",
+      "window_rows": 500,
+      "clean_windows": 3,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 6,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-26231fea8c",
+      "fault_id": "F06",
+      "severity": "high",
+      "dataset": "bank",
+      "window_rows": 500,
+      "clean_windows": 2,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 2,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-234cd9484d",
+      "fault_id": "F07",
+      "severity": "low",
+      "dataset": "bank",
+      "window_rows": 500,
+      "clean_windows": 2,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 2,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-ce4cd733ea",
+      "fault_id": "F07",
+      "severity": "medium",
+      "dataset": "bank",
+      "window_rows": 500,
+      "clean_windows": 3,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 6,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-5ff4dbb334",
+      "fault_id": "F07",
+      "severity": "high",
+      "dataset": "bank",
+      "window_rows": 500,
+      "clean_windows": 2,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 2,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-8e4a10f7f9",
+      "fault_id": "F08",
+      "severity": "low",
+      "dataset": "bank",
+      "window_rows": 500,
+      "clean_windows": 2,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 2,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-7d14525f0c",
+      "fault_id": "F08",
+      "severity": "medium",
+      "dataset": "bank",
+      "window_rows": 500,
+      "clean_windows": 3,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 6,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-1dafa1432f",
+      "fault_id": "F08",
+      "severity": "high",
+      "dataset": "bank",
+      "window_rows": 500,
+      "clean_windows": 2,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 2,
+      "delay_windows": 0
+    },
+    {
+      "scenario_id": "SCN-55b1f492fb",
+      "fault_id": "F09",
+      "severity": "low",
+      "dataset": "bank",
+      "window_rows": 500,
+      "clean_windows": 2,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 2,
+      "delay_windows": 1
+    },
+    {
+      "scenario_id": "SCN-7cddfb7f8a",
+      "fault_id": "F09",
+      "severity": "medium",
+      "dataset": "bank",
+      "window_rows": 500,
+      "clean_windows": 3,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 6,
+      "delay_windows": 1
+    },
+    {
+      "scenario_id": "SCN-1d0c63e609",
+      "fault_id": "F09",
+      "severity": "high",
+      "dataset": "bank",
+      "window_rows": 500,
+      "clean_windows": 2,
+      "false_alarms_before_onset": 0,
+      "faulty_windows": 2,
+      "delay_windows": 0
+    }
+  ],
+  "resources": {
+    "schema_version": "resources-2",
+    "environment": {
+      "platform": "Linux-6.18.58.1-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+      "python": "3.12.16",
+      "cpu_model": "Intel(R) Core(TM) i5-10210U CPU @ 1.60GHz",
+      "logical_cpus": 8,
+      "physical_cores": 4,
+      "guest_memory_total_bytes": 8216276992,
+      "guest_memory_total_gib": 7.65,
+      "guest_memory_total_gb_decimal": 8.22,
+      "guest_swap_total_gib": 2.0,
+      "is_wsl": true,
+      "limitations": [
+        "Running under WSL2: 'guest' memory is the VM's allocation, not the physical host's.",
+        "WSL2 returns freed guest memory to Windows lazily, and the Linux page cache counts toward the VM's footprint on the host; system-wide 'used' excludes cache.",
+        "Windows-side memory pressure is invisible from inside the guest."
+      ],
+      "host": {
+        "virtualised": true,
+        "physical_ram_bytes": 16957034496,
+        "physical_ram_source": "Windows host, Win32_ComputerSystem.TotalPhysicalMemory",
+        "wslconfig": "absent (WSL2 defaults apply: half of host memory, all logical processors)",
+        "wslconfig_source": "Windows host, %USERPROFILE%\\.wslconfig",
+        "physical_ram_gib": 15.79
+      }
+    },
+    "runs": [
+      {
+        "run_id": "RES-1f82695a9c2c",
+        "label": "deterministic",
+        "started_at": "2026-11-12T10:06:50+00:00",
+        "ended_at": "2026-11-12T10:13:35+00:00",
+        "duration_s": 404.7,
+        "sampling_interval_s": 0.5,
+        "samples": 581,
+        "peaks_mb": {
+          "python_rss": 398.3,
+          "aegis_tree_rss": 398.3,
+          "ollama_server_rss": 35.4,
+          "ollama_runner_rss": 0.0,
+          "process_tree_total_rss": 433.8,
+          "system_used": 2303.1,
+          "swap_used": 855.6
+        },
+        "at_start_mb": {
+          "system_available": 5636.3,
+          "system_used": 2199.4,
+          "swap_used": 855.6
+        },
+        "cpu_percent": {
+          "mean": 35.4,
+          "p95": 59.8,
+          "max": 89.9
+        },
+        "process_counts_max": {
+          "ollama_server": 1,
+          "ollama_runner": 0
+        },
+        "monitoring_errors": {},
+        "monitoring_error_total": 0,
+        "notes": [
+          "no Ollama runner process was observed during this run"
+        ],
+        "work": {
+          "configs_executed": {
+            "A": 119,
+            "B": 119
+          },
+          "llm_enabled": false,
+          "llm_explain": false,
+          "delay_study": true,
+          "note": "counts are scenario x configuration pairs executed by THIS invocation; pairs finished by an earlier invocation were skipped and are not in this measurement"
+        },
+        "llm": null,
+        "configuration": {
+          "name": "v2",
+          "seeds": [
+            201,
+            202
+          ],
+          "ollama_num_ctx": 4096,
+          "ollama_timeout_s": 120.0,
+          "ollama_keep_alive": "2m"
+        }
+      },
+      {
+        "run_id": "RES-580441f6aa56",
+        "label": "llm",
+        "started_at": "2026-11-12T10:27:50+00:00",
+        "ended_at": "2026-11-12T11:49:56+00:00",
+        "duration_s": 4926.3,
+        "sampling_interval_s": 0.5,
+        "samples": 9331,
+        "peaks_mb": {
+          "python_rss": 347.5,
+          "aegis_tree_rss": 347.5,
+          "ollama_server_rss": 26.3,
+          "ollama_runner_rss": 5744.5,
+          "process_tree_total_rss": 6001.1,
+          "system_used": 7159.4,
+          "swap_used": 2048.0
+        },
+        "at_start_mb": {
+          "system_available": 6244.2,
+          "system_used": 1591.5,
+          "swap_used": 946.2
+        },
+        "cpu_percent": {
+          "mean": 65.9,
+          "p95": 73.4,
+          "max": 93.9
+        },
+        "process_counts_max": {
+          "ollama_server": 1,
+          "ollama_runner": 1
+        },
+        "monitoring_errors": {},
+        "monitoring_error_total": 0,
+        "notes": [],
+        "work": {
+          "configs_executed": {
+            "C": 20,
+            "D": 20
+          },
+          "llm_enabled": true,
+          "llm_explain": true,
+          "delay_study": true,
+          "note": "counts are scenario x configuration pairs executed by THIS invocation; pairs finished by an earlier invocation were skipped and are not in this measurement"
+        },
+        "llm": {
+          "name": "qwen3:4b",
+          "available": true,
+          "digest": "359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7",
+          "size_bytes": 2497293931,
+          "family": "qwen3",
+          "parameter_size": "4.0B",
+          "quantization_level": "Q4_K_M",
+          "format": "gguf",
+          "modified_at": "2026-11-11T10:19:00.990504924Z"
+        },
+        "configuration": {
+          "name": "v2",
+          "seeds": [
+            201,
+            202
+          ],
+          "ollama_num_ctx": 4096,
+          "ollama_timeout_s": 180.0,
+          "ollama_keep_alive": "2m"
+        }
+      }
+    ]
+  },
+  "delay_summary": {
+    "streams": 54,
+    "window_rows": 500,
+    "detected_in_first_window": {
+      "value": 0.8704,
+      "k": 47,
+      "n": 54,
+      "ci95": [
+        0.756,
+        0.936
+      ]
+    },
+    "never_detected": 2,
+    "mean_delay_windows_when_detected": 0.096,
+    "false_alarm_rate_on_clean_prefix": {
+      "value": 0.0,
+      "k": 0,
+      "n": 126,
+      "ci95": [
+        0.0,
+        0.03
+      ]
+    }
+  },
+  "concept_detector_delay_rows": {
+    "detections": 37,
+    "p50": 111.0,
+    "p95": 1564.4
+  },
+  "headline_metrics": {
+    "overall_fault_detection_precision": 1.0,
+    "overall_fault_detection_recall": 0.9917,
+    "overall_fault_detection_f1": 0.9958,
+    "overall_fault_detection_false_positive_rate": 0.0,
+    "overall_fault_detection_n_positive_scenarios": 120,
+    "overall_fault_detection_n_clean_scenarios": 50,
+    "drift_detection_precision": 1.0,
+    "drift_detection_recall": 0.9167,
+    "drift_detection_f1": 0.9565,
+    "drift_detection_false_positive_rate": 0.0,
+    "drift_detection_n_positive_scenarios": 36,
+    "drift_detection_n_clean_scenarios": 50
+  },
+  "targets": {
+    "drift_detection_f1": {
+      "target": ">= 0.9",
+      "observed": 0.9565,
+      "met": true
+    },
+    "root_cause_recall_at_3": {
+      "target": ">= 0.8",
+      "observed": 0.9748,
+      "met": true,
+      "observed_full_aegis_llm_subset": 0.95
+    },
+    "clean_control_false_positive_rate": {
+      "target": "<= 0.05",
+      "observed": 0.0,
+      "met": true
+    },
+    "unauthorized_tool_executions": {
+      "target": "== 0",
+      "observed": 0,
+      "met": true
+    },
+    "invalid_promotions": {
+      "target": "== 0",
+      "observed": 0,
+      "met": true
+    },
+    "supported_fault_remediation_success": {
+      "target": ">= 0.7",
+      "observed": 0.9306,
+      "met": true
+    }
+  }
+}

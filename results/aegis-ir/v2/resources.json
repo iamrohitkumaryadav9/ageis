@@ -1,0 +1,154 @@
+{
+  "schema_version": "resources-2",
+  "environment": {
+    "platform": "Linux-6.18.58.1-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+    "python": "3.12.16",
+    "cpu_model": "Intel(R) Core(TM) i5-10210U CPU @ 1.60GHz",
+    "logical_cpus": 8,
+    "physical_cores": 4,
+    "guest_memory_total_bytes": 8216276992,
+    "guest_memory_total_gib": 7.65,
+    "guest_memory_total_gb_decimal": 8.22,
+    "guest_swap_total_gib": 2.0,
+    "is_wsl": true,
+    "limitations": [
+      "Running under WSL2: 'guest' memory is the VM's allocation, not the physical host's.",
+      "WSL2 returns freed guest memory to Windows lazily, and the Linux page cache counts toward the VM's footprint on the host; system-wide 'used' excludes cache.",
+      "Windows-side memory pressure is invisible from inside the guest."
+    ],
+    "host": {
+      "virtualised": true,
+      "physical_ram_bytes": 16957034496,
+      "physical_ram_source": "Windows host, Win32_ComputerSystem.TotalPhysicalMemory",
+      "wslconfig": "absent (WSL2 defaults apply: half of host memory, all logical processors)",
+      "wslconfig_source": "Windows host, %USERPROFILE%\\.wslconfig",
+      "physical_ram_gib": 15.79
+    }
+  },
+  "runs": [
+    {
+      "run_id": "RES-1f82695a9c2c",
+      "label": "deterministic",
+      "started_at": "2026-11-12T10:06:50+00:00",
+      "ended_at": "2026-11-12T10:13:35+00:00",
+      "duration_s": 404.7,
+      "sampling_interval_s": 0.5,
+      "samples": 581,
+      "peaks_mb": {
+        "python_rss": 398.3,
+        "aegis_tree_rss": 398.3,
+        "ollama_server_rss": 35.4,
+        "ollama_runner_rss": 0.0,
+        "process_tree_total_rss": 433.8,
+        "system_used": 2303.1,
+        "swap_used": 855.6
+      },
+      "at_start_mb": {
+        "system_available": 5636.3,
+        "system_used": 2199.4,
+        "swap_used": 855.6
+      },
+      "cpu_percent": {
+        "mean": 35.4,
+        "p95": 59.8,
+        "max": 89.9
+      },
+      "process_counts_max": {
+        "ollama_server": 1,
+        "ollama_runner": 0
+      },
+      "monitoring_errors": {},
+      "monitoring_error_total": 0,
+      "notes": [
+        "no Ollama runner process was observed during this run"
+      ],
+      "work": {
+        "configs_executed": {
+          "A": 119,
+          "B": 119
+        },
+        "llm_enabled": false,
+        "llm_explain": false,
+        "delay_study": true,
+        "note": "counts are scenario x configuration pairs executed by THIS invocation; pairs finished by an earlier invocation were skipped and are not in this measurement"
+      },
+      "llm": null,
+      "configuration": {
+        "name": "v2",
+        "seeds": [
+          201,
+          202
+        ],
+        "ollama_num_ctx": 4096,
+        "ollama_timeout_s": 120.0,
+        "ollama_keep_alive": "2m"
+      }
+    },
+    {
+      "run_id": "RES-580441f6aa56",
+      "label": "llm",
+      "started_at": "2026-11-12T10:27:50+00:00",
+      "ended_at": "2026-11-12T11:49:56+00:00",
+      "duration_s": 4926.3,
+      "sampling_interval_s": 0.5,
+      "samples": 9331,
+      "peaks_mb": {
+        "python_rss": 347.5,
+        "aegis_tree_rss": 347.5,
+        "ollama_server_rss": 26.3,
+        "ollama_runner_rss": 5744.5,
+        "process_tree_total_rss": 6001.1,
+        "system_used": 7159.4,
+        "swap_used": 2048.0
+      },
+      "at_start_mb": {
+        "system_available": 6244.2,
+        "system_used": 1591.5,
+        "swap_used": 946.2
+      },
+      "cpu_percent": {
+        "mean": 65.9,
+        "p95": 73.4,
+        "max": 93.9
+      },
+      "process_counts_max": {
+        "ollama_server": 1,
+        "ollama_runner": 1
+      },
+      "monitoring_errors": {},
+      "monitoring_error_total": 0,
+      "notes": [],
+      "work": {
+        "configs_executed": {
+          "C": 20,
+          "D": 20
+        },
+        "llm_enabled": true,
+        "llm_explain": true,
+        "delay_study": true,
+        "note": "counts are scenario x configuration pairs executed by THIS invocation; pairs finished by an earlier invocation were skipped and are not in this measurement"
+      },
+      "llm": {
+        "name": "qwen3:4b",
+        "available": true,
+        "digest": "359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7",
+        "size_bytes": 2497293931,
+        "family": "qwen3",
+        "parameter_size": "4.0B",
+        "quantization_level": "Q4_K_M",
+        "format": "gguf",
+        "modified_at": "2026-11-11T10:19:00.990504924Z"
+      },
+      "configuration": {
+        "name": "v2",
+        "seeds": [
+          201,
+          202
+        ],
+        "ollama_num_ctx": 4096,
+        "ollama_timeout_s": 180.0,
+        "ollama_keep_alive": "2m"
+      }
+    }
+  ]
+}

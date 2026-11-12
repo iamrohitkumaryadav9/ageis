@@ -507,6 +507,9 @@ def _agent_result(
             "ranking_items": stats.get("raw_items", []),
             "explanation": claim_validation.get("raw_summary"),
             "explanation_accepted": claim_validation.get("accepted"),
+            "explanation_rejection_reason": claim_validation.get("reason") or None,
+            "operator_checks": claim_validation.get("raw_operator_checks", []),
+            "operator_checks_dropped": claim_validation.get("dropped_operator_checks", 0),
         }
     remediation = (
         _remediation_row(

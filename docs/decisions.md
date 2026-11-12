@@ -2,8 +2,9 @@
 
 Short ADR-style entries. Newest last.
 
-### D01 - Environment has 7.7 GB RAM, not 16 GB
-The WSL2 VM on the build machine exposes 7.7 GB (i5-10210U, 4C/8T). All defaults are sized for
+### D01 - Environment has 7.65 GiB of RAM visible, not 16 GB
+The WSL2 VM on the build machine exposes 7.65 GiB (8.22 GB in decimal units; the host has 15.8 GiB
+and no `.wslconfig`, so WSL2 takes half) on an i5-10210U, 4 physical cores / 8 logical. All defaults are sized for
 that: one LLM loaded at a time, bounded SHAP samples, a single API process.
 
 ### D02 - Pinned versions resolve without conflict
@@ -112,3 +113,36 @@ Drift statistics are implemented on SciPy (per-method verdicts, BH adjustment an
 gating are needed by the benchmark and are easier to test when owned). Evidently 0.7.23 computes
 the same statistics independently in `aegis/monitoring/crosscheck.py`; a test asserts agreement.
 It is deliberately off the request path.
+
+
+### D19 - Claim validation is lexical and deterministic, and says so
+Causal wording in LLM text is recognised by fixed lexicons and compared with an evidence-strength
+policy (observation < association < mechanism < intervention); only a passed sandbox validation
+for the same cause supports a causal sentence. A model-based classifier was rejected: the thing
+being checked is a model's output, and a second model would add an unverifiable judge. The cost
+is recall on paraphrases, which is measured by a labelled corpus that includes sentences the
+lexicon misses. First live use over-rejected (decision rationale read as causation); that was
+corrected and both the run and the correction are reported.
+
+### D20 - Lifecycle stages keep separate identifiers
+Proposal, policy decision, validation, approval, execution and rollback each have their own id,
+linked by the proposal id and by explicit references. One merged "remediation id" would have
+hidden exactly the mismatch this was built to expose (87 proposals, 85 validations).
+
+### D21 - Benchmark approval, execution and rollback stay simulated, and are labelled
+Driving 119 scenarios through the API and database would measure the web stack, not the
+remediation logic, and would slow the benchmark several-fold. The real path is covered by the
+end-to-end tests, which reconcile the audit trail with the same code. Every simulated event
+carries `simulated: true`.
+
+### D22 - Hardware-dependent checks are optional release gates
+The system is specified to work without an LLM, so a machine that cannot run one can still pass
+every mandatory gate. A blocked or failed optional gate downgrades the verdict to "conditionally
+ready" and is listed. Browser and Docker gates are mandatory: without them the dashboard and the
+deployment are unverified.
+
+### D23 - New development dependencies
+Frontend only: `vitest`, `jsdom`, `@testing-library/react`, `@testing-library/dom`,
+`@testing-library/user-event` (component tests on the existing Vite configuration) and
+`playwright` (the browser check). No Python dependency and no runtime dependency was added;
+`uv.lock` is unchanged.

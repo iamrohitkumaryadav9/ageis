@@ -207,28 +207,47 @@ Weaknesses to volunteer before being asked:
 
 ## 13. Ablation findings
 
-Measured on AEGIS-IR run `main` (see `docs/benchmark.md`).
+Measured on AEGIS-IR runs `main` and `v2` (see `docs/benchmark.md`). The deterministic
+configurations reproduced exactly between the two runs.
 
-- **A -> B (alerts -> diagnostics + rules): Top-1 0.815 -> 0.966 on 119 detected faults**, intervals
-  0.74-0.88 and 0.92-0.99. This is the one difference the benchmark has the power to support. The
-  gain comes from overlapping symptoms: scaling against shift (quantile-fit evidence) and a
-  performance drop that an input change explains away.
-- **B -> D (add the LLM agent): 19/20 and 19/20.** No accuracy gain, and partly by construction,
-  because the LLM can move a rule score by at most 0.15. The cost is latency: p50 84 s against
-  under 1 s.
-- **C (the 4 GB model alone, no tools or rules): 11/20**, with three unusable outputs. Its typical
-  miss is naming concept drift at a stated confidence of 0.95. n=20, so the interval is 0.34-0.74.
-- **Validation counters in D**: 13 of 30 ranked claims dropped as unsupported, 17 fabricated
-  evidence ids stripped, 2 invalid tool arguments rejected, 0 unauthorized tool executions.
-- B's misses: three low-severity scaling errors and one medium leakage case.
+- **Two detection numbers, two populations.** `overall_fault_detection_f1` = 0.9958: all ten
+  fault categories, 120 faulty and 50 clean scenarios, a detection is any incident. And
+  `drift_detection_f1` = 0.9565: only F01, F02 and F04 (36 scenarios) against the same 50 clean
+  ones, a detection is the drift monitor itself triggering. Never quote one for the other.
+- **A -> B (alerts -> diagnostics + rules): Top-1 0.815 -> 0.966 on 119 detected faults**,
+  intervals 0.74-0.88 and 0.92-0.99. The one difference the benchmark has the power to support.
+- **B -> D (add the LLM agent): 19/20 and 19/20, in both runs.** No accuracy gain, and partly by
+  construction, because the LLM can move a rule score by at most 0.15. The cost is latency:
+  p50 139 s with the explanation step against under 1 s.
+- **C (the 4 GB model alone): 11/20 in both runs**, three unusable outputs each. n=20, interval
+  0.34-0.74.
+- **Claim validation in D (`v2`)**: 185 claims evaluated; 7 classified causal, all rejected, none
+  supported; 11 unsupported and 2 contradictory claims dropped; 19 fabricated evidence ids
+  stripped; nothing the validator recognises reached the output.
+- **And the validator was too strict.** 9 of 20 explanations were discarded. Reading them: 2 had
+  a real causal assertion, 4 were the system's own decision rationale ("no_action due to no
+  performance loss"), 3 were discarded over an operator check. The validator was corrected and
+  an offline re-check of the stored summaries accepts 18 of 20. I report the run as it was, and
+  the correction separately.
+- **Remediation accounting**: 119 proposals = 32 no-action + 2 rejected by policy before
+  validation + 85 validated (68 passed, 17 failed). 68 approval requests, 68 simulated
+  executions, 67 resolved, 68 rollbacks. Every record reconciles.
 
-The useful sentence: "The LLM did not improve Top-1 over the rule engine on this benchmark. Its
-value is tool selection and explanation, and the validation counters show why it is not allowed to
-be the source of truth."
+The useful sentences:
 
-What I would not claim: that D is "as good as" B in general (n=20), that the false-positive rate
-is zero (0/50 bounds it under about 7%), or that these synthetic faults represent production
-incidents.
+- "The LLM did not improve Top-1 over the rule engine on this benchmark. Its value is tool
+  selection and explanation, and the validation counters show why it is not allowed to be the
+  source of truth."
+- "'Zero over-claims escaped' is a consistency check on my own validator, not a proof. It cannot
+  see a paraphrase outside its lexicon, and I keep four such sentences in a test so the limit is
+  on record."
+- "My first benchmark report had a 'causal over-claims: 0' line that meant only that one regular
+  expression did not match. I replaced it with counters whose numerator and denominator are
+  stated, and marked the old run's figures as unavailable."
+
+What I would not claim: that D is "as good as" B in general (n=20); that the false-positive rate
+is zero (0/50 bounds it under about 7%); that the claim validator catches every over-claim; that
+these synthetic faults represent production incidents.
 
 ## 14. Limitations and trade-offs
 

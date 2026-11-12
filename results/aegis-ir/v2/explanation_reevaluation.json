@@ -1,0 +1,249 @@
+{
+  "run": "v2",
+  "kind": "offline re-evaluation of stored summaries; no model was called",
+  "limits": [
+    "Operator checks were not stored by this run and are not re-evaluated.",
+    "The evidence is reproduced by the deterministic pipeline; tool evidence the LLM requested in the original run may differ, which can only affect relevance checks.",
+    "These figures are not part of the benchmark's counters."
+  ],
+  "explanations": 20,
+  "accepted_in_run": 11,
+  "summaries_accepted_now": 18,
+  "causal_claims_in_summaries_now": 2,
+  "items": [
+    {
+      "scenario_id": "SCN-996fb5c5dd",
+      "dataset": "adult",
+      "fault_id": "F01",
+      "summary": "Observed: 'age' feature shows numerical shift (evidence fit 0.88). Leading hypothesis: numerical_shift. Proposed action: no_action (drift without performance loss). Status: DEFER. Operator checks: 1. Verify offset magnitude with feature owner. 2. Confirm no performance degradation via model metrics.",
+      "accepted_in_run": true,
+      "summary_accepted_now": true,
+      "reason_now": null,
+      "not_supported_claims_now": [],
+      "causal_claims_now": 0
+    },
+    {
+      "scenario_id": "SCN-3d42b0aaf9",
+      "dataset": "adult",
+      "fault_id": "F02",
+      "summary": "Categorical shift observed in 'sex' feature (evidence fit 0:80). Hypothesis: category proportions changed. Proposed action: no_action due to no performance impact. Status: deferred. Operator checks: 1. Verify PSI score for 'sex' is \u22650.1. 2. Confirm no recent model updates.",
+      "accepted_in_run": false,
+      "summary_accepted_now": true,
+      "reason_now": null,
+      "not_supported_claims_now": [],
+      "causal_claims_now": 0
+    },
+    {
+      "scenario_id": "SCN-0d8c95ba24",
+      "dataset": "adult",
+      "fault_id": "F03",
+      "summary": "Missing values spiked in ['native_country', 'occupation'] (evidence fit 0:92). Hypothesis: missing_values. Proposed action: quarantine_batch (validated in sandbox). Status: WAITING for human approval. Operator checks: 1) Confirm batch is not used in production; 2) Verify upstream backfill plan.",
+      "accepted_in_run": true,
+      "summary_accepted_now": true,
+      "reason_now": null,
+      "not_supported_claims_now": [],
+      "causal_claims_now": 0
+    },
+    {
+      "scenario_id": "SCN-7124e7432b",
+      "dataset": "adult",
+      "fault_id": "F04",
+      "summary": "Observed: Model performance degraded on recent data with concept drift evidence fit 0.80. Leading hypothesis: concept_drift. Proposed action: retrain_candidate on recent data for evaluation. Status: pending; sandbox not run. Policy rejected (score -0.05). Operator checks: 1) Verify error rise concentration in segments; 2) Confirm feature-label association sign stability.",
+      "accepted_in_run": true,
+      "summary_accepted_now": true,
+      "reason_now": null,
+      "not_supported_claims_now": [],
+      "causal_claims_now": 0
+    },
+    {
+      "scenario_id": "SCN-a411f70e56",
+      "dataset": "adult",
+      "fault_id": "F05",
+      "summary": "Observed: Performance degraded on recent data. Leading hypothesis: concept drift (evidence fit 0.85). Proposed action: retrain on recent data; sandbox failed due to regression on reference. No action pending. Operator checks: 1. Verify feature-label associations for sign flip. 2. Confirm label timing alignment.",
+      "accepted_in_run": false,
+      "summary_accepted_now": true,
+      "reason_now": null,
+      "not_supported_claims_now": [],
+      "causal_claims_now": 0
+    },
+    {
+      "scenario_id": "SCN-e3a8d53de0",
+      "dataset": "adult",
+      "fault_id": "F06",
+      "summary": "Duplicate records detected with high rate above expected. Leading hypothesis: duplicate_records (evidence fit 0.92). Proposed action: enable_deduplication (sandbox validated). Status: WAITING for human approval. Operator checks: verify exact duplicates exist; confirm deduplication won't impact other data.",
+      "accepted_in_run": true,
+      "summary_accepted_now": true,
+      "reason_now": null,
+      "not_supported_claims_now": [],
+      "causal_claims_now": 0
+    },
+    {
+      "scenario_id": "SCN-c2bd3ad4f8",
+      "dataset": "adult",
+      "fault_id": "F07",
+      "summary": "Observed: 'age' feature shows near-perfect label association in current batch (evidence fit 0.95). Leading hypothesis: feature leakage (e.g., label leakage into 'age'). Proposed action: quarantine_batch to prevent model bake-in. Status: WAITING for human approval (score 0.61).",
+      "accepted_in_run": false,
+      "summary_accepted_now": true,
+      "reason_now": null,
+      "not_supported_claims_now": [],
+      "causal_claims_now": 0
+    },
+    {
+      "scenario_id": "SCN-1517cb9f82",
+      "dataset": "adult",
+      "fault_id": "F08",
+      "summary": "Observed: Data contract violation due to schema change (e.g., missing/renamed columns or type mismatches). Leading hypothesis: schema_change with 0.95 evidence fit. Proposed action: quarantine_batch (requires human approval). Status: WAITING for approval. Operator checks: 1. Verify missing/renamed columns via get_data_quality_report. 2. Confirm type mismatches with inspect_feature_distribution.",
+      "accepted_in_run": false,
+      "summary_accepted_now": false,
+      "reason_now": "states causation as established",
+      "not_supported_claims_now": [
+        {
+          "text": "Observed: Data contract violation due to schema change (e.g., missing/renamed columns or type mismatches).",
+          "category": "causal_claim",
+          "language": "causal",
+          "verdict": "rejected"
+        }
+      ],
+      "causal_claims_now": 1
+    },
+    {
+      "scenario_id": "SCN-c7323ab3ad",
+      "dataset": "adult",
+      "fault_id": "F09",
+      "summary": "Labels delayed; evidence fits label_delay hypothesis (0.90). No action pending. Wait for labels to arrive and re-monitor. Check label pipeline health and label availability timeline.",
+      "accepted_in_run": true,
+      "summary_accepted_now": true,
+      "reason_now": null,
+      "not_supported_claims_now": [],
+      "causal_claims_now": 0
+    },
+    {
+      "scenario_id": "SCN-621b33e7dd",
+      "dataset": "adult",
+      "fault_id": "F10",
+      "summary": "Serving artifact hash mismatches registry for adult-hgb-f0f7dd8c (evidence fit 0.97). Leading hypothesis: artifact mismatch. Proposed action: restore registered model. Sandbox validated. Requires human approval (medium risk).",
+      "accepted_in_run": false,
+      "summary_accepted_now": true,
+      "reason_now": null,
+      "not_supported_claims_now": [],
+      "causal_claims_now": 0
+    },
+    {
+      "scenario_id": "SCN-a16dd6f2c1",
+      "dataset": "bank",
+      "fault_id": "F01",
+      "summary": "Campaign feature shows numerical shift (evidence fit 0.88), indicating an additive offset change. Hypothesis 1 (numerical_shift) is leading. Proposed action: no_action due to no performance loss. Status: DEFER. Operator checks: 1. Verify campaign unit with feature owner; 2. Confirm no performance degradation via model metrics.",
+      "accepted_in_run": false,
+      "summary_accepted_now": true,
+      "reason_now": null,
+      "not_supported_claims_now": [],
+      "causal_claims_now": 0
+    },
+    {
+      "scenario_id": "SCN-da5a2c4b25",
+      "dataset": "bank",
+      "fault_id": "F02",
+      "summary": "Categorical shift detected in 'default' feature (evidence fit 0:85). Hypothesis: category proportions changed. Proposed action: no action (drift without performance impact). Status: deferred. Operator checks: 1) Verify no performance degradation via model metrics. 2) Confirm drift magnitude meets material effect size thresholds (e.g., PSI \u2265 0.1).",
+      "accepted_in_run": true,
+      "summary_accepted_now": true,
+      "reason_now": null,
+      "not_supported_claims_now": [],
+      "causal_claims_now": 0
+    },
+    {
+      "scenario_id": "SCN-cd9e51b76d",
+      "dataset": "bank",
+      "fault_id": "F03",
+      "summary": "Contact feature shows missing values spike (evidence fit 0:85). Hypothesis: missing_values affecting ['contact']. Proposed action: quarantine_batch to hold batch until upstream backfills. Status: WAITING for human approval. Operator checks: verify missing-value rate in contact, confirm upstream backfill plan.",
+      "accepted_in_run": true,
+      "summary_accepted_now": true,
+      "reason_now": null,
+      "not_supported_claims_now": [],
+      "causal_claims_now": 0
+    },
+    {
+      "scenario_id": "SCN-38304ac8d9",
+      "dataset": "bank",
+      "fault_id": "F04",
+      "summary": "The 'day' feature shows scaling error (evidence fit 0.90), where values are multiplied by ~60 vs reference. Proposed fix: apply inverse factor in ingestion. Sandbox validated. Requires human approval (score 0.74). Check: confirm scaling factor applies to all data; verify no other features affected.",
+      "accepted_in_run": true,
+      "summary_accepted_now": true,
+      "reason_now": null,
+      "not_supported_claims_now": [],
+      "causal_claims_now": 0
+    },
+    {
+      "scenario_id": "SCN-b22a34ae31",
+      "dataset": "bank",
+      "fault_id": "F05",
+      "summary": "Concept drift (evidence fit 0.95) observed: model performance degraded on recent data. Proposed action: retrain on recent data. Sandbox failed due to regression on reference. No action pending. Check: error concentration per segment; verify label sign flips.",
+      "accepted_in_run": false,
+      "summary_accepted_now": true,
+      "reason_now": null,
+      "not_supported_claims_now": [],
+      "causal_claims_now": 0
+    },
+    {
+      "scenario_id": "SCN-b543d6cf67",
+      "dataset": "bank",
+      "fault_id": "F06",
+      "summary": "Duplicate records detected with evidence fit 0.82. Exact duplicates exceed expected rates. Proposed action: enable_deduplication (sandbox validated). Status: WAITING for human approval. Policy score: 0.70 (benefit 1.74 - risk 0.01 - cost 0.03).",
+      "accepted_in_run": true,
+      "summary_accepted_now": true,
+      "reason_now": null,
+      "not_supported_claims_now": [],
+      "causal_claims_now": 0
+    },
+    {
+      "scenario_id": "SCN-ce4cd733ea",
+      "dataset": "bank",
+      "fault_id": "F07",
+      "summary": "Observation: Campaign feature shows near-perfect label association in new batch (evidence fit 0.95). Leading hypothesis: feature leakage (vs. concept drift at 0.40). Proposed action: quarantine batch to prevent leak baking. Status: WAITING for human approval (score 0.61).",
+      "accepted_in_run": false,
+      "summary_accepted_now": true,
+      "reason_now": null,
+      "not_supported_claims_now": [],
+      "causal_claims_now": 0
+    },
+    {
+      "scenario_id": "SCN-1dafa1432f",
+      "dataset": "bank",
+      "fault_id": "F08",
+      "summary": "Observed: Data contract violation due to schema change (e.g., missing/renamed columns or type mismatches). Leading hypothesis: schema_change (evidence fit 0.95). Proposed action: quarantine_batch (requires human approval). Status: WAITING for approval. Operator checks: 1. Verify missing/renamed columns via get_data_quality_report. 2. Confirm type mismatches with inspect_feature_distribution.",
+      "accepted_in_run": false,
+      "summary_accepted_now": false,
+      "reason_now": "states causation as established",
+      "not_supported_claims_now": [
+        {
+          "text": "Observed: Data contract violation due to schema change (e.g., missing/renamed columns or type mismatches).",
+          "category": "causal_claim",
+          "language": "causal",
+          "verdict": "rejected"
+        }
+      ],
+      "causal_claims_now": 1
+    },
+    {
+      "scenario_id": "SCN-55b1f492fb",
+      "dataset": "bank",
+      "fault_id": "F09",
+      "summary": "Labels delayed; evidence fits label_delay (0.90). No action needed. Wait for labels to arrive and re-monitor. Check label pipeline health and label availability.",
+      "accepted_in_run": true,
+      "summary_accepted_now": true,
+      "reason_now": null,
+      "not_supported_claims_now": [],
+      "causal_claims_now": 0
+    },
+    {
+      "scenario_id": "SCN-4b1eeccf1f",
+      "dataset": "bank",
+      "fault_id": "F10",
+      "summary": "Serving artifact hash mismatches registry for bank-hgb-f52dd403 (evidence fit 0.97). Leading hypothesis: artifact mismatch. Proposed action: restore registered model. Sandbox validated. Requires human approval (score 0.79).",
+      "accepted_in_run": true,
+      "summary_accepted_now": true,
+      "reason_now": null,
+      "not_supported_claims_now": [],
+      "causal_claims_now": 0
+    }
+  ]
+}

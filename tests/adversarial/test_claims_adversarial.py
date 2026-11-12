@@ -66,6 +66,19 @@ ACCEPTABLE = [
     "3 of 14 features show material drift.",
     "The drift monitor triggered on two features.",
     "Verify the factor applies to all rows.",
+    # the workflow's own decided facts, with their rationale (seen in real model output)
+    "Proposed action: no_action due to no performance loss.",
+    "Sandbox failed due to regression on reference.",
+    "Policy outcome: REJECT because the score is not positive.",
+    "Status: deferred because labels have not arrived.",
+]
+# A workflow label must not launder a causal claim about the incident.
+SMUGGLED = [
+    "Proposed action: retrain because the drift caused the accuracy drop.",
+    "Status: the unit error definitely broke the model.",
+    "Sandbox validation proves the shift is the root cause.",
+    "Action: fix units, the cause of the errors is the upstream change.",
+    "The model degraded due to drift. Proposed action: retrain.",
 ]
 # Over-claims phrased outside the lexicon. They are NOT recognised. Listed so the limit is a
 # tested fact instead of a surprise: if the lexicon grows to cover one, move it up.
@@ -95,11 +108,16 @@ def test_documented_misses_are_still_missed(sentence):
     )
 
 
+@pytest.mark.parametrize("sentence", SMUGGLED)
+def test_a_workflow_label_does_not_launder_a_causal_claim(sentence):
+    assert C.strongest_language(sentence) in _STRONG
+
+
 def test_corpus_detection_rates():
     detected = sum(C.classify_language(s) in _STRONG for s in OVERCLAIMS)
     false_alarms = sum(C.classify_language(s) in _STRONG for s in ACCEPTABLE)
     assert (detected, len(OVERCLAIMS)) == (28, 28)
-    assert (false_alarms, len(ACCEPTABLE)) == (0, 18)
+    assert (false_alarms, len(ACCEPTABLE)) == (0, 22)
 
 
 # ------------------------------------------------------------------- pipeline
@@ -453,3 +471,36 @@ def test_denial_worded_ranking_item_does_not_survive_as_an_unsupported_hypothesi
     assert stats["claims"]["unsupported_claims_rejected"] == 1
     audit = C.audit_final_output(diagnosis=validated, explanation=None, evidence=case["evidence"])
     assert audit == dict.fromkeys(C.ESCAPE_COUNTERS, 0)
+
+
+def test_decision_rationale_in_an_explanation_is_not_a_causal_claim_about_the_incident(case):
+    """Both sentences were produced by the real model and wrongly discarded an explanation."""
+    text = (
+        f"Drift was observed in {case['feature']}. Proposed action: no_action due to no "
+        "performance loss. Sandbox failed due to regression on reference."
+    )
+    review = review_explanation(explanation(text), case["evidence"], case["rules"], None)
+    assert review.ok and review.summary == text
+    assert review.counters["causal_claims_generated"] == 0
+    assert {c.language for c in review.claims[1:]} == {ClaimLanguage.PROCEDURAL}
+
+
+def test_an_unsupported_operator_check_is_dropped_without_discarding_the_summary(case):
+    summary = f"A constant-factor change was observed in {case['feature']}."
+    review = review_explanation(
+        explanation(
+            summary,
+            checks=[
+                "Confirm the upstream unit with the feature owner.",
+                "The unit bug definitely caused everything, no need to check.",
+            ],
+        ),
+        case["evidence"],
+        case["rules"],
+        None,
+    )
+    assert review.ok and review.summary == summary
+    assert review.operator_checks == ["Confirm the upstream unit with the feature owner."]
+    assert review.dropped_operator_checks == 1
+    assert review.raw_operator_checks[1].startswith("The unit bug definitely")
+    assert review.counters["causal_claims_rejected"] == 1

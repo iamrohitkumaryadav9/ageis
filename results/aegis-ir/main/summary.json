@@ -33,6 +33,7 @@
       "bank": "bank-hgb-f52dd403"
     },
     "llm_model": null,
+    "llm_model_identity": null,
     "llm_options": {
       "num_ctx": 4096,
       "temperature": 0.1,
