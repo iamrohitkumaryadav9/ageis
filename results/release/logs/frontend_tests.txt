@@ -1,0 +1,20 @@
+
+ RUN  v2.1.9 /home/rohit/ageis/apps/dashboard
+
+ ✓ src/api.test.ts (8 tests) 77ms
+ ✓ src/ui.test.tsx (12 tests) 873ms
+   ✓ StateBox > explains error 401 to the user 378ms
+ ✓ src/Evaluation.test.tsx (9 tests) 1427ms
+   ✓ evaluation page > shows each detection F1 under its own name with its own population 785ms
+ ✓ src/App.test.tsx (10 tests) 1356ms
+   ✓ App shell > asks for a token and loads no protected data without one 360ms
+   ✓ App shell > loads the overview after a token is entered and sends it as a bearer token 380ms
+ ✓ src/IncidentView.test.tsx (12 tests) 2064ms
+   ✓ incident detail > renders findings and evidence, labelled as measurements rather than causes 426ms
+   ✓ remediation and approval > approving sends the version the reviewer saw and the comment 311ms
+
+ Test Files  5 passed (5)
+      Tests  51 passed (51)
+   Start at  14:09:21
+   Duration  6.12s (transform 1.61s, setup 2.69s, collect 3.38s, tests 5.80s, environment 8.61s, prepare 1.20s)
+

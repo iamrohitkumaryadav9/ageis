@@ -1,0 +1,76 @@
+{
+  "generated_at": "2026-11-12T14:12:09+00:00",
+  "profiles": [
+    "tracing"
+  ],
+  "clean_volumes": false,
+  "passed": true,
+  "checks": {
+    "compose_config_valid": {
+      "passed": true,
+      "stderr": ""
+    },
+    "compose_up": {
+      "passed": true,
+      "seconds": 90.5,
+      "stderr": ""
+    },
+    "api_ready": {
+      "passed": true,
+      "waited_s": 4.2,
+      "components": {
+        "database": "ok",
+        "models": "ok",
+        "runbooks": "ok",
+        "llm": "unavailable"
+      }
+    },
+    "total_startup": {
+      "passed": true,
+      "seconds": 98.6,
+      "clean_volumes": false
+    },
+    "dashboard_serves_and_proxies": {
+      "passed": true,
+      "index": 200,
+      "proxied_overview": 200
+    },
+    "mlflow_lists_training_runs": {
+      "passed": true,
+      "experiments": [
+        "aegis-baseline-bank",
+        "aegis-baseline-adult",
+        "Default"
+      ]
+    },
+    "traces_reach_jaeger": {
+      "passed": true
+    },
+    "deterministic_investigation": {
+      "passed": true,
+      "incident_id": "INC-e026ecd41cf3",
+      "status": "completed",
+      "llm_status": "disabled",
+      "llm_model": null,
+      "seconds": 3.5,
+      "llm_calls": [],
+      "top_cause": "scaling_error",
+      "ranked_by": "rules",
+      "errors": []
+    },
+    "all_services_up": {
+      "passed": true,
+      "services": {
+        "api": "Up About a minute (healthy)",
+        "dashboard": "Up About a minute",
+        "jaeger": "Up About a minute",
+        "mlflow": "Up About a minute",
+        "postgres": "Up About a minute (healthy)"
+      },
+      "problems": {}
+    }
+  },
+  "log_tails": {
+    "api": "api-1  | INFO:     127.0.0.1:43366 - \"GET /health HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:52512 - \"GET /ready HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:52518 - \"GET /ready HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.5:59856 - \"GET /overview HTTP/1.0\" 200 OK\napi-1  | INFO:     172.20.0.5:59872 - \"GET /overview HTTP/1.0\" 401 Unauthorized\napi-1  | INFO:     127.0.0.1:34472 - \"GET /health HTTP/1.1\" 200 OK\napi-1  | INFO:     127.0.0.1:34440 - \"GET /health HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:45316 - \"GET /overview HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:60052 - \"POST /data/current HTTP/1.1\" 201 Created\napi-1  | INFO:     127.0.0.1:60818 - \"GET /health HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:60052 - \"POST /monitor/run HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:60052 - \"POST /incidents/INC-e026ecd41cf3/investigate HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:60052 - \"GET /incidents/INC-e026ecd41cf3 HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:54056 - \"POST /incidents/INC-e026ecd41cf3/investigate HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:60562 - \"GET /investigations/INV-bf716e569544 HTTP/1.1\" 200 OK\n"
+  }
+}

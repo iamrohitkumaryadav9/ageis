@@ -1,6 +1,6 @@
 {
   "model": "qwen3:4b",
-  "generated_at": "2026-11-12T09:57:12+00:00",
+  "generated_at": "2026-11-12T14:17:55+00:00",
   "passed": true,
   "checks": {
     "metadata": {
@@ -18,7 +18,7 @@
     },
     "load": {
       "passed": true,
-      "cold_load_s": 7.5,
+      "cold_load_s": 12.7,
       "detail": ""
     },
     "structured_output": {
@@ -33,7 +33,7 @@
       "error": null,
       "attempts": 1,
       "invalid_outputs": 0,
-      "seconds": 13.0,
+      "seconds": 21.0,
       "prompt_tokens": 107,
       "completion_tokens": 34,
       "cites_only_given_ids": true
@@ -43,14 +43,14 @@
       "status": "awaiting_approval",
       "llm_status": "available",
       "llm_model": "qwen3:4b",
-      "seconds": 225.0,
+      "seconds": 237.5,
       "llm_calls": [
         {
           "purpose": "plan",
           "ok": true,
           "error": null,
-          "seconds": 76.2,
-          "prompt_tokens": 771,
+          "seconds": 81.3,
+          "prompt_tokens": 772,
           "completion_tokens": 87,
           "invalid_outputs": 0
         },
@@ -58,18 +58,18 @@
           "purpose": "rank",
           "ok": true,
           "error": null,
-          "seconds": 81.2,
-          "prompt_tokens": 995,
-          "completion_tokens": 216,
+          "seconds": 93.6,
+          "prompt_tokens": 997,
+          "completion_tokens": 233,
           "invalid_outputs": 0
         },
         {
           "purpose": "explain",
           "ok": true,
           "error": null,
-          "seconds": 64.0,
+          "seconds": 58.5,
           "prompt_tokens": 737,
-          "completion_tokens": 112,
+          "completion_tokens": 114,
           "invalid_outputs": 0
         }
       ],
@@ -83,7 +83,7 @@
       "tools_requested_by_llm": 4,
       "tools_rejected": 0,
       "claim_counters": {
-        "claims_evaluated": 12,
+        "claims_evaluated": 10,
         "causal_claims_generated": 0,
         "causal_claims_supported": 0,
         "causal_claims_rejected": 0,
@@ -95,7 +95,7 @@
         "contradictory_claims_rejected": 0,
         "fabricated_evidence_ids_generated": 0,
         "fabricated_evidence_ids_stripped": 0,
-        "irrelevant_evidence_ids_stripped": 9,
+        "irrelevant_evidence_ids_stripped": 0,
         "untrusted_evidence_ids_stripped": 0,
         "causal_claims_escaped": 0,
         "unsupported_claims_escaped": 0,
@@ -146,31 +146,31 @@
     }
   },
   "resources": {
-    "run_id": "RES-67fa21f2057c",
+    "run_id": "RES-24fb82de05bb",
     "label": "verify-qwen3:4b",
-    "started_at": "2026-11-12T09:52:35+00:00",
-    "ended_at": "2026-11-12T09:56:40+00:00",
-    "duration_s": 245.5,
+    "started_at": "2026-11-12T14:12:50+00:00",
+    "ended_at": "2026-11-12T14:17:22+00:00",
+    "duration_s": 271.2,
     "sampling_interval_s": 0.5,
-    "samples": 468,
+    "samples": 511,
     "peaks_mb": {
-      "python_rss": 349.4,
-      "aegis_tree_rss": 349.4,
-      "ollama_server_rss": 41.6,
-      "ollama_runner_rss": 3317.6,
-      "process_tree_total_rss": 3704.1,
-      "system_used": 5013.9,
-      "swap_used": 813.9
+      "python_rss": 358.4,
+      "aegis_tree_rss": 358.4,
+      "ollama_server_rss": 25.3,
+      "ollama_runner_rss": 3319.6,
+      "process_tree_total_rss": 3702.6,
+      "system_used": 5371.1,
+      "swap_used": 1031.5
     },
     "at_start_mb": {
-      "system_available": 3404.2,
-      "system_used": 4431.4,
-      "swap_used": 797.1
+      "system_available": 5896.3,
+      "system_used": 1939.3,
+      "swap_used": 1030.9
     },
     "cpu_percent": {
-      "mean": 65.3,
-      "p95": 75.5,
-      "max": 86.5
+      "mean": 66.1,
+      "p95": 79.8,
+      "max": 93.8
     },
     "process_counts_max": {
       "ollama_server": 1,

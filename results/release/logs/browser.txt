@@ -1,0 +1,27 @@
+browser 131.0.6778.33 -> http://localhost:8080
+  ok    dashboard loads and asks for a token
+  ok    an invalid token produces a visible 401 error, not a blank page
+  ok    overview renders live data after sign-in
+  ok    loading state is shown while the API is slow
+  ok    an API failure shows 'API unavailable' and the shell stays usable
+  ok    a server error (500) is reported with its status
+  ok    incident list renders and links to the incident
+  ok    status filter with no matches shows the empty state
+  ok    incident detail: findings and evidence panels render
+  ok    investigation tab: ranked hypotheses with evidence, worded as hypotheses
+  ok    remediation tab: proposal shown as recommendation with validation and policy
+  ok    a viewer's approval is refused by the server and shown as refused
+  ok    an approver approves: UI shows executed, verified, and the audit trail
+  ok    rollback needs a reason and then restores the previous state
+  ok    a non-existent incident shows a not-found error
+  ok    evaluation page: both detection metrics under their own names and populations
+  ok    evaluation page: switching the run reloads the results
+  ok    desktop layout has no horizontal overflow
+  ok    phone viewport (390px): overview renders without horizontal page overflow
+  ok    phone viewport (390px): incidents renders without horizontal page overflow
+  ok    phone viewport (390px): incident renders without horizontal page overflow
+  ok    phone viewport (390px): evaluation renders without horizontal page overflow
+  ok    phone viewport: tabs remain operable
+  ok    no unexpected console errors and no uncaught exceptions
+
+24/24 checks passed -> /home/rohit/ageis/results/release/browser/browser-report.json

@@ -7,6 +7,8 @@ each event is counted under the right name.
 
 from __future__ import annotations
 
+import re
+
 import pytest
 
 from aegis.agents import claims as C
@@ -504,3 +506,69 @@ def test_an_unsupported_operator_check_is_dropped_without_discarding_the_summary
     assert review.dropped_operator_checks == 1
     assert review.raw_operator_checks[1].startswith("The unit bug definitely")
     assert review.counters["causal_claims_rejected"] == 1
+
+
+def test_llm_cannot_displace_a_strong_rule_hypothesis_by_omitting_it(case):
+    """Regression: seen with the real fallback model (llama3.2:3b).
+
+    The model ranked only a weak guess and left out the cause the rule engine supports at 0.88.
+    The rule hypothesis must lead, and the conclusion must be the rule engine's.
+    """
+    rule_top = case["rules"].hypotheses[0]
+    assert rule_top.root_cause.value == "scaling_error" and rule_top.confidence >= 0.8
+    perf = [
+        e.evidence_id
+        for e in case["evidence"]
+        if e.data.get("polarity") == "anomaly" and e.data.get("check") in C.PERF_CHECKS
+    ]
+    assert perf, "fixture should contain a performance anomaly for the weak guess to cite"
+    validated, _ = validate_ranking(
+        rank(
+            [
+                {
+                    "root_cause": "concept_drift",
+                    "confidence": 0.95,
+                    "supporting_evidence_ids": perf[:2],
+                    "reasoning": "Evidence is consistent with a changed relationship.",
+                }
+            ]
+        ),
+        case["evidence"],
+        case["rules"],
+    )
+    assert validated is not None
+    order = [(h.root_cause.value, h.ranked_by) for h in validated.hypotheses]
+    assert order[0] == ("scaling_error", "rules"), order
+    confidences = [h.confidence for h in validated.hypotheses]
+    assert confidences == sorted(confidences, reverse=True)
+    assert validated.sufficient_evidence and "scaling error" in validated.conclusion
+
+
+def test_the_same_omission_through_a_whole_investigation_keeps_the_rule_decision(ctx):
+    baseline, *_ = investigate(ctx, ctx.scenario("F04", "high", seed=4))
+    scenario = ctx.scenario("F04", "high", seed=4)
+
+    def only_a_weak_guess(body):
+        prompt = body["messages"][1]["content"]
+        ids = re.findall(
+            r"\[(EV-[\w-]+)\] ANOMALY/\w+: [^\n]*(?:precision|recall|accuracy|f1|auc)", prompt
+        )
+        return {
+            "ranking": [
+                {
+                    "root_cause": "concept_drift",
+                    "confidence": 0.95,
+                    "supporting_evidence_ids": ids[:2],
+                    "reasoning": "Consistent with a changed relationship.",
+                }
+            ]
+        }
+
+    fake = FakeOllama(
+        {"plan": good_plan(scenario.truth.affected_features[0]), "rank": only_a_weak_guess}
+    )
+    final, *_ = investigate(ctx, scenario, llm=fake.client(), use_llm_explain=False)
+    top = final["diagnosis"]["hypotheses"][0]
+    assert top["root_cause"] == "scaling_error"
+    assert final["proposal"]["action"] == baseline["proposal"]["action"]
+    assert final["policy_decision"]["outcome"] == baseline["policy_decision"]["outcome"]

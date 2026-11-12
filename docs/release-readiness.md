@@ -177,14 +177,29 @@ profile leaves no headroom for anything else.
 | Dead endpoint, then the real one | unavailable, then works | same |
 | Same investigation with the LLM unreachable | completes on rules in 2 to 3 s | same |
 
+The table is the first verification run of each model. Small-model output varies between runs,
+and a second run of `llama3.2:3b` behaved differently in a way that exposed a defect:
+
+**Defect found with the fallback model, and fixed.** In the second run the model ranked a single
+weak guess (concept drift, capped at 0.45 because the rule engine does not support it) and
+omitted the cause the rule engine supported at 0.88 (scaling error). The merged ranking listed
+the model's item first and the omitted rule hypothesis after it, so the displayed leading cause
+was the model's. The policy then returned `INVESTIGATE_MORE` and nothing was proposed, so the
+outcome was safe, but the diagnosis shown was not the best-supported one: a model could displace
+deterministic evidence by not mentioning it. The merged ranking is now ordered by evidence fit.
+Two regression tests reproduce the case (both fail without the fix). An offline replay of the
+model output stored by benchmark run `v2` shows the fix changes none of the 20 configuration D
+diagnoses. The report of the verification pass that caught it is kept as
+`results/release/release-report.pass1-before-ordering-fix.json`.
+
 Assessment. `llama3.2:3b` is **usable as a fallback on this machine in the sense that matters
 for safety**: it loads, returns schema-valid JSON, is about a third faster and 0.6 GB lighter, and
 every failure mode degrades to the deterministic path. It is **not a like-for-like substitute**:
-in the one investigation run, its ranking did not survive validation, so the diagnosis shown was
-the rule engine's, and it answered the standalone classification wrongly. With the fallback
-active, expect the LLM's contribution to shrink to tool planning and the explanation. This is one
-scenario; it is not a measurement of the model's accuracy, and the fallback was not run on the
-benchmark.
+across the runs its ranking was either discarded by validation or contributed only a weak guess,
+and it answered the standalone classification wrongly. With the fallback active, expect the
+LLM's contribution to shrink to tool planning and the explanation, with the diagnosis coming from
+the rule engine. These are single scenarios; they are not a measurement of the model's accuracy,
+and the fallback was not run on the benchmark.
 
 ## D. MLflow tracking
 

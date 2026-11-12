@@ -291,9 +291,12 @@ def validate_ranking(
     ]
     if not accepted:
         return None, stats
-    accepted += [
-        h for cause, h in rules.items() if cause not in seen
-    ]  # rule candidates the LLM omitted
+    # Rule candidates the LLM omitted come back, and the merged list is ordered by evidence fit.
+    # Without the sort an omitted, strongly supported rule hypothesis would sit below the LLM's
+    # own weaker one: the model could displace deterministic evidence simply by not mentioning
+    # it. (Observed with the fallback model.) The sort is stable, so the LLM's order decides ties.
+    accepted += [h for cause, h in rules.items() if cause not in seen]
+    accepted.sort(key=lambda h: -h.confidence)
     verdict = (
         conclude(sorted(accepted, key=lambda h: -h.confidence)[:1])
         if not ranking.insufficient_evidence

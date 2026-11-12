@@ -1,7 +1,7 @@
 {
   "model": "llama3.2:3b",
-  "generated_at": "2026-11-12T09:52:27+00:00",
-  "passed": true,
+  "generated_at": "2026-11-12T14:21:05+00:00",
+  "passed": false,
   "checks": {
     "metadata": {
       "passed": true,
@@ -18,7 +18,7 @@
     },
     "load": {
       "passed": true,
-      "cold_load_s": 11.7,
+      "cold_load_s": 12.5,
       "detail": ""
     },
     "structured_output": {
@@ -34,24 +34,24 @@
       "error": null,
       "attempts": 1,
       "invalid_outputs": 0,
-      "seconds": 13.1,
+      "seconds": 12.0,
       "prompt_tokens": 116,
       "completion_tokens": 34,
       "cites_only_given_ids": true
     },
     "investigation": {
       "passed": true,
-      "status": "awaiting_approval",
+      "status": "completed",
       "llm_status": "available",
       "llm_model": "llama3.2:3b",
-      "seconds": 144.3,
+      "seconds": 132.9,
       "llm_calls": [
         {
           "purpose": "plan",
           "ok": true,
           "error": null,
-          "seconds": 40.7,
-          "prompt_tokens": 714,
+          "seconds": 45.8,
+          "prompt_tokens": 719,
           "completion_tokens": 20,
           "invalid_outputs": 0
         },
@@ -59,52 +59,50 @@
           "purpose": "rank",
           "ok": true,
           "error": null,
-          "seconds": 62.5,
-          "prompt_tokens": 911,
-          "completion_tokens": 231,
+          "seconds": 54.0,
+          "prompt_tokens": 912,
+          "completion_tokens": 199,
           "invalid_outputs": 0
         },
         {
           "purpose": "explain",
           "ok": true,
           "error": null,
-          "seconds": 39.1,
-          "prompt_tokens": 722,
-          "completion_tokens": 97,
+          "seconds": 32.0,
+          "prompt_tokens": 649,
+          "completion_tokens": 80,
           "invalid_outputs": 0
         }
       ],
       "llm_calls_ok": 3,
       "llm_calls_total": 3,
-      "top_cause": "scaling_error",
-      "top_ranked_by": "rules",
+      "top_cause": "concept_drift",
+      "top_ranked_by": "llm",
       "rule_top_cause": "scaling_error",
-      "policy_outcome": "REQUEST_HUMAN_APPROVAL",
+      "policy_outcome": "INVESTIGATE_MORE",
       "explanation_source": "llm:llama3.2:3b",
       "tools_requested_by_llm": 1,
       "tools_rejected": 0,
       "claim_counters": {
-        "claims_evaluated": 7,
+        "claims_evaluated": 8,
         "causal_claims_generated": 0,
         "causal_claims_supported": 0,
         "causal_claims_rejected": 0,
         "causal_claims_escalated": 0,
-        "unsupported_claims_generated": 1,
-        "unsupported_claims_rejected": 1,
+        "unsupported_claims_generated": 0,
+        "unsupported_claims_rejected": 0,
         "invalid_cause_labels_rejected": 0,
-        "contradictory_claims_generated": 1,
-        "contradictory_claims_rejected": 1,
+        "contradictory_claims_generated": 0,
+        "contradictory_claims_rejected": 0,
         "fabricated_evidence_ids_generated": 0,
         "fabricated_evidence_ids_stripped": 0,
-        "irrelevant_evidence_ids_stripped": 13,
+        "irrelevant_evidence_ids_stripped": 1,
         "untrusted_evidence_ids_stripped": 0,
         "causal_claims_escaped": 0,
         "unsupported_claims_escaped": 0,
         "fabricated_evidence_ids_escaped": 0
       },
-      "errors": [
-        "LLM ranking contained no hypothesis backed by evidence; keeping the deterministic ranking"
-      ]
+      "errors": []
     },
     "fallback_selection": {
       "passed": true,
@@ -139,41 +137,41 @@
       "real_endpoint_ok_afterwards": true
     },
     "deterministic_path": {
-      "passed": true,
+      "passed": false,
       "status": "awaiting_approval",
       "llm_status": "unavailable",
       "top_cause": "scaling_error",
       "ranked_by": "rules",
       "policy_outcome": "REQUEST_HUMAN_APPROVAL",
-      "seconds": 3.3
+      "seconds": 3.1
     }
   },
   "resources": {
-    "run_id": "RES-808b1bbc1fbe",
+    "run_id": "RES-383ad3646d1c",
     "label": "verify-llama3.2:3b",
-    "started_at": "2026-11-12T09:49:10+00:00",
-    "ended_at": "2026-11-12T09:51:59+00:00",
-    "duration_s": 169.1,
+    "started_at": "2026-11-12T14:18:02+00:00",
+    "ended_at": "2026-11-12T14:20:40+00:00",
+    "duration_s": 157.4,
     "sampling_interval_s": 0.5,
-    "samples": 323,
+    "samples": 301,
     "peaks_mb": {
-      "python_rss": 305.8,
-      "aegis_tree_rss": 305.8,
-      "ollama_server_rss": 41.8,
-      "ollama_runner_rss": 2677.2,
-      "process_tree_total_rss": 3024.0,
-      "system_used": 4370.0,
-      "swap_used": 792.3
+      "python_rss": 315.0,
+      "aegis_tree_rss": 315.0,
+      "ollama_server_rss": 26.1,
+      "ollama_runner_rss": 3471.0,
+      "process_tree_total_rss": 3754.1,
+      "system_used": 5453.1,
+      "swap_used": 998.4
     },
     "at_start_mb": {
-      "system_available": 5978.1,
-      "system_used": 1857.5,
-      "swap_used": 776.0
+      "system_available": 2382.6,
+      "system_used": 5453.1,
+      "swap_used": 975.4
     },
     "cpu_percent": {
-      "mean": 63.9,
-      "p95": 75.7,
-      "max": 82.2
+      "mean": 63.6,
+      "p95": 72.6,
+      "max": 81.9
     },
     "process_counts_max": {
       "ollama_server": 1,

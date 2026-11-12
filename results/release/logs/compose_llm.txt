@@ -1,0 +1,19 @@
+  ok    compose_config_valid  {"stderr": ""}
+  ok    compose_up  {"seconds": 49.5, "stderr": ""}
+  ok    api_ready  {"waited_s": 0.2, "components": {"database": "ok", "models": "ok", "runbooks": "ok", "llm": "ok"}}
+  ok    total_startup  {"seconds": 49.8, "clean_volumes": false}
+  ok    dashboard_serves_and_proxies  {"index": 200, "proxied_overview": 200}
+  ok    mlflow_lists_training_runs  {"experiments": ["aegis-baseline-bank", "aegis-baseline-adult", "Default"]}
+  ok    traces_reach_jaeger  {}
+  ok    deterministic_investigation  {"incident_id": "INC-1e8f9b9ec409", "status": "completed", "llm_status": "disabled", "llm_model": null, "seconds": 2.0, "llm_calls": [], "top_cause": "scaling_error", "ranked_by": "rules", "errors": []}
+  ok    model_pulled_in_container  {"waited_s": 1.0, "ollama_list": ["NAME           ID              SIZE      MODIFIED           ", "llama3.2:3b    a80c4f17acd5    2.0 GB    About a minute ago    ", "qwen3:4b       359d7dd4bcda    2.5 GB    About a minute ago"]}
+  ok    ollama_service_healthy  {"status": "Up About a minute (healthy)"}
+  ok    api_reaches_ollama_over_compose_network  {"llm": {"status": "ok", "required": false, "detail": "qwen3:4b via Ollama 0.40.16"}, "endpoint": "http://ollama:11434 (service name, no host port)"}
+  ok    ollama_not_published_to_host  {"port_output": ":0", "note": "the model server is reachable only from inside the Compose network"}
+  ok    llm_investigation_through_api  {"incident_id": "INC-ed391ad5ab25", "status": "completed", "llm_status": "available", "llm_model": "qwen3:4b", "seconds": 372.9, "llm_calls": [{"purpose": "plan", "ok": true, "error": null, "seconds": 165.2}, {"purpose": "rank", "ok": true, "error": null, "sec
+  ok    ready_reports_llm_unavailable_but_system_ready  {"llm": {"status": "unavailable", "required": false, "detail": "ConnectError; deterministic diagnosis remains available"}, "system": "ready"}
+  ok    fallback_to_deterministic_when_ollama_is_down  {"incident_id": "INC-f2939c24fabe", "status": "completed", "llm_status": "unavailable", "llm_model": null, "seconds": 6.0, "llm_calls": [], "top_cause": "scaling_error", "ranked_by": "rules", "errors": ["LLM investigation unavailable: ConnectError; continuing 
+  ok    llm_recovers_after_ollama_restart  {"waited_s": 3.1, "llm": {"status": "ok", "required": false, "detail": "qwen3:4b via Ollama 0.40.16"}}
+  ok    all_services_up  {"services": {"api": "Up 8 minutes (healthy)", "dashboard": "Up 8 minutes", "jaeger": "Up 8 minutes", "mlflow": "Up 7 minutes", "ollama": "Up 3 seconds (health: starting)", "ollama-pull": "Exited (0) 7 minutes ago", "postgres": "Up 8 minutes (healthy)"}, "prob
+
+17/17 checks passed -> results/release/compose-llm.json

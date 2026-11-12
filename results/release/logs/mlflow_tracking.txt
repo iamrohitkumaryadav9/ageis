@@ -1,0 +1,8 @@
+..................                                                       [100%]
+=============================== warnings summary ===============================
+tests/integration/test_tracking.py::test_run_is_created_logged_and_terminated
+  /home/rohit/ageis/.venv/lib/python3.12/site-packages/mlflow/store/tracking/utils/sql_trace_metrics_utils.py:155: SADeprecationWarning: The ``noload`` loader strategy is deprecated and will be removed in a future release.  This option produces incorrect results by returning ``None`` for related items. (deprecated since: 2.1) (This warning originated from the `configure_mappers()` process, which was invoked automatically in response to a user-initiated operation.)
+    _SESSION_TRACE_METADATA = aliased(SqlTraceMetadata)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+18 passed, 1 warning in 53.43s

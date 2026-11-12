@@ -112,6 +112,14 @@ Rates in the report, each with numerator and denominator:
 
 A run without counters reports them as unavailable, not as zero.
 
+## Ordering: deterministic evidence leads
+
+After validation, rule hypotheses the model did not mention are merged back and the whole list is
+ordered by evidence fit. A cause the rule engine does not support is capped at 0.45, so a model
+cannot put its own guess ahead of a better-supported rule hypothesis, either by ranking it first
+or by leaving the rule hypothesis out. (The second route existed until it was observed with the
+fallback model; see `docs/release-readiness.md`.)
+
 ## What "escaped" can and cannot mean
 
 The escape counters come from running the same validator over the final output. They prove the
