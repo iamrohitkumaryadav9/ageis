@@ -334,3 +334,49 @@ def test_investigate_endpoint_runs_in_background_and_is_pollable(api, service, c
         ).status_code
         == 422
     )
+
+
+# ------------------------------------------------------------------ evaluation
+def test_evaluation_results_are_served_with_explicit_metric_names(api):
+    assert api.get("/evaluation/runs").status_code == 401
+    runs = api.get("/evaluation/runs", headers=auth("viewer")).json()["runs"]
+    assert "main" in runs
+    body = api.get("/evaluation/runs/main", headers=auth("viewer")).json()
+    overall, drift = body["detection"]
+    assert overall["metric_prefix"] == "overall_fault_detection"
+    assert drift["metric_prefix"] == "drift_detection"
+    assert overall["metrics"]["overall_fault_detection_f1"]["value"] == 0.9958
+    assert drift["metrics"]["drift_detection_f1"]["value"] == 0.9565
+    assert overall["population"]["n_positive_scenarios"] == 120
+    assert drift["population"]["n_positive_scenarios"] == 36
+    assert set(overall["metrics"]).isdisjoint(drift["metrics"])  # no shared, unnamed key
+    assert overall["confusion"] == {"tp": 119, "fp": 0, "tn": 50, "fn": 1}
+    rem = body["full_grid"]["B"]["remediation"]
+    assert rem["lifecycle"]["reconciled"] is True
+    assert rem["rates"]["validation_success_rate"]["n"] == rem["counts"]["validation_attempts"]
+    assert rem["rates"]["validation_success_rate"]["definition"]
+    assert body["llm_subset"]["configs"]["D"]["claim_validation"]["available"] is False
+
+
+@pytest.mark.parametrize("name", ["nope", "..", "a/b", "%2e%2e", "main%2F..%2Fmain", "x" * 80])
+def test_unknown_or_unsafe_run_names_are_not_found(api, name):
+    response = api.get(f"/evaluation/runs/{name}", headers=auth("viewer"))
+    assert response.status_code == 404
+
+
+def test_outdated_or_corrupt_summary_is_a_conflict_not_a_crash(api, service, tmp_path):
+    (tmp_path / "old").mkdir()
+    (tmp_path / "old" / "summary.json").write_text('{"name": "old", "detection": {"overall": {}}}')
+    (tmp_path / "bad").mkdir()
+    (tmp_path / "bad" / "summary.json").write_text("{not json")
+    original = service.settings.results_dir
+    service.settings.results_dir = tmp_path
+    try:
+        old = api.get("/evaluation/runs/old", headers=auth("viewer"))
+        assert old.status_code == 409 and "regenerate" in old.json()["error"]["message"]
+        assert api.get("/evaluation/runs/bad", headers=auth("viewer")).status_code == 409
+        assert api.get("/evaluation/runs", headers=auth("viewer")).json() == {
+            "runs": ["bad", "old"]
+        }
+    finally:
+        service.settings.results_dir = original

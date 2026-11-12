@@ -61,7 +61,7 @@ table.clickable tbody tr { cursor: pointer; } table.clickable tbody tr:hover { b
 .kv { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; margin: 8px 0; } .kv dt { color: var(--text-secondary); } .kv dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
 .kv.compact { font-size: 13px; }
 .page-head { display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; } .back { font-size: 12.5px; }
-.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--border); } .tabs button { background: transparent; color: var(--text-secondary); border: 0; border-bottom: 2px solid transparent; border-radius: 0; padding: 8px 14px; }
+.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--border); overflow-x: auto; max-width: 100%; scrollbar-width: thin; } .tabs button { flex: none; white-space: nowrap; background: transparent; color: var(--text-secondary); border: 0; border-bottom: 2px solid transparent; border-radius: 0; padding: 8px 14px; }
 .tabs button.active { color: var(--text-primary); border-bottom-color: var(--accent); font-weight: 600; }
 ul.plain { list-style: none; padding: 0; margin: 6px 0; } ul.plain li { padding: 3px 0; }
 ul.notes { margin: 8px 0; padding: 8px 12px 8px 28px; border-left: 3px solid var(--warning); background: var(--surface-0); border-radius: 0 6px 6px 0; }
@@ -88,4 +88,4 @@ ol.lifecycle { list-style: none; display: flex; gap: 0; padding: 0; margin: 0 0 
 ol.lifecycle li { padding: 4px 12px; font-size: 12px; color: var(--text-muted); border: 1px solid var(--border); margin-right: -1px; background: var(--surface-1); }
 ol.lifecycle li.done { color: var(--text-primary); background: var(--surface-0); font-weight: 600; } ol.lifecycle li.done::before { content: "✓ "; color: var(--good); }
 ol.lifecycle li:first-child { border-radius: 6px 0 0 6px; } ol.lifecycle li:last-child { border-radius: 0 6px 6px 0; }
-@media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } .metric-row { grid-template-columns: 70px 1fr; } .metric-values { grid-column: 1 / -1; text-align: left; } main { padding: 16px; } }
+@media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } .tabs button { padding: 8px 10px; } .rate { overflow-wrap: anywhere; } .card table { min-width: 560px; } .kv { grid-template-columns: minmax(0, max-content) minmax(0, 1fr); } .kv dt { overflow-wrap: anywhere; } .metric-row { grid-template-columns: 70px 1fr; } .metric-values { grid-column: 1 / -1; text-align: left; } main { padding: 16px; } }

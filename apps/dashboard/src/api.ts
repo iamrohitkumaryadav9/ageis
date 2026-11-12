@@ -1,4 +1,4 @@
-import type { AuditEvent, IncidentDetail, Incident, InvestigationDetail, InvestigationSummary, Overview, Page, Ready, Remediation } from "./types";
+import type { AuditEvent, EvalRun, IncidentDetail, Incident, InvestigationDetail, InvestigationSummary, Overview, Page, Ready, Remediation } from "./types";
 
 const BASE = import.meta.env.VITE_API_BASE ?? "/api";
 const TOKEN_KEY = "aegis.token";
@@ -43,6 +43,8 @@ export const api = {
     return response.json();
   },
   overview: () => request<Overview>("/overview"),
+  evaluationRuns: () => request<{ runs: string[] }>("/evaluation/runs"),
+  evaluationRun: (name: string) => request<EvalRun>(`/evaluation/runs/${encodeURIComponent(name)}`),
   incidents: (limit: number, offset: number, status: string) =>
     request<Page<Incident>>(`/incidents?limit=${limit}&offset=${offset}${status ? `&status=${status}` : ""}`),
   incident: (id: string) => request<IncidentDetail>(`/incidents/${id}`),

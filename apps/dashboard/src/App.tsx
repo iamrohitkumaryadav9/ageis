@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
 import { api, getToken, setToken } from "./api";
+import { EvaluationPage } from "./Evaluation";
 import { IncidentView } from "./IncidentView";
 import { IncidentList, OverviewPage } from "./Pages";
 import { Status, useAsync } from "./ui";
 
-type Route = { page: "overview" } | { page: "incidents" } | { page: "incident"; id: string };
+type Route = { page: "overview" } | { page: "incidents" } | { page: "incident"; id: string } | { page: "evaluation" };
 
 function parseRoute(): Route {
   const [, page, id] = window.location.hash.split("/");
   if (page === "incidents" && id) return { page: "incident", id };
   if (page === "incidents") return { page: "incidents" };
+  if (page === "evaluation") return { page: "evaluation" };
   return { page: "overview" };
 }
 
@@ -33,7 +35,8 @@ export function App() {
         <a className="brand" href="#/"><b>AEGIS</b><span>ML Incident Commander</span></a>
         <nav>
           <a href="#/" className={route.page === "overview" ? "active" : ""}>Overview</a>
-          <a href="#/incidents" className={route.page !== "overview" ? "active" : ""}>Incidents</a>
+          <a href="#/incidents" className={route.page === "incidents" || route.page === "incident" ? "active" : ""}>Incidents</a>
+          <a href="#/evaluation" className={route.page === "evaluation" ? "active" : ""}>Evaluation</a>
         </nav>
         <div className="health" title={Object.entries(ready.data?.components ?? {}).map(([k, v]) => `${k}: ${v.status} ${v.detail}`).join("\n")}>
           {ready.error ? <Status value="unavailable" /> : ready.data ? (
@@ -59,6 +62,7 @@ export function App() {
         {token && route.page === "overview" && <OverviewPage ready={ready.data} />}
         {token && route.page === "incidents" && <IncidentList />}
         {token && route.page === "incident" && <IncidentView id={route.id} />}
+        {token && route.page === "evaluation" && <EvaluationPage />}
       </main>
     </div>
   );

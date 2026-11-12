@@ -56,7 +56,7 @@ export interface ToolTrace {
 export interface InvestigationDetail extends InvestigationSummary {
   diagnosis: { conclusion: string; sufficient_evidence: boolean; engine: string } | null;
   recommendation: Json | null; policy_decision: Json | null;
-  explanation: { source: string; summary: string; operator_checks: string[] } | null;
+  explanation: { source: string; summary: string; operator_checks: string[]; review_flags?: string[] } | null;
   runbook_refs: { passage_id: string; doc_title: string; doc_version: string; section: string; text: string;
     score: number; suspicious: boolean }[];
   llm_calls: { purpose: string; ok: boolean; model: string | null; duration_ms: number; error: string | null;
@@ -82,4 +82,33 @@ export interface Ready { status: string; components: Record<string, { status: st
 export interface AuditEvent {
   id: number; at: string; actor: string; actor_role: string; action: string; entity_type: string;
   entity_id: string; outcome: string; detail: Json;
+}
+
+// ---- benchmark results (GET /evaluation/runs/{name})
+export interface EvalRate { value: number | null; k: number; n: number; ci95: [number, number]; definition?: string }
+export interface DetectionMetric {
+  metric_prefix: string; definition: string; positive_condition: string;
+  population: { included_fault_categories: string[]; n_positive_scenarios: number; n_clean_scenarios: number; n_scenarios: number };
+  confusion: { tp: number; fp: number; tn: number; fn: number };
+  metrics: Record<string, EvalRate>;
+}
+export interface ClaimValidation {
+  available: boolean; reason?: string; counters?: Record<string, number>;
+  rates?: Record<string, EvalRate>; limits?: string;
+}
+export interface EvalConfig {
+  scenarios_diagnosed: number; root_cause_top1: EvalRate; root_cause_recall_at_3: EvalRate;
+  claim_validation: ClaimValidation | null;
+  remediation: null | {
+    counts: Record<string, number>; simulation_note: string; rates: Record<string, EvalRate>;
+    lifecycle: { reconciled: boolean; events: number; proposals: number; derived_events: number;
+      terminal_status_counts: Record<string, number>; failure_counts: Record<string, number> };
+  };
+}
+export interface EvalRun {
+  name: string; n_scenarios: number; seeds: number[] | null; llm_model: string | null; methodology: string[];
+  detection: DetectionMetric[];
+  targets: Record<string, { target: string; observed: number | null; met: boolean }>;
+  full_grid: Record<"A" | "B", EvalConfig | null>;
+  llm_subset: { n: number; configs: Record<"A" | "B" | "C" | "D", EvalConfig | null> };
 }

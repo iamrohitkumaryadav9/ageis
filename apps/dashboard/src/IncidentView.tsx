@@ -136,6 +136,7 @@ function InvestigationTab({ d, onChange }: { d: IncidentDetail; onChange: () => 
                     <h4>Final explanation <span className="muted">(source: {inv.explanation.source})</span></h4>
                     <p className="pre">{inv.explanation.summary}</p>
                     {inv.explanation.operator_checks.length > 0 && <ul>{inv.explanation.operator_checks.map((c, i) => <li key={i}>{c}</li>)}</ul>}
+                    {(inv.explanation.review_flags ?? []).map((flag: string, i: number) => <p key={i} className="muted small" role="note">Review flag: {flag}</p>)}
                   </div>
                 )}
               </>
@@ -261,7 +262,7 @@ function RemediationCard({ id, stamp, onChange }: { id: string; stamp: string; o
               <>
                 <h4>Policy decision <Status value={r.policy_decision.outcome} /></h4>
                 <p className="small">score {r.policy_decision.score.toFixed(2)} = benefit {r.policy_decision.expected_benefit.toFixed(2)} − risk {r.policy_decision.failure_risk.toFixed(2)} − cost {r.policy_decision.execution_cost.toFixed(2)} <span className="muted">({r.policy_decision.policy_version})</span></p>
-                <ul className="plain small">{[...r.policy_decision.reasons, ...r.policy_decision.unmet_requirements].map((x, i) => <li key={i}>{x}</li>)}</ul>
+                <ul className="plain small">{[...r.policy_decision.reasons, ...r.policy_decision.unmet_requirements].filter((x) => !x.startsWith("score ")).map((x, i) => <li key={i}>{x}</li>)}</ul>
               </>
             )}
             <h4>Approval</h4>

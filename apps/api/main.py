@@ -19,7 +19,7 @@ from aegis.services.core import AegisService
 from aegis.services.errors import ServiceError
 from aegis.storage.db import Database
 from apps.api.deps import parse_tokens
-from apps.api.routes import data, health, incidents, observability, remediation
+from apps.api.routes import data, evaluation, health, incidents, observability, remediation
 
 log = get_logger("aegis.api")
 
@@ -126,7 +126,7 @@ def create_app(settings: Settings | None = None, service: AegisService | None = 
         log.error("unhandled_error", path=request.url.path, error=repr(exc)[:500])
         return _error(request, 500, "internal_error", "an unexpected error occurred")
 
-    for module in (health, data, incidents, remediation, observability):
+    for module in (health, data, incidents, remediation, observability, evaluation):
         app.include_router(module.router)
     FastAPIInstrumentor.instrument_app(app, excluded_urls="health,metrics")
     return app
