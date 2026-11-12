@@ -45,27 +45,77 @@
       "physical_cpus": 4,
       "ram_gb": 8.2,
       "platform": "Linux-6.18.58.1-microsoft-standard-WSL2-x86_64-with-glibc2.43"
-    }
+    },
+    "environment": null,
+    "methodology": null
   },
   "detection": {
-    "overall": {
-      "precision": 1.0,
-      "recall": 0.9917,
-      "f1": 0.9958,
-      "tp": 119,
-      "fp": 0,
-      "fn": 1,
-      "false_positive_rate": {
+    "overall_fault_detection": {
+      "metric_prefix": "overall_fault_detection",
+      "definition": "Was an incident opened? Positives: every injected-fault scenario, all fault categories. Negatives: clean control batches. A scenario counts as detected when the monitoring run reports an incident, raised by any monitor.",
+      "positive_condition": "detection.incident_detected (any monitor)",
+      "population": {
+        "included_fault_categories": [
+          "F01",
+          "F02",
+          "F03",
+          "F04",
+          "F05",
+          "F06",
+          "F07",
+          "F08",
+          "F09",
+          "F10"
+        ],
+        "n_positive_scenarios": 120,
+        "n_clean_scenarios": 50,
+        "n_scenarios": 170
+      },
+      "confusion": {
+        "tp": 119,
+        "fp": 0,
+        "tn": 50,
+        "fn": 1
+      },
+      "overall_fault_detection_precision": {
+        "value": 1.0,
+        "k": 119,
+        "n": 119,
+        "ci95": [
+          0.969,
+          1.0
+        ],
+        "definition": "TP / (TP + FP)"
+      },
+      "overall_fault_detection_recall": {
+        "value": 0.9917,
+        "k": 119,
+        "n": 120,
+        "ci95": [
+          0.954,
+          0.999
+        ],
+        "definition": "TP / (TP + FN)"
+      },
+      "overall_fault_detection_false_positive_rate": {
         "value": 0.0,
         "k": 0,
         "n": 50,
         "ci95": [
           0.0,
           0.071
-        ]
+        ],
+        "definition": "FP / (FP + TN)"
       },
-      "n_faulty": 120,
-      "n_clean": 50
+      "overall_fault_detection_f1": {
+        "value": 0.9958,
+        "ci95": [
+          0.987,
+          1.0
+        ],
+        "ci_method": "percentile bootstrap over scenarios, 2000 resamples, fixed seed",
+        "definition": "2 TP / (2 TP + FP + FN)"
+      }
     },
     "recall_by_fault_id": {
       "F01": {
@@ -250,81 +300,148 @@
         ]
       }
     ],
-    "drift": {
-      "positives": "F01, F02, F04 scenarios",
-      "negatives": "clean controls",
-      "methods": {
-        "monitor": {
-          "precision": 1.0,
-          "recall": 0.9167,
-          "f1": 0.9565,
-          "tp": 33,
-          "fp": 0,
-          "fn": 3,
-          "false_positive_rate": 0.0
-        },
-        "ks": {
-          "precision": 0.9583,
-          "recall": 0.6389,
-          "f1": 0.7667,
-          "tp": 23,
-          "fp": 1,
-          "fn": 13,
-          "false_positive_rate": 0.02
-        },
-        "ks_bh": {
-          "precision": 1.0,
-          "recall": 0.6111,
-          "f1": 0.7586,
-          "tp": 22,
-          "fp": 0,
-          "fn": 14,
-          "false_positive_rate": 0.0
-        },
-        "chi2": {
-          "precision": 0.9286,
-          "recall": 0.3611,
-          "f1": 0.52,
-          "tp": 13,
-          "fp": 1,
-          "fn": 23,
-          "false_positive_rate": 0.02
-        },
-        "chi2_bh": {
-          "precision": 1.0,
-          "recall": 0.3333,
-          "f1": 0.5,
-          "tp": 12,
-          "fp": 0,
-          "fn": 24,
-          "false_positive_rate": 0.0
-        },
-        "psi_effect": {
-          "precision": 1.0,
-          "recall": 0.75,
-          "f1": 0.8571,
-          "tp": 27,
-          "fp": 0,
-          "fn": 9,
-          "false_positive_rate": 0.0
-        },
-        "wasserstein_effect": {
-          "precision": 1.0,
-          "recall": 0.6389,
-          "f1": 0.7797,
-          "tp": 23,
-          "fp": 0,
-          "fn": 13,
-          "false_positive_rate": 0.0
-        },
-        "ks_effect": {
-          "precision": 1.0,
-          "recall": 0.5556,
-          "f1": 0.7143,
-          "tp": 20,
-          "fp": 0,
-          "fn": 16,
-          "false_positive_rate": 0.0
+    "drift_detection": {
+      "metric_prefix": "drift_detection",
+      "definition": "Did the drift monitor flag a distribution change? Positives: only the covariate-drift scenarios (numerical shift F01, categorical shift F02, scaling error F04). Negatives: the same clean control batches. A scenario counts as detected only when the drift monitor itself triggers; an incident raised by another monitor does not count.",
+      "positive_condition": "detection.drift_flagged (the drift monitor specifically)",
+      "population": {
+        "included_fault_categories": [
+          "F01",
+          "F02",
+          "F04"
+        ],
+        "n_positive_scenarios": 36,
+        "n_clean_scenarios": 50,
+        "n_scenarios": 86
+      },
+      "confusion": {
+        "tp": 33,
+        "fp": 0,
+        "tn": 50,
+        "fn": 3
+      },
+      "drift_detection_precision": {
+        "value": 1.0,
+        "k": 33,
+        "n": 33,
+        "ci95": [
+          0.896,
+          1.0
+        ],
+        "definition": "TP / (TP + FP)"
+      },
+      "drift_detection_recall": {
+        "value": 0.9167,
+        "k": 33,
+        "n": 36,
+        "ci95": [
+          0.782,
+          0.971
+        ],
+        "definition": "TP / (TP + FN)"
+      },
+      "drift_detection_false_positive_rate": {
+        "value": 0.0,
+        "k": 0,
+        "n": 50,
+        "ci95": [
+          0.0,
+          0.071
+        ],
+        "definition": "FP / (FP + TN)"
+      },
+      "drift_detection_f1": {
+        "value": 0.9565,
+        "ci95": [
+          0.892,
+          1.0
+        ],
+        "ci_method": "percentile bootstrap over scenarios, 2000 resamples, fixed seed",
+        "definition": "2 TP / (2 TP + FP + FN)"
+      },
+      "methods_compared": {
+        "note": "same population as drift_detection; 'monitor' is the shipped rule",
+        "methods": {
+          "monitor": {
+            "precision": 1.0,
+            "recall": 0.9167,
+            "f1": 0.9565,
+            "tp": 33,
+            "fp": 0,
+            "fn": 3,
+            "tn": 50,
+            "false_positive_rate": 0.0
+          },
+          "ks": {
+            "precision": 0.9583,
+            "recall": 0.6389,
+            "f1": 0.7667,
+            "tp": 23,
+            "fp": 1,
+            "fn": 13,
+            "tn": 49,
+            "false_positive_rate": 0.02
+          },
+          "ks_bh": {
+            "precision": 1.0,
+            "recall": 0.6111,
+            "f1": 0.7586,
+            "tp": 22,
+            "fp": 0,
+            "fn": 14,
+            "tn": 50,
+            "false_positive_rate": 0.0
+          },
+          "chi2": {
+            "precision": 0.9286,
+            "recall": 0.3611,
+            "f1": 0.52,
+            "tp": 13,
+            "fp": 1,
+            "fn": 23,
+            "tn": 49,
+            "false_positive_rate": 0.02
+          },
+          "chi2_bh": {
+            "precision": 1.0,
+            "recall": 0.3333,
+            "f1": 0.5,
+            "tp": 12,
+            "fp": 0,
+            "fn": 24,
+            "tn": 50,
+            "false_positive_rate": 0.0
+          },
+          "psi_effect": {
+            "precision": 1.0,
+            "recall": 0.75,
+            "f1": 0.8571,
+            "tp": 27,
+            "fp": 0,
+            "fn": 9,
+            "tn": 50,
+            "false_positive_rate": 0.0
+          },
+          "wasserstein_effect": {
+            "precision": 1.0,
+            "recall": 0.6389,
+            "f1": 0.7797,
+            "tp": 23,
+            "fp": 0,
+            "fn": 13,
+            "tn": 50,
+            "false_positive_rate": 0.0
+          },
+          "ks_effect": {
+            "precision": 1.0,
+            "recall": 0.5556,
+            "f1": 0.7143,
+            "tp": 20,
+            "fp": 0,
+            "fn": 16,
+            "tn": 50,
+            "false_positive_rate": 0.0
+          }
         }
       }
     },
@@ -397,6 +514,10 @@
         },
         "fabricated_evidence_ids": 0,
         "causal_overclaims": 0,
+        "claim_validation": {
+          "available": false,
+          "reason": "this run recorded no claim-validation counters (no LLM text was produced, or the run predates claim validation and did not store the model's text)"
+        },
         "insufficient_evidence_answers": 0,
         "top1_by_fault": {
           "F01": {
@@ -576,6 +697,10 @@
         },
         "fabricated_evidence_ids": 0,
         "causal_overclaims": 0,
+        "claim_validation": {
+          "available": false,
+          "reason": "this run recorded no claim-validation counters (no LLM text was produced, or the run predates claim validation and did not store the model's text)"
+        },
         "insufficient_evidence_answers": 0,
         "top1_by_fault": {
           "F01": {
@@ -671,6 +796,25 @@
         }
       },
       "remediation": {
+        "counts": {
+          "investigations": 119,
+          "investigations_crashed": 0,
+          "investigations_without_remediation_record": 0,
+          "proposals_total": 119,
+          "proposals_no_state_change": 32,
+          "proposals_actionable": 87,
+          "rejected_by_policy_before_validation": 2,
+          "validation_attempts": 85,
+          "validation_passed": 68,
+          "validation_failed": 17,
+          "approval_requests": 68,
+          "executed_fixes": 68,
+          "executed_fixes_resolving_incident": 67,
+          "rollback_attempts": 68,
+          "rollbacks_succeeded": 68,
+          "supported_fault_scenarios_detected": 72
+        },
+        "simulation_note": "In the benchmark, approval, execution and rollback are simulated in-process (no human, API or database). The API/database path is exercised by the end-to-end tests.",
         "proposals": 119,
         "actions": {
           "enable_deduplication": 12,
@@ -692,7 +836,8 @@
           "ci95": [
             0.703,
             0.871
-          ]
+          ],
+          "definition": "validation attempts that passed / all validation attempts"
         },
         "regression_failure_rate": {
           "value": 0.1647,
@@ -701,25 +846,28 @@
           "ci95": [
             0.101,
             0.258
-          ]
+          ],
+          "definition": "validation attempts with a failed regression check / all validation attempts"
         },
-        "supported_fault_validation_success": {
+        "supported_fault_remediation_success": {
           "value": 0.9306,
           "k": 67,
           "n": 72,
           "ci95": [
             0.848,
             0.97
-          ]
+          ],
+          "definition": "detected scenarios of a fault with an automatable fix where the expected action was proposed AND its validation passed / all detected scenarios of such faults. The denominator is scenarios, not validation attempts: a wrong or missing proposal counts as a failure."
         },
-        "executed_resolves_incident": {
+        "execution_resolution_rate": {
           "value": 0.9853,
           "k": 67,
           "n": 68,
           "ci95": [
             0.921,
             0.997
-          ]
+          ],
+          "definition": "executed fixes after which the incident batch was healthy / executed fixes"
         },
         "rollback_success_rate": {
           "value": 1.0,
@@ -728,12 +876,134 @@
           "ci95": [
             0.947,
             1.0
-          ]
+          ],
+          "definition": "rollbacks that restored the previous state / rollback attempts"
         },
         "invalid_promotions": 0,
         "unauthorized_actions": 0,
         "approval_requests_on_clean_data": 0,
-        "validation_ms_p50": 931.9
+        "validation_ms_p50": 931.9,
+        "lifecycle": {
+          "coverage": {
+            "config": "B",
+            "investigated": 119,
+            "recorded": 0,
+            "derived_from_legacy_fields": 119,
+            "crashed": [],
+            "without_remediation": []
+          },
+          "schema_version": "lifecycle-1.0",
+          "reconciled": true,
+          "events": 748,
+          "simulated_events": 272,
+          "derived_events": 748,
+          "proposals": 119,
+          "stage_counts": {
+            "PROPOSED": 119,
+            "POLICY_DECIDED": 204,
+            "VALIDATION": 85,
+            "APPROVAL_REQUESTED": 68,
+            "APPROVAL_DECIDED": 68,
+            "EXECUTED": 68,
+            "VERIFIED": 68,
+            "ROLLED_BACK": 68,
+            "CANCELLED": 0
+          },
+          "outcome_counts": {
+            "APPROVAL_DECIDED:approved": 68,
+            "APPROVAL_REQUESTED:requested": 68,
+            "EXECUTED:succeeded": 68,
+            "POLICY_DECIDED:DEFER": 32,
+            "POLICY_DECIDED:PROPOSE_ACTION": 85,
+            "POLICY_DECIDED:REJECT": 19,
+            "POLICY_DECIDED:REQUEST_HUMAN_APPROVAL": 68,
+            "PROPOSED:actionable": 87,
+            "PROPOSED:no_action": 32,
+            "ROLLED_BACK:succeeded": 68,
+            "VALIDATION:failed": 17,
+            "VALIDATION:passed": 68,
+            "VERIFIED:resolved": 67,
+            "VERIFIED:unresolved": 1
+          },
+          "terminal_status_counts": {
+            "deferred_no_action": 32,
+            "rejected_by_policy_before_validation": 2,
+            "rejected_validation_failed": 17,
+            "rolled_back": 68
+          },
+          "accounting_identities": [
+            {
+              "name": "every proposal has exactly one terminal status",
+              "left": 119,
+              "right": 119,
+              "holds": true
+            },
+            {
+              "name": "proposals = actionable + no_action + investigate_further",
+              "left": 119,
+              "right": 119,
+              "holds": true
+            },
+            {
+              "name": "validation attempts = passed + failed",
+              "left": 85,
+              "right": 85,
+              "holds": true
+            },
+            {
+              "name": "approval requests = approved + rejected + still pending",
+              "left": 68,
+              "right": 68,
+              "holds": true
+            },
+            {
+              "name": "execution attempts = approvals granted",
+              "left": 68,
+              "right": 68,
+              "holds": true
+            },
+            {
+              "name": "actionable proposals = rejected before validation + investigate-more + cancelled before validation + validation attempts",
+              "left": 87,
+              "right": 87,
+              "holds": true
+            }
+          ],
+          "rates": {
+            "validation_success_rate": {
+              "numerator": 68,
+              "denominator": 85,
+              "value": 0.8,
+              "definition": "validation attempts that passed / all validation attempts"
+            },
+            "approval_grant_rate": {
+              "numerator": 68,
+              "denominator": 68,
+              "value": 1.0,
+              "definition": "approval decisions that approved / all approval decisions"
+            },
+            "execution_success_rate": {
+              "numerator": 68,
+              "denominator": 68,
+              "value": 1.0,
+              "definition": "executions that succeeded / execution attempts"
+            },
+            "execution_resolution_rate": {
+              "numerator": 67,
+              "denominator": 68,
+              "value": 0.9853,
+              "definition": "executed fixes after which the incident batch was healthy / executed fixes"
+            },
+            "rollback_success_rate": {
+              "numerator": 68,
+              "denominator": 68,
+              "value": 1.0,
+              "definition": "rollbacks that restored the previous state / rollback attempts"
+            }
+          },
+          "failures": [],
+          "failure_counts": {}
+        }
       },
       "agent": {
         "investigations": 119,
@@ -823,6 +1093,10 @@
           },
           "fabricated_evidence_ids": 0,
           "causal_overclaims": 0,
+          "claim_validation": {
+            "available": false,
+            "reason": "this run recorded no claim-validation counters (no LLM text was produced, or the run predates claim validation and did not store the model's text)"
+          },
           "insufficient_evidence_answers": 0,
           "top1_by_fault": {
             "F01": {
@@ -1002,6 +1276,10 @@
           },
           "fabricated_evidence_ids": 0,
           "causal_overclaims": 0,
+          "claim_validation": {
+            "available": false,
+            "reason": "this run recorded no claim-validation counters (no LLM text was produced, or the run predates claim validation and did not store the model's text)"
+          },
           "insufficient_evidence_answers": 0,
           "top1_by_fault": {
             "F01": {
@@ -1097,6 +1375,25 @@
           }
         },
         "remediation": {
+          "counts": {
+            "investigations": 20,
+            "investigations_crashed": 0,
+            "investigations_without_remediation_record": 0,
+            "proposals_total": 20,
+            "proposals_no_state_change": 6,
+            "proposals_actionable": 14,
+            "rejected_by_policy_before_validation": 1,
+            "validation_attempts": 13,
+            "validation_passed": 11,
+            "validation_failed": 2,
+            "approval_requests": 11,
+            "executed_fixes": 11,
+            "executed_fixes_resolving_incident": 11,
+            "rollback_attempts": 11,
+            "rollbacks_succeeded": 11,
+            "supported_fault_scenarios_detected": 12
+          },
+          "simulation_note": "In the benchmark, approval, execution and rollback are simulated in-process (no human, API or database). The API/database path is exercised by the end-to-end tests.",
           "proposals": 20,
           "actions": {
             "enable_deduplication": 2,
@@ -1118,7 +1415,8 @@
             "ci95": [
               0.578,
               0.957
-            ]
+            ],
+            "definition": "validation attempts that passed / all validation attempts"
           },
           "regression_failure_rate": {
             "value": 0.1538,
@@ -1127,25 +1425,28 @@
             "ci95": [
               0.043,
               0.422
-            ]
+            ],
+            "definition": "validation attempts with a failed regression check / all validation attempts"
           },
-          "supported_fault_validation_success": {
+          "supported_fault_remediation_success": {
             "value": 0.9167,
             "k": 11,
             "n": 12,
             "ci95": [
               0.646,
               0.985
-            ]
+            ],
+            "definition": "detected scenarios of a fault with an automatable fix where the expected action was proposed AND its validation passed / all detected scenarios of such faults. The denominator is scenarios, not validation attempts: a wrong or missing proposal counts as a failure."
           },
-          "executed_resolves_incident": {
+          "execution_resolution_rate": {
             "value": 1.0,
             "k": 11,
             "n": 11,
             "ci95": [
               0.741,
               1.0
-            ]
+            ],
+            "definition": "executed fixes after which the incident batch was healthy / executed fixes"
           },
           "rollback_success_rate": {
             "value": 1.0,
@@ -1154,12 +1455,133 @@
             "ci95": [
               0.741,
               1.0
-            ]
+            ],
+            "definition": "rollbacks that restored the previous state / rollback attempts"
           },
           "invalid_promotions": 0,
           "unauthorized_actions": 0,
           "approval_requests_on_clean_data": 0,
-          "validation_ms_p50": 708.6
+          "validation_ms_p50": 708.6,
+          "lifecycle": {
+            "coverage": {
+              "config": "B",
+              "investigated": 20,
+              "recorded": 0,
+              "derived_from_legacy_fields": 20,
+              "crashed": [],
+              "without_remediation": []
+            },
+            "schema_version": "lifecycle-1.0",
+            "reconciled": true,
+            "events": 121,
+            "simulated_events": 44,
+            "derived_events": 121,
+            "proposals": 20,
+            "stage_counts": {
+              "PROPOSED": 20,
+              "POLICY_DECIDED": 33,
+              "VALIDATION": 13,
+              "APPROVAL_REQUESTED": 11,
+              "APPROVAL_DECIDED": 11,
+              "EXECUTED": 11,
+              "VERIFIED": 11,
+              "ROLLED_BACK": 11,
+              "CANCELLED": 0
+            },
+            "outcome_counts": {
+              "APPROVAL_DECIDED:approved": 11,
+              "APPROVAL_REQUESTED:requested": 11,
+              "EXECUTED:succeeded": 11,
+              "POLICY_DECIDED:DEFER": 6,
+              "POLICY_DECIDED:PROPOSE_ACTION": 13,
+              "POLICY_DECIDED:REJECT": 3,
+              "POLICY_DECIDED:REQUEST_HUMAN_APPROVAL": 11,
+              "PROPOSED:actionable": 14,
+              "PROPOSED:no_action": 6,
+              "ROLLED_BACK:succeeded": 11,
+              "VALIDATION:failed": 2,
+              "VALIDATION:passed": 11,
+              "VERIFIED:resolved": 11
+            },
+            "terminal_status_counts": {
+              "deferred_no_action": 6,
+              "rejected_by_policy_before_validation": 1,
+              "rejected_validation_failed": 2,
+              "rolled_back": 11
+            },
+            "accounting_identities": [
+              {
+                "name": "every proposal has exactly one terminal status",
+                "left": 20,
+                "right": 20,
+                "holds": true
+              },
+              {
+                "name": "proposals = actionable + no_action + investigate_further",
+                "left": 20,
+                "right": 20,
+                "holds": true
+              },
+              {
+                "name": "validation attempts = passed + failed",
+                "left": 13,
+                "right": 13,
+                "holds": true
+              },
+              {
+                "name": "approval requests = approved + rejected + still pending",
+                "left": 11,
+                "right": 11,
+                "holds": true
+              },
+              {
+                "name": "execution attempts = approvals granted",
+                "left": 11,
+                "right": 11,
+                "holds": true
+              },
+              {
+                "name": "actionable proposals = rejected before validation + investigate-more + cancelled before validation + validation attempts",
+                "left": 14,
+                "right": 14,
+                "holds": true
+              }
+            ],
+            "rates": {
+              "validation_success_rate": {
+                "numerator": 11,
+                "denominator": 13,
+                "value": 0.8462,
+                "definition": "validation attempts that passed / all validation attempts"
+              },
+              "approval_grant_rate": {
+                "numerator": 11,
+                "denominator": 11,
+                "value": 1.0,
+                "definition": "approval decisions that approved / all approval decisions"
+              },
+              "execution_success_rate": {
+                "numerator": 11,
+                "denominator": 11,
+                "value": 1.0,
+                "definition": "executions that succeeded / execution attempts"
+              },
+              "execution_resolution_rate": {
+                "numerator": 11,
+                "denominator": 11,
+                "value": 1.0,
+                "definition": "executed fixes after which the incident batch was healthy / executed fixes"
+              },
+              "rollback_success_rate": {
+                "numerator": 11,
+                "denominator": 11,
+                "value": 1.0,
+                "definition": "rollbacks that restored the previous state / rollback attempts"
+              }
+            },
+            "failures": [],
+            "failure_counts": {}
+          }
         },
         "agent": {
           "investigations": 20,
@@ -1245,6 +1667,10 @@
           },
           "fabricated_evidence_ids": 9,
           "causal_overclaims": 0,
+          "claim_validation": {
+            "available": false,
+            "reason": "this run recorded no claim-validation counters (no LLM text was produced, or the run predates claim validation and did not store the model's text)"
+          },
           "insufficient_evidence_answers": 20,
           "top1_by_fault": {
             "F01": {
@@ -1443,6 +1869,10 @@
           },
           "fabricated_evidence_ids": 17,
           "causal_overclaims": 0,
+          "claim_validation": {
+            "available": false,
+            "reason": "this run recorded no claim-validation counters (no LLM text was produced, or the run predates claim validation and did not store the model's text)"
+          },
           "insufficient_evidence_answers": 0,
           "top1_by_fault": {
             "F01": {
@@ -1538,6 +1968,25 @@
           }
         },
         "remediation": {
+          "counts": {
+            "investigations": 20,
+            "investigations_crashed": 0,
+            "investigations_without_remediation_record": 0,
+            "proposals_total": 20,
+            "proposals_no_state_change": 6,
+            "proposals_actionable": 14,
+            "rejected_by_policy_before_validation": 1,
+            "validation_attempts": 13,
+            "validation_passed": 11,
+            "validation_failed": 2,
+            "approval_requests": 11,
+            "executed_fixes": 11,
+            "executed_fixes_resolving_incident": 11,
+            "rollback_attempts": 11,
+            "rollbacks_succeeded": 11,
+            "supported_fault_scenarios_detected": 12
+          },
+          "simulation_note": "In the benchmark, approval, execution and rollback are simulated in-process (no human, API or database). The API/database path is exercised by the end-to-end tests.",
           "proposals": 20,
           "actions": {
             "enable_deduplication": 2,
@@ -1559,7 +2008,8 @@
             "ci95": [
               0.578,
               0.957
-            ]
+            ],
+            "definition": "validation attempts that passed / all validation attempts"
           },
           "regression_failure_rate": {
             "value": 0.1538,
@@ -1568,25 +2018,28 @@
             "ci95": [
               0.043,
               0.422
-            ]
+            ],
+            "definition": "validation attempts with a failed regression check / all validation attempts"
           },
-          "supported_fault_validation_success": {
+          "supported_fault_remediation_success": {
             "value": 0.9167,
             "k": 11,
             "n": 12,
             "ci95": [
               0.646,
               0.985
-            ]
+            ],
+            "definition": "detected scenarios of a fault with an automatable fix where the expected action was proposed AND its validation passed / all detected scenarios of such faults. The denominator is scenarios, not validation attempts: a wrong or missing proposal counts as a failure."
           },
-          "executed_resolves_incident": {
+          "execution_resolution_rate": {
             "value": 1.0,
             "k": 11,
             "n": 11,
             "ci95": [
               0.741,
               1.0
-            ]
+            ],
+            "definition": "executed fixes after which the incident batch was healthy / executed fixes"
           },
           "rollback_success_rate": {
             "value": 1.0,
@@ -1595,12 +2048,133 @@
             "ci95": [
               0.741,
               1.0
-            ]
+            ],
+            "definition": "rollbacks that restored the previous state / rollback attempts"
           },
           "invalid_promotions": 0,
           "unauthorized_actions": 0,
           "approval_requests_on_clean_data": 0,
-          "validation_ms_p50": 605.1
+          "validation_ms_p50": 605.1,
+          "lifecycle": {
+            "coverage": {
+              "config": "D",
+              "investigated": 20,
+              "recorded": 0,
+              "derived_from_legacy_fields": 20,
+              "crashed": [],
+              "without_remediation": []
+            },
+            "schema_version": "lifecycle-1.0",
+            "reconciled": true,
+            "events": 121,
+            "simulated_events": 44,
+            "derived_events": 121,
+            "proposals": 20,
+            "stage_counts": {
+              "PROPOSED": 20,
+              "POLICY_DECIDED": 33,
+              "VALIDATION": 13,
+              "APPROVAL_REQUESTED": 11,
+              "APPROVAL_DECIDED": 11,
+              "EXECUTED": 11,
+              "VERIFIED": 11,
+              "ROLLED_BACK": 11,
+              "CANCELLED": 0
+            },
+            "outcome_counts": {
+              "APPROVAL_DECIDED:approved": 11,
+              "APPROVAL_REQUESTED:requested": 11,
+              "EXECUTED:succeeded": 11,
+              "POLICY_DECIDED:DEFER": 6,
+              "POLICY_DECIDED:PROPOSE_ACTION": 13,
+              "POLICY_DECIDED:REJECT": 3,
+              "POLICY_DECIDED:REQUEST_HUMAN_APPROVAL": 11,
+              "PROPOSED:actionable": 14,
+              "PROPOSED:no_action": 6,
+              "ROLLED_BACK:succeeded": 11,
+              "VALIDATION:failed": 2,
+              "VALIDATION:passed": 11,
+              "VERIFIED:resolved": 11
+            },
+            "terminal_status_counts": {
+              "deferred_no_action": 6,
+              "rejected_by_policy_before_validation": 1,
+              "rejected_validation_failed": 2,
+              "rolled_back": 11
+            },
+            "accounting_identities": [
+              {
+                "name": "every proposal has exactly one terminal status",
+                "left": 20,
+                "right": 20,
+                "holds": true
+              },
+              {
+                "name": "proposals = actionable + no_action + investigate_further",
+                "left": 20,
+                "right": 20,
+                "holds": true
+              },
+              {
+                "name": "validation attempts = passed + failed",
+                "left": 13,
+                "right": 13,
+                "holds": true
+              },
+              {
+                "name": "approval requests = approved + rejected + still pending",
+                "left": 11,
+                "right": 11,
+                "holds": true
+              },
+              {
+                "name": "execution attempts = approvals granted",
+                "left": 11,
+                "right": 11,
+                "holds": true
+              },
+              {
+                "name": "actionable proposals = rejected before validation + investigate-more + cancelled before validation + validation attempts",
+                "left": 14,
+                "right": 14,
+                "holds": true
+              }
+            ],
+            "rates": {
+              "validation_success_rate": {
+                "numerator": 11,
+                "denominator": 13,
+                "value": 0.8462,
+                "definition": "validation attempts that passed / all validation attempts"
+              },
+              "approval_grant_rate": {
+                "numerator": 11,
+                "denominator": 11,
+                "value": 1.0,
+                "definition": "approval decisions that approved / all approval decisions"
+              },
+              "execution_success_rate": {
+                "numerator": 11,
+                "denominator": 11,
+                "value": 1.0,
+                "definition": "executions that succeeded / execution attempts"
+              },
+              "execution_resolution_rate": {
+                "numerator": 11,
+                "denominator": 11,
+                "value": 1.0,
+                "definition": "executed fixes after which the incident batch was healthy / executed fixes"
+              },
+              "rollback_success_rate": {
+                "numerator": 11,
+                "denominator": 11,
+                "value": 1.0,
+                "definition": "rollbacks that restored the previous state / rollback attempts"
+              }
+            },
+            "failures": [],
+            "failure_counts": {}
+          }
         },
         "agent": {
           "investigations": 20,
@@ -2295,19 +2869,33 @@
     "p50": 111.0,
     "p95": 1564.4
   },
+  "headline_metrics": {
+    "overall_fault_detection_precision": 1.0,
+    "overall_fault_detection_recall": 0.9917,
+    "overall_fault_detection_f1": 0.9958,
+    "overall_fault_detection_false_positive_rate": 0.0,
+    "overall_fault_detection_n_positive_scenarios": 120,
+    "overall_fault_detection_n_clean_scenarios": 50,
+    "drift_detection_precision": 1.0,
+    "drift_detection_recall": 0.9167,
+    "drift_detection_f1": 0.9565,
+    "drift_detection_false_positive_rate": 0.0,
+    "drift_detection_n_positive_scenarios": 36,
+    "drift_detection_n_clean_scenarios": 50
+  },
   "targets": {
-    "drift_f1": {
+    "drift_detection_f1": {
       "target": ">= 0.9",
       "observed": 0.9565,
       "met": true
     },
-    "recall_at_3": {
+    "root_cause_recall_at_3": {
       "target": ">= 0.8",
       "observed": 0.9748,
       "met": true,
       "observed_full_aegis_llm_subset": 0.95
     },
-    "clean_fpr": {
+    "clean_control_false_positive_rate": {
       "target": "<= 0.05",
       "observed": 0.0,
       "met": true
@@ -2322,7 +2910,7 @@
       "observed": 0,
       "met": true
     },
-    "supported_validation_success": {
+    "supported_fault_remediation_success": {
       "target": ">= 0.7",
       "observed": 0.9306,
       "met": true

@@ -70,6 +70,9 @@ class Settings(BaseSettings):
     # --- reproducibility -------------------------------------------------
     seed: int = 20260101
 
+    #: Where `aegis.evaluation` writes benchmark runs and the API reads them from.
+    results_dir: Path = REPO_ROOT / "results" / "aegis-ir"
+
     @property
     def raw_dir(self) -> Path:
         return self.data_dir / "raw"

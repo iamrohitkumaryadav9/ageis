@@ -23,6 +23,7 @@ from typing import Any
 
 import pandas as pd
 
+from aegis.agents import claims as claim_rules
 from aegis.agents import llm_tasks
 from aegis.agents.graph import AgentRuntime, run_investigation
 from aegis.agents.ollama import OllamaClient
@@ -40,6 +41,7 @@ from aegis.rag.retriever import RunbookRetriever
 from aegis.remediation.executor import state_to_execute
 from aegis.remediation.policy import PolicyEngine
 from aegis.remediation.proposals import propose
+from aegis.remediation.reconciliation import LifecycleEvent, Stage
 from aegis.schemas.deployment import DeploymentState
 from aegis.schemas.diagnosis import Diagnosis, Evidence
 from aegis.schemas.findings import Severity
@@ -80,6 +82,9 @@ class BenchmarkEnv:
     datasets: dict[str, DatasetContext] = field(default_factory=dict)
     llm: OllamaClient | None = None
     policy: PolicyEngine = field(default_factory=PolicyEngine)
+    #: Whether configuration D also asks the LLM for the operator explanation. Historical run
+    #: ``main`` had this off, which is why it has no claim metrics for explanations.
+    llm_explain: bool = True
 
     @classmethod
     def create(
@@ -156,6 +161,121 @@ def _diagnosis_row(
     }
 
 
+def _lifecycle_events(
+    *,
+    scenario_id: str,
+    config: str,
+    proposal: RemediationProposal,
+    pre_decision: dict | None,
+    validation: ValidationResult | None,
+    post_decision: dict | None,
+    approval_requested: bool,
+    execution: dict | None,
+) -> list[dict[str, Any]]:
+    """The canonical lifecycle of one benchmark proposal (see ``aegis.remediation.reconciliation``).
+
+    Approval, execution and rollback are *simulated* in the benchmark (no human, API or
+    database); those events say so. Ids are derived from the scenario and configuration, so a
+    re-run produces the same ids.
+    """
+    key = f"{scenario_id.removeprefix('SCN-')}-{config}"
+    common = {
+        "proposal_id": f"PRP-{key}",
+        "incident_id": f"INC-{key}",
+        "scenario_id": scenario_id,
+        "investigation_id": f"INV-{key}",
+        "action": proposal.action.value,
+    }
+    events: list[dict[str, Any]] = []
+
+    def emit(stage: Stage, outcome: str, **fields: Any) -> None:
+        events.append(
+            LifecycleEvent(
+                event_id=f"EVT-{key}-{len(events)}",
+                stage=stage,
+                sequence=len(events),
+                outcome=outcome,
+                **common,
+                **fields,
+            ).model_dump(mode="json")
+        )
+
+    kind = (
+        "actionable"
+        if proposal.action in STATE_CHANGING
+        else ("no_action" if proposal.action is ActionType.NO_ACTION else "investigate_further")
+    )
+    emit(Stage.PROPOSED, kind, detail={"risk_level": proposal.risk_level.value})
+    validated = validation is not None
+    first = pre_decision if pre_decision is not None else (None if validated else post_decision)
+    if first is not None:
+        emit(
+            Stage.POLICY_DECIDED,
+            first["outcome"],
+            policy_decision_id=f"POL-{key}-pre",
+            phase="pre_validation",
+            detail={
+                "score": first.get("score"),
+                "reasons": first.get("reasons", [])[:3],
+                "unmet_requirements": first.get("unmet_requirements", [])[:3],
+            },
+        )
+    if validation is not None:
+        emit(
+            Stage.VALIDATION,
+            "passed" if validation.passed else "failed",
+            validation_id=f"VAL-{key}",
+            detail={
+                "failed_checks": [c.name for c in validation.checks if not c.passed],
+                "regression_failed": validation.regression_failed,
+            },
+        )
+        if post_decision is not None:
+            emit(
+                Stage.POLICY_DECIDED,
+                post_decision["outcome"],
+                policy_decision_id=f"POL-{key}-post",
+                validation_id=f"VAL-{key}",
+                phase="post_validation",
+                detail={
+                    "score": post_decision.get("score"),
+                    "reasons": post_decision.get("reasons", [])[:3],
+                },
+            )
+    if approval_requested:
+        emit(
+            Stage.APPROVAL_REQUESTED,
+            "requested",
+            approval_id=f"APR-{key}",
+            validation_id=f"VAL-{key}" if validated else None,
+        )
+    if execution is not None:
+        emit(Stage.APPROVAL_DECIDED, "approved", approval_id=f"APR-{key}", simulated=True)
+        emit(
+            Stage.EXECUTED,
+            "succeeded" if execution["executed"] else "failed",
+            execution_id=f"EXE-{key}",
+            approval_id=f"APR-{key}",
+            simulated=True,
+            detail={"error": execution.get("error")} if execution.get("error") else {},
+        )
+        if execution["executed"]:
+            emit(
+                Stage.VERIFIED,
+                "resolved" if execution["resolved"] else "unresolved",
+                execution_id=f"EXE-{key}",
+                simulated=True,
+            )
+            emit(
+                Stage.ROLLED_BACK,
+                "succeeded" if execution["rolled_back"] else "failed",
+                rollback_id=f"RBK-{key}",
+                execution_id=f"EXE-{key}",
+                simulated=True,
+            )
+    return events
+
+
 def _remediation_row(
     env: BenchmarkEnv,
     inp: MonitoringInput,
@@ -165,6 +285,8 @@ def _remediation_row(
     evidence: list[Evidence],
     state: DeploymentState,
     precomputed: dict | None = None,
+    scenario_id: str = "SCN-unknown",
+    config: str = "?",
 ) -> dict[str, Any]:
     """Propose -> policy -> sandbox validation -> (simulated approval) execute -> verify -> rollback."""
     from aegis.remediation.validation import validate_proposal
@@ -176,21 +298,29 @@ def _remediation_row(
             if precomputed.get("validation")
             else None
         )
-        outcome = (precomputed.get("policy_decision") or {}).get("outcome")
+        pre_decision = precomputed.get("policy_pre_decision")
+        post_decision = precomputed.get("policy_decision")
+        outcome = (post_decision or {}).get("outcome")
     else:
         proposal = propose(diagnosis, evidence, state, inp.model_version)
         decision = env.policy.evaluate(proposal, diagnosis, evidence, rule_diagnosis=rule_diagnosis)
+        pre_decision = decision.model_dump(mode="json")
         validation = None
         if decision.outcome.value == "PROPOSE_ACTION":
             validation = validate_proposal(proposal, inp, result, state)
             decision = env.policy.evaluate(
                 proposal, diagnosis, evidence, rule_diagnosis=rule_diagnosis, validation=validation
             )
+        post_decision = decision.model_dump(mode="json")
         outcome = decision.outcome.value
     row: dict[str, Any] = {
         "action": proposal.action.value,
         "policy_outcome": outcome,
+        "policy_reasons": (post_decision or {}).get("reasons", [])[:3],
         "validated": validation.passed if validation else None,
+        "failed_checks": [c.name for c in validation.checks if not c.passed]
+        if validation
+        else None,
         "regression_failed": validation.regression_failed if validation else None,
         "validation_ms": validation.duration_ms if validation else None,
         "approval_requested": outcome == "REQUEST_HUMAN_APPROVAL",
@@ -206,47 +336,68 @@ def _remediation_row(
         row["invalid_promotion"] = True
     if row["approval_requested"] and proposal.action not in STATE_CHANGING:
         row["unauthorized_action"] = True
+    execution: dict[str, Any] | None = None
     if row["approval_requested"] and validation and validation.passed:
         # Simulate the human approving, then check execution and rollback really work.
-        new_state = state_to_execute(state, proposal, validation)
-        if proposal.action is ActionType.QUARANTINE_BATCH:
-            row["executed_resolves_incident"] = new_state.quarantined
-        else:
-            after = run_monitoring(
+        execution = {"executed": False, "resolved": False, "rolled_back": False, "error": None}
+        try:
+            new_state = state_to_execute(state, proposal, validation)
+        except Exception as exc:  # an execution that cannot be built is a failed execution
+            execution["error"] = f"{type(exc).__name__}: {str(exc)[:160]}"
+            new_state = None
+        if new_state is not None:
+            execution["executed"] = True
+            if proposal.action is ActionType.QUARANTINE_BATCH:
+                execution["resolved"] = bool(new_state.quarantined)
+            else:
+                after = run_monitoring(
+                    MonitoringInput(
+                        inp.spec,
+                        inp.contract,
+                        inp.reference,
+                        inp.current,
+                        inp.registry,
+                        new_state.model_version,
+                        None,
+                        new_state.ingestion,
+                    )
+                )
+                execution["resolved"] = not after.report.incident_detected
+            restored = DeploymentState.model_validate(
+                state.model_dump()
+            )  # rollback = re-activate the base revision
+            before = run_monitoring(
                 MonitoringInput(
                     inp.spec,
                     inp.contract,
                     inp.reference,
                     inp.current,
                     inp.registry,
-                    new_state.model_version,
-                    None,
-                    new_state.ingestion,
+                    restored.model_version,
+                    inp.artifact_path,
+                    restored.ingestion,
                 )
             )
-            row["executed_resolves_incident"] = not after.report.incident_detected
-        restored = DeploymentState.model_validate(
-            state.model_dump()
-        )  # rollback = re-activate the base revision
-        before = run_monitoring(
-            MonitoringInput(
-                inp.spec,
-                inp.contract,
-                inp.reference,
-                inp.current,
-                inp.registry,
-                restored.model_version,
-                inp.artifact_path,
-                restored.ingestion,
+            execution["rolled_back"] = (
+                restored == state
+                and before.report.incident_detected == result.report.incident_detected
             )
-        )
-        row["rollback_restores_state"] = (
-            restored == state and before.report.incident_detected == result.report.incident_detected
-        )
+            row["executed_resolves_incident"] = execution["resolved"]
+            row["rollback_restores_state"] = execution["rolled_back"]
+    row["lifecycle"] = _lifecycle_events(
+        scenario_id=scenario_id,
+        config=config,
+        proposal=proposal,
+        pre_decision=pre_decision,
+        validation=validation,
+        post_decision=post_decision,
+        approval_requested=row["approval_requested"],
+        execution=execution,
+    )
     return row
 
 
-def run_config_a(env, inp, result, truth) -> dict[str, Any]:
+def run_config_a(env, inp, result, truth, scenario_id: str = "SCN-unknown") -> dict[str, Any]:
     started = time.perf_counter()
     evidence = build_evidence(result.report)
     diagnosis = naive_diagnosis(result.report)
@@ -261,7 +412,7 @@ def run_config_a(env, inp, result, truth) -> dict[str, Any]:
     }
 
 
-def run_config_b(env, inp, result, truth) -> dict[str, Any]:
+def run_config_b(env, inp, result, truth, scenario_id: str = "SCN-unknown") -> dict[str, Any]:
     started = time.perf_counter()
     state = DeploymentState(dataset=inp.spec.name, model_version=inp.model_version)
     tools = ToolExecutor(ToolContext(inp, result, env.retriever, state))
@@ -269,10 +420,10 @@ def run_config_b(env, inp, result, truth) -> dict[str, Any]:
         tools=tools, policy=env.policy, llm=None, declared_version=inp.model_version
     )
     final = run_investigation(runtime, "bench-B", "bench")
-    return _agent_result(env, inp, result, truth, final, tools, state, started)
+    return _agent_result(env, inp, result, truth, final, tools, state, started, scenario_id, "B")
 
 
-def run_config_c(env, inp, result, truth) -> dict[str, Any]:
+def run_config_c(env, inp, result, truth, scenario_id: str = "SCN-unknown") -> dict[str, Any]:
     """LLM diagnosis from monitoring evidence only: no tools, no rules, no runbooks, no remediation."""
     started = time.perf_counter()
     evidence = build_evidence(result.report)
@@ -292,6 +443,11 @@ def run_config_c(env, inp, result, truth) -> dict[str, Any]:
     row["claims"] = proposed
     row["cited_unknown_evidence"] = stats.get("fabricated_evidence_ids", 0)
     row["overclaims"] = stats.get("overclaims", 0)
+    row["claim_counters"] = claim_rules.add_counters(
+        stats.get("claims"),
+        claim_rules.audit_final_output(diagnosis=diagnosis, explanation=None, evidence=evidence),
+    )
+    row["llm_texts"] = {"ranking_items": stats.get("raw_items", []), "explanation": None}
     return {
         "diagnosis": row,
         "remediation": None,
@@ -311,7 +467,7 @@ def run_config_c(env, inp, result, truth) -> dict[str, Any]:
     }
 
 
-def run_config_d(env, inp, result, truth) -> dict[str, Any]:
+def run_config_d(env, inp, result, truth, scenario_id: str = "SCN-unknown") -> dict[str, Any]:
     started = time.perf_counter()
     state = DeploymentState(dataset=inp.spec.name, model_version=inp.model_version)
     tools = ToolExecutor(ToolContext(inp, result, env.retriever, state))
@@ -320,13 +476,15 @@ def run_config_d(env, inp, result, truth) -> dict[str, Any]:
         policy=env.policy,
         llm=env.llm,
         declared_version=inp.model_version,
-        use_llm_explain=False,
-    )  # the explanation does not affect any scored quantity
+        use_llm_explain=env.llm_explain,
+    )
     final = run_investigation(runtime, "bench-D", "bench")
-    return _agent_result(env, inp, result, truth, final, tools, state, started)
+    return _agent_result(env, inp, result, truth, final, tools, state, started, scenario_id, "D")
 
 
-def _agent_result(env, inp, result, truth, final, tools, state, started) -> dict[str, Any]:
+def _agent_result(
+    env, inp, result, truth, final, tools, state, started, scenario_id="SCN-unknown", config="?"
+) -> dict[str, Any]:
     evidence = [Evidence.model_validate(e) for e in final.get("evidence", [])]
     diagnosis = Diagnosis.model_validate(final["diagnosis"]) if final.get("diagnosis") else None
     rules = (
@@ -339,8 +497,30 @@ def _agent_result(env, inp, result, truth, final, tools, state, started) -> dict
         row["claims"] = max(stats.get("proposed", 0), 1)
         row["cited_unknown_evidence"] = stats.get("fabricated_evidence_ids", 0)
         row["overclaims"] = stats.get("overclaims", 0)
+    explanation = final.get("explanation") or {}
+    claim_validation = explanation.get("claim_validation") or {}
+    if stats or claim_validation:  # only when the LLM actually produced text to validate
+        row["claim_counters"] = claim_rules.add_counters(
+            stats.get("claims"), claim_validation.get("counters"), explanation.get("output_audit")
+        )
+        row["llm_texts"] = {
+            "ranking_items": stats.get("raw_items", []),
+            "explanation": claim_validation.get("raw_summary"),
+            "explanation_accepted": claim_validation.get("accepted"),
+        }
     remediation = (
-        _remediation_row(env, inp, result, diagnosis, rules, evidence, state, precomputed=final)
+        _remediation_row(
+            env,
+            inp,
+            result,
+            diagnosis,
+            rules,
+            evidence,
+            state,
+            precomputed=final,
+            scenario_id=scenario_id,
+            config=config,
+        )
         if diagnosis is not None and final.get("proposal")
         else None
     )
@@ -434,7 +614,9 @@ def run_scenario(env: BenchmarkEnv, cell: dict, configs: tuple[str, ...]) -> dic
         return record  # nothing to diagnose; a missed fault is scored as a detection miss
     for config in configs:
         try:
-            record["configs"][config] = RUNNERS[config](env, inp, result, truth.root_cause)
+            record["configs"][config] = RUNNERS[config](
+                env, inp, result, truth.root_cause, scenario.spec.scenario_id
+            )
         except Exception as exc:  # a crash is a result, not a reason to lose the run
             record["configs"][config] = {"error": f"{type(exc).__name__}: {str(exc)[:200]}"}
     return record

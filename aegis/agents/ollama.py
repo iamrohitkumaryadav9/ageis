@@ -133,6 +133,32 @@ class OllamaClient:
         )
         return LLMHealth(True, True, version, models, active, detail)
 
+    def model_info(self, model: str) -> dict[str, Any]:
+        """Identity of a pulled model: digest, size, family, parameter size, quantisation.
+
+        Returns ``{"name": model, "available": False}`` plus a reason when it cannot be read.
+        """
+        try:
+            tags = self._client.get("/api/tags", timeout=5.0).json()
+        except (httpx.HTTPError, ValueError) as exc:
+            return {"name": model, "available": False, "reason": type(exc).__name__}
+        for entry in tags.get("models", []):
+            name = entry.get("name", "")
+            if name == model or name == f"{model}:latest" or name.split(":")[0] == model:
+                details = entry.get("details") or {}
+                return {
+                    "name": name,
+                    "available": True,
+                    "digest": entry.get("digest"),
+                    "size_bytes": entry.get("size"),
+                    "family": details.get("family"),
+                    "parameter_size": details.get("parameter_size"),
+                    "quantization_level": details.get("quantization_level"),
+                    "format": details.get("format"),
+                    "modified_at": entry.get("modified_at"),
+                }
+        return {"name": model, "available": False, "reason": "not pulled"}
+
     def warm(self, model: str) -> tuple[bool, float, str]:
         """Load ``model`` into memory before the first real request.
 

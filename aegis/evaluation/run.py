@@ -14,15 +14,10 @@ from __future__ import annotations
 
 import argparse
 import json
-import platform
 import shutil
 import tempfile
-import threading
 import time
 from pathlib import Path
-
-import numpy as np
-import psutil
 
 from aegis.agents.ollama import OllamaClient
 from aegis.config import get_settings
@@ -31,70 +26,11 @@ from aegis.faults.injectors import FAULTS
 from aegis.faults.scenarios import CLEAN, scenario_grid, scenario_id
 from aegis.ingestion.datasets import DATASETS
 from aegis.monitoring.engine import MonitoringInput, run_monitoring
+from aegis.observability.resources import DEFAULT_INTERVAL_S, ResourceSampler, environment_info
 
 DEV_SEEDS = (101, 102)  # used while tuning thresholds; never used for reported results
 EVAL_SEEDS = (201, 202)
 WINDOW = 500
-
-
-class ResourceSampler(threading.Thread):
-    """Samples RSS of this process and of the Ollama runner, and system CPU, once a second."""
-
-    def __init__(self) -> None:
-        super().__init__(daemon=True)
-        self.samples: list[dict] = []
-        self._stop = threading.Event()
-        self._me = psutil.Process()
-
-    @staticmethod
-    def _ollama_rss() -> int:
-        """RSS of the Ollama server and every descendant.
-
-        The model is held by a runner child process whose name is not guaranteed to
-        contain "ollama", so descendants are followed explicitly.
-        """
-        seen: dict[int, int] = {}
-        for proc in psutil.process_iter(["name"]):
-            try:
-                if "ollama" not in (proc.info["name"] or "").lower():
-                    continue
-                for member in [proc, *proc.children(recursive=True)]:
-                    seen[member.pid] = member.memory_info().rss
-            except (psutil.NoSuchProcess, psutil.AccessDenied):
-                continue
-        return sum(seen.values())
-
-    def run(self) -> None:
-        psutil.cpu_percent(interval=None)
-        while not self._stop.wait(1.0):
-            ollama = self._ollama_rss()
-            memory = psutil.virtual_memory()
-            self.samples.append(
-                {
-                    "python_rss": self._me.memory_info().rss,
-                    "ollama_rss": ollama,
-                    "cpu_percent": psutil.cpu_percent(interval=None),
-                    "system_used": memory.used,
-                }
-            )
-
-    def stop(self) -> dict:
-        self._stop.set()
-        if not self.samples:
-            return {}
-        mb = 1024 * 1024
-        col = lambda key: np.array([s[key] for s in self.samples])  # noqa: E731
-        return {
-            "samples": len(self.samples),
-            "python_peak_rss_mb": round(float(col("python_rss").max()) / mb, 1),
-            "ollama_peak_rss_mb": round(float(col("ollama_rss").max()) / mb, 1),
-            "combined_peak_rss_mb": round(
-                float((col("python_rss") + col("ollama_rss")).max()) / mb, 1
-            ),
-            "system_used_peak_mb": round(float(col("system_used").max()) / mb, 1),
-            "cpu_percent_mean": round(float(col("cpu_percent").mean()), 1),
-            "cpu_percent_p95": round(float(np.percentile(col("cpu_percent"), 95)), 1),
-        }
 
 
 def llm_subset(grid: list[dict]) -> list[dict]:
@@ -175,6 +111,17 @@ def main() -> None:
         "--quick", action="store_true", help="1 seed, 5 clean controls, no delay study"
     )
     parser.add_argument("--out", type=Path, default=Path("results/aegis-ir"))
+    parser.add_argument(
+        "--no-explain",
+        action="store_true",
+        help="configuration D skips the LLM explanation (as historical run 'main' did)",
+    )
+    parser.add_argument(
+        "--sample-interval",
+        type=float,
+        default=DEFAULT_INTERVAL_S,
+        help="resource sampling, seconds",
+    )
     args = parser.parse_args()
     if set(args.seeds) & set(DEV_SEEDS):
         parser.error(
@@ -195,6 +142,9 @@ def main() -> None:
             f"--llm requested but the local model is not available: {llm.health().detail or 'unreachable'}"
         )
     env = BenchmarkEnv.create(settings, workdir / "models", workdir / "scenarios", llm)
+    env.llm_explain = not args.no_explain
+    environment = environment_info()
+    llm_identity = llm.model_info(settings.ollama_model) if llm is not None else None
 
     grid = scenario_grid(sorted(DATASETS), args.seeds, args.clean)
     for cell in grid:
@@ -214,6 +164,15 @@ def main() -> None:
             record = json.loads(line)
             done[record["scenario_id"]] = record
 
+    # A later invocation without --llm (for example a resumed deterministic run) must not erase
+    # the record that LLM configurations were run earlier under this name.
+    earlier: dict = {}
+    if (out / "manifest.json").exists():
+        try:
+            earlier = json.loads((out / "manifest.json").read_text())
+        except ValueError:
+            earlier = {}
+    keep_llm = not args.llm and bool(earlier.get("llm_model"))
     (out / "manifest.json").write_text(
         json.dumps(
             {
@@ -225,7 +184,7 @@ def main() -> None:
                 "datasets": sorted(DATASETS),
                 "faults": sorted(FAULTS),
                 "n_scenarios": len(grid),
-                "llm_subset": sorted(subset_ids),
+                "llm_subset": earlier.get("llm_subset", []) if keep_llm else sorted(subset_ids),
                 "scenarios": [
                     {
                         "scenario_id": c["scenario_id"],
@@ -235,29 +194,43 @@ def main() -> None:
                     for c in grid
                 ],
                 "model_versions": {name: ctx.version for name, ctx in env.datasets.items()},
-                "llm_model": settings.ollama_model if args.llm else None,
+                "llm_model": earlier.get("llm_model")
+                if keep_llm
+                else (settings.ollama_model if args.llm else None),
                 "llm_options": {
                     "num_ctx": settings.ollama_num_ctx,
                     "temperature": settings.ollama_temperature,
                     "timeout_s": settings.ollama_timeout_s,
                     "max_retries": settings.ollama_max_retries,
                 },
-                "machine": {
-                    "cpu": platform.processor() or platform.machine(),
-                    "logical_cpus": psutil.cpu_count(),
-                    "physical_cpus": psutil.cpu_count(logical=False),
-                    "ram_gb": round(psutil.virtual_memory().total / 1e9, 1),
-                    "platform": platform.platform(),
-                },
+                "llm_model_identity": earlier.get("llm_model_identity")
+                if keep_llm
+                else llm_identity,
+                "environment": environment,
+                "methodology": [
+                    "Detection metrics are reported under explicit names with their populations "
+                    "(overall_fault_detection_*, drift_detection_*).",
+                    "Remediation lifecycle events are recorded per proposal and reconciled.",
+                    "LLM text is validated claim by claim; the raw text and the counters are stored.",
+                    "Configuration D "
+                    + (
+                        "skips the LLM explanation step."
+                        if args.no_explain
+                        else "includes the LLM explanation step (run 'main' did not), so its "
+                        "latency is not comparable with 'main'."
+                    ),
+                    "Resources are sampled by the process-tree sampler "
+                    f"every {args.sample_interval} s; each invocation is a separate record.",
+                ],
             },
             indent=2,
         )
         + "\n"
     )
 
-    sampler = ResourceSampler()
-    sampler.start()
-    started = time.perf_counter()
+    label = "llm" if args.llm else "deterministic"
+    sampler = ResourceSampler(label, interval_s=args.sample_interval).start()
+    started_configs: dict[str, int] = {}
     truths = []
     for index, cell in enumerate(grid, start=1):
         wanted = ("A", "B", "C", "D") if cell["scenario_id"] in subset_ids else ("A", "B")
@@ -272,7 +245,11 @@ def main() -> None:
             truths.append(previous["truth"])
             continue
         tick = time.perf_counter()
-        record = run_scenario(env, cell, missing if previous is not None else wanted)
+        ran = missing if previous is not None else wanted
+        record = run_scenario(env, cell, ran)
+        for config in record["configs"]:
+            if config in ran:
+                started_configs[config] = started_configs.get(config, 0) + 1
         if previous is not None:
             previous["configs"].update(record["configs"])
             record = previous
@@ -293,17 +270,36 @@ def main() -> None:
         (out / "delay.json").write_text(
             json.dumps(detection_delay(env, delay_cells), indent=2) + "\n"
         )
-    resources = sampler.stop()
-    resources["duration_s"] = round(time.perf_counter() - started, 1)
-    resources["llm"] = bool(args.llm)
-    previous_resources = {}
-    if (out / "resources.json").exists():
-        previous_resources = json.loads((out / "resources.json").read_text())
-    key = "with_llm" if args.llm else "deterministic"
-    previous_resources[key] = resources
-    (out / "resources.json").write_text(json.dumps(previous_resources, indent=2) + "\n")
+    measured = sampler.stop().to_dict()
+    measured["work"] = {
+        "configs_executed": dict(sorted(started_configs.items())),
+        "llm_enabled": bool(args.llm),
+        "llm_explain": bool(args.llm and not args.no_explain),
+        "delay_study": not args.quick,
+        "note": "counts are scenario x configuration pairs executed by THIS invocation; "
+        "pairs finished by an earlier invocation were skipped and are not in this measurement",
+    }
+    measured["llm"] = llm_identity
+    measured["configuration"] = {
+        "name": args.name,
+        "seeds": args.seeds,
+        "ollama_num_ctx": settings.ollama_num_ctx,
+        "ollama_timeout_s": settings.ollama_timeout_s,
+        "ollama_keep_alive": settings.ollama_keep_alive,
+    }
+    resources_path = out / "resources.json"
+    document: dict = {"schema_version": "resources-2", "environment": environment, "runs": []}
+    if resources_path.exists():
+        existing = json.loads(resources_path.read_text())
+        if "runs" in existing:
+            document = existing
+            document["environment"] = environment
+        else:  # a file in the pre-process-tree format: keep it, never overwrite it
+            resources_path.rename(out / "resources.legacy.json")
+    document["runs"].append(measured)
+    resources_path.write_text(json.dumps(document, indent=2) + "\n")
     shutil.rmtree(workdir, ignore_errors=True)
-    print(f"done in {resources['duration_s']}s -> {out}")
+    print(f"done in {measured['duration_s']}s -> {out} (resource run {measured['run_id']})")
 
 
 if __name__ == "__main__":
