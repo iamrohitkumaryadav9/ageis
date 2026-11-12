@@ -1,4 +1,5 @@
 import json
+import zlib
 
 import numpy as np
 import pytest
@@ -63,9 +64,11 @@ class StubEmbedder:
             return None
         out = []
         for text in texts:
-            vector = np.zeros(64)
+            # zlib.crc32, not hash(): the built-in is salted per process (PYTHONHASHSEED), which
+            # made this stub, and the ranking it produces, differ from run to run.
+            vector = np.zeros(256)
             for token in text.lower().split():
-                vector[hash(token) % 64] += 1.0
+                vector[zlib.crc32(token.encode()) % 256] += 1.0
             out.append(vector.tolist())
         return out
 
