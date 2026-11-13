@@ -1,17 +1,17 @@
 
  RUN  v2.1.9 /home/rohit/ageis/apps/dashboard
 
- ✓ src/api.test.ts (8 tests) 25ms
- ✓ src/ui.test.tsx (12 tests) 364ms
- ✓ src/Evaluation.test.tsx (9 tests) 880ms
- ✓ src/App.test.tsx (10 tests) 1245ms
-   ✓ App shell > asks for a token and loads no protected data without one 333ms
-   ✓ App shell > loads the overview after a token is entered and sends it as a bearer token 338ms
- ✓ src/IncidentView.test.tsx (12 tests) 1838ms
-   ✓ incident detail > renders findings and evidence, labelled as measurements rather than causes 315ms
+ ✓ src/api.test.ts (8 tests) 35ms
+ ✓ src/ui.test.tsx (12 tests) 357ms
+ ✓ src/Evaluation.test.tsx (9 tests) 939ms
+   ✓ evaluation page > shows each detection F1 under its own name with its own population 305ms
+ ✓ src/App.test.tsx (10 tests) 1264ms
+   ✓ App shell > asks for a token and loads no protected data without one 321ms
+   ✓ App shell > loads the overview after a token is entered and sends it as a bearer token 356ms
+ ✓ src/IncidentView.test.tsx (12 tests) 1853ms
 
  Test Files  5 passed (5)
       Tests  51 passed (51)
-   Start at  15:17:05
-   Duration  5.04s (transform 930ms, setup 2.38s, collect 1.82s, tests 4.35s, environment 7.28s, prepare 1.13s)
+   Start at  01:09:56
+   Duration  5.88s (transform 1.67s, setup 2.41s, collect 3.24s, tests 4.45s, environment 9.18s, prepare 1.44s)
 

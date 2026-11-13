@@ -73,3 +73,22 @@ Known gaps, stated plainly:
 - The fallback model `llama3.2:3b` was never pulled; fallback selection is tested with a fake server only.
 - The LLM ablation covers 20 scenarios, run once.
 - Authentication is static bearer tokens with roles: adequate for a local tool, not for production.
+
+
+## Addendum, 2026-11-13: five defects remediated
+
+The gaps listed above were closed or measured in a second round of work; the audit that started
+it is `docs/remediation-audit.md`. Status of each row above that changed:
+
+| # | Requirement | Status now | How it was verified |
+|---|---|---|---|
+| 25 | React dashboard consumes real backend data | browser verified | 24 checks in headless Chromium against the Compose stack at desktop and phone widths; 51 component tests. Chromium only |
+| 26 | MLflow tracking | integration tested | 18 tests on real MLflow backends, 100% of `observability/tracking.py` |
+| 32 | Benchmark runs reproducibly | verified for the deterministic configurations | run `v2` reproduced run `main` exactly on all 170 detections and every A and B outcome. LLM configurations agree on Top-1 (11/20 and 19/20 in both runs) but are single runs each |
+| 33 | CPU/RAM measurements documented | verified for new runs; historical gap stated | process-tree sampler; separate deterministic and LLM records in `v2`. The historical run's runner memory is unavailable and is labelled so |
+| 34 | Docker Compose starts the application | verified including the `llm` profile | `scripts.verify_compose` and `--llm`: 9 and 17 checks |
+| - | Fallback model `llama3.2:3b` | hardware verified | `scripts.verify_llm`: 10 checks against the real model |
+
+Whole release workflow: `python -m scripts.release_verify`, last result RELEASE READY, 13 of 13
+mandatory and 4 of 4 optional gates. See `docs/release-readiness.md` for what that does and does
+not establish, and `results/release/release-report.md` for the generated table.

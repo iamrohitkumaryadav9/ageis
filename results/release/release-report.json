@@ -1,16 +1,16 @@
 {
-  "generated_at": "2026-11-12T15:41:18+00:00",
-  "started_at": "2026-11-12T15:08:13+00:00",
-  "duration_s": 1985.7,
+  "generated_at": "2026-11-13T01:34:09+00:00",
+  "started_at": "2026-11-13T00:59:53+00:00",
+  "duration_s": 2055.5,
   "git": {
-    "commit": "05e9767bb930f196ac5d4c1c41d5b919d07be178",
+    "commit": "9cfd559171c014e7a09cc3f31004f083d4edbfea",
     "branch": "main",
-    "uncommitted_files": 31
+    "uncommitted_files": 32
   },
   "platform": "Linux-6.18.58.1-microsoft-standard-WSL2-x86_64-with-glibc2.43",
   "python": "3.12.16",
   "partial_run": false,
-  "verdict": "CONDITIONALLY READY",
+  "verdict": "RELEASE READY",
   "mandatory": {
     "total": 13,
     "passed": 13,
@@ -20,8 +20,8 @@
   },
   "optional": {
     "total": 4,
-    "passed": 3,
-    "failed": 1,
+    "passed": 4,
+    "failed": 0,
     "blocked": 0,
     "skipped": 0
   },
@@ -61,17 +61,17 @@
         "tests": {
           "passed": 423
         },
-        "summary_line": "423 passed in 138.03s (0:02:18)",
+        "summary_line": "423 passed in 156.31s (0:02:36)",
         "output_tail": [
           "........................................................................ [ 34%]",
           "........................................................................ [ 51%]",
           "........................................................................ [ 68%]",
           "........................................................................ [ 85%]",
           "...............................................................          [100%]",
-          "423 passed in 138.03s (0:02:18)"
+          "423 passed in 156.31s (0:02:36)"
         ]
       },
-      "seconds": 143.1,
+      "seconds": 166.5,
       "log": "results/release/logs/backend_unit.txt"
     },
     {
@@ -85,13 +85,13 @@
         "tests": {
           "passed": 63
         },
-        "summary_line": "63 passed in 68.19s (0:01:08)",
+        "summary_line": "63 passed in 80.22s (0:01:20)",
         "output_tail": [
           "...............................................................          [100%]",
-          "63 passed in 68.19s (0:01:08)"
+          "63 passed in 80.22s (0:01:20)"
         ]
       },
-      "seconds": 72.9,
+      "seconds": 84.9,
       "log": "results/release/logs/postgres_integration.txt"
     },
     {
@@ -105,17 +105,17 @@
         "tests": {
           "passed": 18
         },
-        "summary_line": "18 passed, 1 warning in 38.61s",
+        "summary_line": "18 passed, 1 warning in 61.29s (0:01:01)",
         "output_tail": [
           "tests/integration/test_tracking.py::test_run_is_created_logged_and_terminated",
           "  /home/rohit/ageis/.venv/lib/python3.12/site-packages/mlflow/store/tracking/utils/sql_trace_metrics_utils.py:155: SADeprecationWarning: The ``noload`` loader strategy is deprecated and will be removed in a future release.  This option produces incorrect results by returning ``None`` for related ite",
           "    _SESSION_TRACE_METADATA = aliased(SqlTraceMetadata)",
           "",
           "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
-          "18 passed, 1 warning in 38.61s"
+          "18 passed, 1 warning in 61.29s (0:01:01)"
         ]
       },
-      "seconds": 46.5,
+      "seconds": 71.3,
       "log": "results/release/logs/mlflow_tracking.txt"
     },
     {
@@ -130,13 +130,13 @@
           "passed": 38,
           "deselected": 1
         },
-        "summary_line": "38 passed, 1 deselected in 1.71s",
+        "summary_line": "38 passed, 1 deselected in 2.01s",
         "output_tail": [
           "......................................                                   [100%]",
-          "38 passed, 1 deselected in 1.71s"
+          "38 passed, 1 deselected in 2.01s"
         ]
       },
-      "seconds": 5.4,
+      "seconds": 7.3,
       "log": "results/release/logs/resource_sampler.txt"
     },
     {
@@ -150,14 +150,14 @@
         "tests": {
           "passed": 120
         },
-        "summary_line": "120 passed in 113.12s (0:01:53)",
+        "summary_line": "120 passed in 116.22s (0:01:56)",
         "output_tail": [
           "........................................................................ [ 60%]",
           "................................................                         [100%]",
-          "120 passed in 113.12s (0:01:53)"
+          "120 passed in 116.22s (0:01:56)"
         ]
       },
-      "seconds": 117.5,
+      "seconds": 120.7,
       "log": "results/release/logs/adversarial.txt"
     },
     {
@@ -171,14 +171,14 @@
         "tests": {
           "passed": 142
         },
-        "summary_line": "142 passed in 92.10s (0:01:32)",
+        "summary_line": "142 passed in 95.22s (0:01:35)",
         "output_tail": [
           "........................................................................ [ 50%]",
           "......................................................................   [100%]",
-          "142 passed in 92.10s (0:01:32)"
+          "142 passed in 95.22s (0:01:35)"
         ]
       },
-      "seconds": 96.6,
+      "seconds": 99.7,
       "log": "results/release/logs/security_policy.txt"
     },
     {
@@ -193,13 +193,13 @@
           "passed": 3,
           "deselected": 1
         },
-        "summary_line": "3 passed, 1 deselected in 18.62s",
+        "summary_line": "3 passed, 1 deselected in 19.34s",
         "output_tail": [
           "...                                                                      [100%]",
-          "3 passed, 1 deselected in 18.62s"
+          "3 passed, 1 deselected in 19.34s"
         ]
       },
-      "seconds": 23.1,
+      "seconds": 23.7,
       "log": "results/release/logs/e2e.txt"
     },
     {
@@ -231,7 +231,7 @@
           "passed": 56
         }
       },
-      "seconds": 9.9,
+      "seconds": 10.1,
       "log": "results/release/logs/benchmark_integrity.txt"
     },
     {
@@ -247,15 +247,15 @@
           "failed": 0
         },
         "output_tail": [
-          "   \u2713 incident detail > renders findings and evidence, labelled as measurements rather than causes 315ms",
+          " \u2713 src/IncidentView.test.tsx (12 tests) 1853ms",
           "",
           " Test Files  5 passed (5)",
           "      Tests  51 passed (51)",
-          "   Start at  15:17:05",
-          "   Duration  5.04s (transform 930ms, setup 2.38s, collect 1.82s, tests 4.35s, environment 7.28s, prepare 1.13s)"
+          "   Start at  01:09:56",
+          "   Duration  5.88s (transform 1.67s, setup 2.41s, collect 3.24s, tests 4.45s, environment 9.18s, prepare 1.44s)"
         ]
       },
-      "seconds": 5.8,
+      "seconds": 7.2,
       "log": "results/release/logs/frontend_tests.txt"
     },
     {
@@ -272,10 +272,10 @@
           "dist/index.html                   0.41 kB \u2502 gzip:  0.28 kB",
           "dist/assets/index-BplKSql6.css    8.27 kB \u2502 gzip:  2.39 kB",
           "dist/assets/index-DbVOH8kj.js   182.77 kB \u2502 gzip: 56.50 kB",
-          "\u2713 built in 1.30s"
+          "\u2713 built in 1.60s"
         ]
       },
-      "seconds": 6.5,
+      "seconds": 7.1,
       "log": "results/release/logs/frontend_build.txt"
     },
     {
@@ -302,13 +302,13 @@
         "output_tail": [
           "  ok    mlflow_lists_training_runs  {\"experiments\": [\"aegis-baseline-bank\", \"aegis-baseline-adult\", \"Default\"]}",
           "  ok    traces_reach_jaeger  {}",
-          "  ok    deterministic_investigation  {\"incident_id\": \"INC-115a824b42e5\", \"status\": \"completed\", \"llm_status\": \"disabled\", \"llm_model\": null, \"seconds\": 2.3, \"llm_calls\": [], \"top_cause\": \"scaling_error\", \"ranked_by\": \"rules\", \"errors\": []}",
-          "  ok    all_services_up  {\"services\": {\"api\": \"Up 52 seconds (healthy)\", \"dashboard\": \"Up 51 seconds\", \"jaeger\": \"Up 58 seconds\", \"mlflow\": \"Up 35 seconds\", \"postgres\": \"Up 58 seconds (healthy)\"}, \"problems\": {}}",
+          "  ok    deterministic_investigation  {\"incident_id\": \"INC-c27b56e2ffe9\", \"status\": \"completed\", \"llm_status\": \"disabled\", \"llm_model\": null, \"seconds\": 2.4, \"llm_calls\": [], \"top_cause\": \"scaling_error\", \"ranked_by\": \"rules\", \"errors\": []}",
+          "  ok    all_services_up  {\"services\": {\"api\": \"Up About a minute (healthy)\", \"dashboard\": \"Up About a minute\", \"jaeger\": \"Up About a minute\", \"mlflow\": \"Up 56 seconds\", \"postgres\": \"Up About a minute (healthy)\"}, \"problems\": {}}",
           "",
           "9/9 checks passed -> results/release/compose.json"
         ]
       },
-      "seconds": 66.7,
+      "seconds": 106.2,
       "log": "results/release/logs/compose_default.txt"
     },
     {
@@ -337,7 +337,7 @@
           "24/24 checks passed -> /home/rohit/ageis/results/release/browser/browser-report.json"
         ]
       },
-      "seconds": 19.8,
+      "seconds": 32.1,
       "log": "results/release/logs/browser.txt"
     },
     {
@@ -364,14 +364,14 @@
         "report": "results/release/llm-qwen3-4b.json",
         "output_tail": [
           "  ok    unavailable_model  {\"health_detail\": \"neither aegis-no-such-model:0b nor aegis-none:0b is pulled\", \"error\": \"unavailable\"}",
-          "2026-11-12 15:23:18 [warning  ] llm_request_failed             attempts=1 detail=ConnectError error=unavailable model=qwen3:4b purpose=verify-dead",
+          "2026-11-13 01:20:03 [warning  ] llm_request_failed             attempts=1 detail=ConnectError error=unavailable model=qwen3:4b purpose=verify-dead",
           "  ok    unreachable_server  {\"dead_health\": \"ConnectError\", \"dead_error\": \"unavailable\", \"real_endpoint_ok_afterwards\": true}",
-          "  ok    deterministic_path  {\"status\": \"awaiting_approval\", \"llm_status\": \"unavailable\", \"top_cause\": \"scaling_error\", \"ranked_by\": \"rules\", \"policy_outcome\": \"REQUEST_HUMAN_APPROVAL\", \"seconds\": 2.1}",
+          "  ok    deterministic_path  {\"status\": \"awaiting_approval\", \"llm_status\": \"unavailable\", \"top_cause\": \"scaling_error\", \"ranked_by\": \"rules\", \"policy_outcome\": \"REQUEST_HUMAN_APPROVAL\", \"seconds\": 2.8}",
           "",
           "10/10 checks passed -> results/release/llm-qwen3-4b.json"
         ]
       },
-      "seconds": 276.2,
+      "seconds": 455.6,
       "log": "results/release/logs/ollama_qwen3_4b.txt"
     },
     {
@@ -398,14 +398,14 @@
         "report": "results/release/llm-llama3.2-3b.json",
         "output_tail": [
           "  ok    unavailable_model  {\"health_detail\": \"neither aegis-no-such-model:0b nor aegis-none:0b is pulled\", \"error\": \"unavailable\"}",
-          "2026-11-12 15:26:27 [warning  ] llm_request_failed             attempts=1 detail=ConnectError error=unavailable model=llama3.2:3b purpose=verify-dead",
+          "2026-11-13 01:23:18 [warning  ] llm_request_failed             attempts=1 detail=ConnectError error=unavailable model=llama3.2:3b purpose=verify-dead",
           "  ok    unreachable_server  {\"dead_health\": \"ConnectError\", \"dead_error\": \"unavailable\", \"real_endpoint_ok_afterwards\": true}",
-          "  ok    deterministic_path  {\"status\": \"awaiting_approval\", \"llm_status\": \"unavailable\", \"top_cause\": \"scaling_error\", \"ranked_by\": \"rules\", \"policy_outcome\": \"REQUEST_HUMAN_APPROVAL\", \"seconds\": 3.1}",
+          "  ok    deterministic_path  {\"status\": \"awaiting_approval\", \"llm_status\": \"unavailable\", \"top_cause\": \"scaling_error\", \"ranked_by\": \"rules\", \"policy_outcome\": \"REQUEST_HUMAN_APPROVAL\", \"seconds\": 2.9}",
           "",
           "10/10 checks passed -> results/release/llm-llama3.2-3b.json"
         ]
       },
-      "seconds": 190.0,
+      "seconds": 192.2,
       "log": "results/release/logs/ollama_llama3_2_3b.txt"
     },
     {
@@ -420,23 +420,23 @@
           "passed": 2,
           "deselected": 5
         },
-        "summary_line": "2 passed, 5 deselected in 243.44s (0:04:03)",
+        "summary_line": "2 passed, 5 deselected in 239.12s (0:03:59)",
         "output_tail": [
           "..                                                                       [100%]",
-          "2 passed, 5 deselected in 243.44s (0:04:03)"
+          "2 passed, 5 deselected in 239.12s (0:03:59)"
         ]
       },
-      "seconds": 247.9,
+      "seconds": 243.5,
       "log": "results/release/logs/e2e_real_llm.txt"
     },
     {
       "id": "compose_llm",
       "title": "Docker Compose `llm` profile: in-container Ollama, connectivity, fallback, recovery",
       "mandatory": false,
-      "status": "failed",
+      "status": "passed",
       "detail": {
         "command": "/home/rohit/ageis/.venv/bin/python -m scripts.verify_compose --llm",
-        "exit_code": 1,
+        "exit_code": 0,
         "passed": true,
         "checks": {
           "compose_config_valid": true,
@@ -459,13 +459,15 @@
         },
         "report": "results/release/compose-llm.json",
         "output_tail": [
-          "ok    compose_config_valid  {\"stderr\": \"\"}",
-          "  FAIL  compose_up  {\"seconds\": 22.2, \"stderr\": \"OM python:3.12-slim-bookworm\\n\\n   3 |     \\n\\n   4 | >>> COPY --from=ghcr.io/astral-sh/uv:0.13.7 /uv /usr/local/bin/uv\\n\\n   5 |     ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy UV_PYTHON_DOWNLOADS=never \\\\\\n\\n   6 |         PYTHON",
-          "  FAIL  api_ready  {\"waited_s\": 602.1, \"components\": {}}",
-          "  FAIL  total_startup  {\"seconds\": 624.4, \"clean_volumes\": false}"
+          "  ok    ready_reports_llm_unavailable_but_system_ready  {\"llm\": {\"status\": \"unavailable\", \"required\": false, \"detail\": \"ConnectError; deterministic diagnosis remains available\"}, \"system\": \"ready\"}",
+          "  ok    fallback_to_deterministic_when_ollama_is_down  {\"incident_id\": \"INC-08f2f5175859\", \"status\": \"completed\", \"llm_status\": \"unavailable\", \"llm_model\": null, \"seconds\": 6.1, \"llm_calls\": [], \"top_cause\": \"scaling_error\", \"ranked_by\": \"rules\", \"errors\": [\"LLM investigation unavailable: ConnectErr",
+          "  ok    llm_recovers_after_ollama_restart  {\"waited_s\": 3.1, \"llm\": {\"status\": \"ok\", \"required\": false, \"detail\": \"qwen3:4b via Ollama 0.40.16\"}}",
+          "  ok    all_services_up  {\"services\": {\"api\": \"Up 6 minutes (healthy)\", \"dashboard\": \"Up 6 minutes\", \"jaeger\": \"Up 6 minutes\", \"mlflow\": \"Up 5 minutes\", \"ollama\": \"Up 3 seconds (health: starting)\", \"ollama-pull\": \"Exited (0) 5 minutes ago\", \"postgres\": \"Up 6 minutes (healthy)\"}, \"prob",
+          "",
+          "17/17 checks passed -> results/release/compose-llm.json"
         ]
       },
-      "seconds": 625.2,
+      "seconds": 388.0,
       "log": "results/release/logs/compose_llm.txt"
     }
   ]

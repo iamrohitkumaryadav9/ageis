@@ -1,19 +1,19 @@
 verifying llama3.2:3b at http://localhost:11434
   ok    metadata  {"name": "llama3.2:3b", "available": true, "digest": "a80c4f17acd55265feec403c7aef86be0c25983ab279d83f3bcd3abbcb5b8b72", "size_bytes": 2019393189, "family": "llama", "parameter_size": "3.2B", "quantization_level": "Q4_K_M", "forma
-2026-11-12 15:23:40 [info     ] llm_model_loaded               model=llama3.2:3b seconds=6.6
-  ok    load  {"cold_load_s": 6.6, "detail": ""}
-  ok    structured_output  {"parsed": {"root_cause": "concept_drift", "confidence": 0.8, "evidence_ids": ["EV-1", "EV-2"]}, "error": null, "attempts": 1, "invalid_outputs": 0, "seconds": 11.5, "prompt_tokens": 116, "completion_tokens": 34, "cites_only_given
-2026-11-12 15:23:52 [info     ] llm_model_loaded               model=llama3.2:3b seconds=0.0
-  ok    investigation  {"status": "awaiting_approval", "llm_status": "available", "llm_model": "llama3.2:3b", "seconds": 139.7, "llm_calls": [{"purpose": "plan", "ok": true, "error": null, "seconds": 40.6, "prompt_tokens": 717, "completion_tokens": 20, 
+2026-11-13 01:20:32 [info     ] llm_model_loaded               model=llama3.2:3b seconds=7.2
+  ok    load  {"cold_load_s": 7.2, "detail": ""}
+  ok    structured_output  {"parsed": {"root_cause": "concept_drift", "confidence": 0.8, "evidence_ids": ["EV-1", "EV-2"]}, "error": null, "attempts": 1, "invalid_outputs": 0, "seconds": 11.7, "prompt_tokens": 116, "completion_tokens": 34, "cites_only_given
+2026-11-13 01:20:45 [info     ] llm_model_loaded               model=llama3.2:3b seconds=0.0
+  ok    investigation  {"status": "awaiting_approval", "llm_status": "available", "llm_model": "llama3.2:3b", "seconds": 138.1, "llm_calls": [{"purpose": "plan", "ok": true, "error": null, "seconds": 41.6, "prompt_tokens": 712, "completion_tokens": 20, 
   ok    fallback_selection  {"active_model": "llama3.2:3b", "health_detail": "primary model aegis-no-such-model:0b not pulled; using fallback llama3.2:3b", "answered_by": "llama3.2:3b", "ok": true, "error": null}
-2026-11-12 15:26:18 [warning  ] llm_request_failed             attempts=1 detail='no reply within 1s' error=timeout model=llama3.2:3b purpose=verify-timeout
+2026-11-13 01:23:09 [warning  ] llm_request_failed             attempts=1 detail='no reply within 1s' error=timeout model=llama3.2:3b purpose=verify-timeout
   ok    timeout  {"error": "timeout", "detail": "no reply within 1s", "returned_after_s": 1.0}
-2026-11-12 15:26:27 [warning  ] llm_request_failed             attempts=2 detail='not valid JSON (Unterminated string starting at)' error=invalid_output model=llama3.2:3b purpose=verify-malformed
+2026-11-13 01:23:18 [warning  ] llm_request_failed             attempts=2 detail='not valid JSON (Unterminated string starting at)' error=invalid_output model=llama3.2:3b purpose=verify-malformed
   ok    malformed_output  {"error": "invalid_output", "attempts": 2, "invalid_outputs": 2, "raw": "{\"root_cause\": \"Scaling error"}
-2026-11-12 15:26:27 [warning  ] llm_request_failed             attempts=0 detail='model aegis-none:0b is not pulled' error=unavailable model=aegis-none:0b purpose=verify-missing
+2026-11-13 01:23:18 [warning  ] llm_request_failed             attempts=0 detail='model aegis-none:0b is not pulled' error=unavailable model=aegis-none:0b purpose=verify-missing
   ok    unavailable_model  {"health_detail": "neither aegis-no-such-model:0b nor aegis-none:0b is pulled", "error": "unavailable"}
-2026-11-12 15:26:27 [warning  ] llm_request_failed             attempts=1 detail=ConnectError error=unavailable model=llama3.2:3b purpose=verify-dead
+2026-11-13 01:23:18 [warning  ] llm_request_failed             attempts=1 detail=ConnectError error=unavailable model=llama3.2:3b purpose=verify-dead
   ok    unreachable_server  {"dead_health": "ConnectError", "dead_error": "unavailable", "real_endpoint_ok_afterwards": true}
-  ok    deterministic_path  {"status": "awaiting_approval", "llm_status": "unavailable", "top_cause": "scaling_error", "ranked_by": "rules", "policy_outcome": "REQUEST_HUMAN_APPROVAL", "seconds": 3.1}
+  ok    deterministic_path  {"status": "awaiting_approval", "llm_status": "unavailable", "top_cause": "scaling_error", "ranked_by": "rules", "policy_outcome": "REQUEST_HUMAN_APPROVAL", "seconds": 2.9}
 
 10/10 checks passed -> results/release/llm-llama3.2-3b.json

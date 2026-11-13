@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-12T14:33:44+00:00",
+  "generated_at": "2026-11-13T01:34:00+00:00",
   "profiles": [
     "tracing",
     "llm"
@@ -13,7 +13,9 @@
     },
     "compose_up": {
       "passed": true,
-      "seconds": 49.5,
+      "seconds": 36.9,
+      "attempts": 1,
+      "first_attempt_error": "",
       "stderr": ""
     },
     "api_ready": {
@@ -28,7 +30,7 @@
     },
     "total_startup": {
       "passed": true,
-      "seconds": 49.8,
+      "seconds": 37.1,
       "clean_volumes": false
     },
     "dashboard_serves_and_proxies": {
@@ -49,11 +51,11 @@
     },
     "deterministic_investigation": {
       "passed": true,
-      "incident_id": "INC-1e8f9b9ec409",
+      "incident_id": "INC-2a33032de5c0",
       "status": "completed",
       "llm_status": "disabled",
       "llm_model": null,
-      "seconds": 2.0,
+      "seconds": 2.5,
       "llm_calls": [],
       "top_cause": "scaling_error",
       "ranked_by": "rules",
@@ -61,11 +63,11 @@
     },
     "model_pulled_in_container": {
       "passed": true,
-      "waited_s": 1.0,
+      "waited_s": 0.8,
       "ollama_list": [
-        "NAME           ID              SIZE      MODIFIED           ",
-        "llama3.2:3b    a80c4f17acd5    2.0 GB    About a minute ago    ",
-        "qwen3:4b       359d7dd4bcda    2.5 GB    About a minute ago"
+        "NAME           ID              SIZE      MODIFIED       ",
+        "llama3.2:3b    a80c4f17acd5    2.0 GB    57 seconds ago    ",
+        "qwen3:4b       359d7dd4bcda    2.5 GB    59 seconds ago"
       ]
     },
     "ollama_service_healthy": {
@@ -88,29 +90,29 @@
     },
     "llm_investigation_through_api": {
       "passed": true,
-      "incident_id": "INC-ed391ad5ab25",
+      "incident_id": "INC-b90c519b359b",
       "status": "completed",
       "llm_status": "available",
       "llm_model": "qwen3:4b",
-      "seconds": 372.9,
+      "seconds": 262.5,
       "llm_calls": [
         {
           "purpose": "plan",
           "ok": true,
           "error": null,
-          "seconds": 165.2
+          "seconds": 82.8
         },
         {
           "purpose": "rank",
           "ok": true,
           "error": null,
-          "seconds": 98.4
+          "seconds": 93.7
         },
         {
           "purpose": "explain",
           "ok": true,
           "error": null,
-          "seconds": 62.7
+          "seconds": 61.8
         }
       ],
       "top_cause": "scaling_error",
@@ -128,11 +130,11 @@
     },
     "fallback_to_deterministic_when_ollama_is_down": {
       "passed": true,
-      "incident_id": "INC-f2939c24fabe",
+      "incident_id": "INC-08f2f5175859",
       "status": "completed",
       "llm_status": "unavailable",
       "llm_model": null,
-      "seconds": 6.0,
+      "seconds": 6.1,
       "llm_calls": [],
       "top_cause": "scaling_error",
       "ranked_by": "rules",
@@ -152,20 +154,20 @@
     "all_services_up": {
       "passed": true,
       "services": {
-        "api": "Up 8 minutes (healthy)",
-        "dashboard": "Up 8 minutes",
-        "jaeger": "Up 8 minutes",
-        "mlflow": "Up 7 minutes",
+        "api": "Up 6 minutes (healthy)",
+        "dashboard": "Up 6 minutes",
+        "jaeger": "Up 6 minutes",
+        "mlflow": "Up 5 minutes",
         "ollama": "Up 3 seconds (health: starting)",
-        "ollama-pull": "Exited (0) 7 minutes ago",
-        "postgres": "Up 8 minutes (healthy)"
+        "ollama-pull": "Exited (0) 5 minutes ago",
+        "postgres": "Up 6 minutes (healthy)"
       },
       "problems": {}
     }
   },
   "log_tails": {
-    "api": "api-1  | INFO:     172.20.0.1:43096 - \"POST /incidents/INC-ed391ad5ab25/investigate HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:49928 - \"GET /investigations/INV-8ea904199f31 HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:49936 - \"GET /ready HTTP/1.1\" 200 OK\napi-1  | INFO:     127.0.0.1:58944 - \"GET /health HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:37710 - \"GET /ready HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:46108 - \"POST /data/current HTTP/1.1\" 201 Created\napi-1  | INFO:     172.20.0.1:46108 - \"POST /monitor/run HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:46108 - \"POST /incidents/INC-f2939c24fabe/investigate HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:46108 - \"GET /incidents/INC-f2939c24fabe HTTP/1.1\" 200 OK\napi-1  | INFO:     127.0.0.1:55910 - \"GET /health HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:46118 - \"POST /incidents/INC-f2939c24fabe/investigate HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:50204 - \"GET /investigations/INV-5f054e218e96 HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:50212 - \"GET /ready HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:50226 - \"GET /ready HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:50236 - \"GET /ready HTTP/1.1\" 200 OK\n",
-    "ollama": "| time=2026-11-12T14:33:40.505Z level=INFO source=routes.go:2476 msg=\"Ollama cloud disabled: false\"\nollama-1  | time=2026-11-12T14:33:40.508Z level=INFO source=images.go:1033 msg=\"total blobs: 13\"\nollama-1  | time=2026-11-12T14:33:40.509Z level=INFO source=images.go:1042 msg=\"total unused blobs removed: 0\"\nollama-1  | time=2026-11-12T14:33:40.510Z level=INFO source=routes.go:2536 msg=\"Listening on [::]:11434 (version 0.40.16)\"\nollama-1  | time=2026-11-12T14:33:40.519Z level=INFO source=runner.go:60 msg=\"discovering available GPUs...\"\nollama-1  | time=2026-11-12T14:33:41.171Z level=INFO source=model_recommendations.go:177 msg=\"model recommendations cache sleep scheduled\" wait=4h16m23.360952251s consecutive_failures=0\nollama-1  | time=2026-11-12T14:33:41.799Z level=INFO source=types.go:50 msg=\"inference compute\" id=cpu library=cpu compute=\"\" name=cpu description=cpu libdirs=ollama driver=\"\" pci_id=\"\" type=\"\" total=\"7.7 GiB\" available=\"7.2 GiB\"\nollama-1  | time=2026-11-12T14:33:41.799Z level=INFO source=routes.go:2586 msg=\"vram-based default context\" total_vram=\"0 B\" default_num_ctx=4096\nollama-1  | [GIN] 2026/11/12 - 14:33:43 | 200 |   72.9\u00b5s |      172.20.0.5 | GET      \"/api/version\"\nollama-1  | [GIN] 2026/11/12 - 14:33:43 | 200 |   3.55ms |      172.20.0.5 | GET      \"/api/tags\"\nollama-1  | [GIN] 2026/11/12 - 14:33:43 | 200 |   22.2\u00b5s |      172.20.0.5 | GET      \"/api/version\"\nollama-1  | [GIN] 2026/11/12 - 14:33:43 | 200 |   2.21ms |      172.20.0.5 | GET      \"/api/tags\"\n",
-    "ollama-pull": "[?2026l\u001b[?2026h\u001b[?25l\u001b[1Gpulling manifest \u2826 \u001b[K\u001b[?25h\u001b[?2026l\u001b[?2026h\u001b[?25l\u001b[1Gpulling manifest \u2827 \u001b[K\u001b[?25h\u001b[?2026l\u001b[?2026h\u001b[?25l\u001b[1Gpulling manifest \u2807 \u001b[K\u001b[?25h\u001b[?2026l\u001b[?2026h\u001b[?25l\u001b[1Gpulling manifest \u280f \u001b[K\u001b[?25h\u001b[?2026l\u001b[?2026h\u001b[?25l\u001b[1Gpulling manifest \u280b \u001b[K\u001b[?25h\u001b[?2026l\u001b[?2026h\u001b[?25l\u001b[1Gpulling manifest \u2819 \u001b[K\u001b[?25h\u001b[?2026l\u001b[?2026h\u001b[?25l\u001b[1Gpulling manifest \u2839 \u001b[K\u001b[?25h\u001b[?2026l\u001b[?2026h\u001b[?25l\u001b[1Gpulling manifest \u2838 \u001b[K\u001b[?25h\u001b[?2026l\u001b[?2026h\u001b[?25l\u001b[1Gpulling manifest \u001b[K\nollama-pull-1  | pulling dde5aa3fc5ff: 100% \u2595\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258f 2.0 GB                         \u001b[K\nollama-pull-1  | pulling 966de95ca8a6: 100% \u2595\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258f 1.4 KB                         \u001b[K\nollama-pull-1  | pulling fcc5a6bec9da: 100% \u2595\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258f 7.7 KB                         \u001b[K\nollama-pull-1  | pulling a70ff7e570d9: 100% \u2595\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258f 6.0 KB                         \u001b[K\nollama-pull-1  | pulling 56bb8bd477a5: 100% \u2595\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258f   96 B                         \u001b[K\nollama-pull-1  | pulling 34bb5ab01051: 100% \u2595\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258f  561 B                         \u001b[K\nollama-pull-1  | verifying sha256 digest \u001b[K\nollama-pull-1  | writing manifest \u001b[K\nollama-pull-1  | removing unused layers \u001b[K\nollama-pull-1  | success \u001b[K\u001b[?25h\u001b[?2026l\nollama-pull-1  | NAME           ID              SIZE      MODIFIED               \nollama-pull-1  | llama3.2:3b    a80c4f17acd5    2.0 GB    Less than a second ago    \nollama-pull-1  | qwen3:4b       359d7dd4bcda    2.5 GB    2 seconds ago             \n"
+    "api": "api-1  | INFO:     172.20.0.1:55978 - \"POST /incidents/INC-b90c519b359b/investigate HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:45402 - \"GET /investigations/INV-c3412b17c343 HTTP/1.1\" 200 OK\napi-1  | INFO:     127.0.0.1:53888 - \"GET /health HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:45418 - \"GET /ready HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:45420 - \"GET /ready HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:47890 - \"POST /data/current HTTP/1.1\" 201 Created\napi-1  | INFO:     172.20.0.1:47890 - \"POST /monitor/run HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:47890 - \"POST /incidents/INC-08f2f5175859/investigate HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:47890 - \"GET /incidents/INC-08f2f5175859 HTTP/1.1\" 200 OK\napi-1  | INFO:     127.0.0.1:59682 - \"GET /health HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:47896 - \"POST /incidents/INC-08f2f5175859/investigate HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:60742 - \"GET /investigations/INV-b7d13ab1c311 HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:60750 - \"GET /ready HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:60756 - \"GET /ready HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:60772 - \"GET /ready HTTP/1.1\" 200 OK\n",
+    "ollama": "| time=2026-11-13T01:33:57.070Z level=INFO source=routes.go:2476 msg=\"Ollama cloud disabled: false\"\nollama-1  | time=2026-11-13T01:33:57.074Z level=INFO source=images.go:1033 msg=\"total blobs: 13\"\nollama-1  | time=2026-11-13T01:33:57.075Z level=INFO source=images.go:1042 msg=\"total unused blobs removed: 0\"\nollama-1  | time=2026-11-13T01:33:57.075Z level=INFO source=routes.go:2536 msg=\"Listening on [::]:11434 (version 0.40.16)\"\nollama-1  | time=2026-11-13T01:33:57.092Z level=INFO source=runner.go:60 msg=\"discovering available GPUs...\"\nollama-1  | time=2026-11-13T01:33:58.568Z level=INFO source=types.go:50 msg=\"inference compute\" id=cpu library=cpu compute=\"\" name=cpu description=cpu libdirs=ollama driver=\"\" pci_id=\"\" type=\"\" total=\"7.7 GiB\" available=\"7.2 GiB\"\nollama-1  | time=2026-11-13T01:33:58.568Z level=INFO source=routes.go:2586 msg=\"vram-based default context\" total_vram=\"0 B\" default_num_ctx=4096\nollama-1  | time=2026-11-13T01:33:58.979Z level=INFO source=model_recommendations.go:177 msg=\"model recommendations cache sleep scheduled\" wait=4h40m25.947125788s consecutive_failures=0\nollama-1  | [GIN] 2026/11/13 - 01:33:59 | 200 |   56.3\u00b5s |      172.20.0.5 | GET      \"/api/version\"\nollama-1  | [GIN] 2026/11/13 - 01:33:59 | 200 |   2.22ms |      172.20.0.5 | GET      \"/api/tags\"\nollama-1  | [GIN] 2026/11/13 - 01:33:59 | 200 |   22.6\u00b5s |      172.20.0.5 | GET      \"/api/version\"\nollama-1  | [GIN] 2026/11/13 - 01:33:59 | 200 |   2.05ms |      172.20.0.5 | GET      \"/api/tags\"\n",
+    "ollama-pull": "ollama-pull-1  | writing manifest \u001b[K\nollama-pull-1  | removing unused layers \u280b \u001b[K\u001b[?25h\u001b[?2026l\u001b[?2026h\u001b[?25l\u001b[A\u001b[A\u001b[A\u001b[A\u001b[A\u001b[A\u001b[A\u001b[A\u001b[A\u001b[1Gpulling manifest \u001b[K\nollama-pull-1  | pulling dde5aa3fc5ff: 100% \u2595\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258f 2.0 GB                         \u001b[K\nollama-pull-1  | pulling 966de95ca8a6: 100% \u2595\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258f 1.4 KB                         \u001b[K\nollama-pull-1  | pulling fcc5a6bec9da: 100% \u2595\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258f 7.7 KB                         \u001b[K\nollama-pull-1  | pulling a70ff7e570d9: 100% \u2595\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258f 6.0 KB                         \u001b[K\nollama-pull-1  | pulling 56bb8bd477a5: 100% \u2595\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258f   96 B                         \u001b[K\nollama-pull-1  | pulling 34bb5ab01051: 100% \u2595\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258f  561 B                         \u001b[K\nollama-pull-1  | verifying sha256 digest \u001b[K\nollama-pull-1  | writing manifest \u001b[K\nollama-pull-1  | removing unused layers \u001b[K\nollama-pull-1  | success \u001b[K\u001b[?25h\u001b[?2026l\nollama-pull-1  | NAME           ID              SIZE      MODIFIED               \nollama-pull-1  | llama3.2:3b    a80c4f17acd5    2.0 GB    Less than a second ago    \nollama-pull-1  | qwen3:4b       359d7dd4bcda    2.5 GB    1 second ago              \n"
   }
 }

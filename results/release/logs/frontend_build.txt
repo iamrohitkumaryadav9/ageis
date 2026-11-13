@@ -6,4 +6,4 @@ computing gzip size...
 dist/index.html                   0.41 kB │ gzip:  0.28 kB
 dist/assets/index-BplKSql6.css    8.27 kB │ gzip:  2.39 kB
 dist/assets/index-DbVOH8kj.js   182.77 kB │ gzip: 56.50 kB
-✓ built in 1.30s
+✓ built in 1.60s

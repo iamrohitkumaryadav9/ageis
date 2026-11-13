@@ -1,12 +1,12 @@
 {
-  "generated_at": "2026-11-12T15:18:44.476Z",
+  "generated_at": "2026-11-13T01:12:30.683Z",
   "dashboard_url": "http://localhost:8080",
   "browser": "chromium 131.0.6778.33 (headless)",
   "viewports": [
     "1440x900",
     "390x844"
   ],
-  "incident_id": "INC-96c79cbd6d11",
+  "incident_id": "INC-21575343edb5",
   "observed": {
     "evaluation": {
       "run": "main",
@@ -21,87 +21,87 @@
     {
       "name": "dashboard loads and asks for a token",
       "passed": true,
-      "ms": 4614
+      "ms": 4892
     },
     {
       "name": "an invalid token produces a visible 401 error, not a blank page",
       "passed": true,
-      "ms": 236
+      "ms": 512
     },
     {
       "name": "overview renders live data after sign-in",
       "passed": true,
-      "ms": 418
+      "ms": 1170
     },
     {
       "name": "loading state is shown while the API is slow",
       "passed": true,
-      "ms": 1882
+      "ms": 2295
     },
     {
       "name": "an API failure shows 'API unavailable' and the shell stays usable",
       "passed": true,
-      "ms": 85
+      "ms": 109
     },
     {
       "name": "a server error (500) is reported with its status",
       "passed": true,
-      "ms": 88
+      "ms": 100
     },
     {
       "name": "incident list renders and links to the incident",
       "passed": true,
-      "ms": 217
+      "ms": 252
     },
     {
       "name": "status filter with no matches shows the empty state",
       "passed": true,
-      "ms": 111
+      "ms": 110
     },
     {
       "name": "incident detail: findings and evidence panels render",
       "passed": true,
-      "ms": 413
+      "ms": 549
     },
     {
       "name": "investigation tab: ranked hypotheses with evidence, worded as hypotheses",
       "passed": true,
-      "ms": 490
+      "ms": 695
     },
     {
       "name": "remediation tab: proposal shown as recommendation with validation and policy",
       "passed": true,
-      "ms": 307
+      "ms": 403
     },
     {
       "name": "a viewer's approval is refused by the server and shown as refused",
       "passed": true,
-      "ms": 102
+      "ms": 94
     },
     {
       "name": "an approver approves: UI shows executed, verified, and the audit trail",
       "passed": true,
-      "ms": 1529
+      "ms": 1875
     },
     {
       "name": "rollback needs a reason and then restores the previous state",
       "passed": true,
-      "ms": 144
+      "ms": 131
     },
     {
       "name": "a non-existent incident shows a not-found error",
       "passed": true,
-      "ms": 44
+      "ms": 43
     },
     {
       "name": "evaluation page: both detection metrics under their own names and populations",
       "passed": true,
-      "ms": 500
+      "ms": 652
     },
     {
       "name": "evaluation page: switching the run reloads the results",
       "passed": true,
-      "ms": 158
+      "ms": 156
     },
     {
       "name": "desktop layout has no horizontal overflow",
@@ -111,27 +111,27 @@
     {
       "name": "phone viewport (390px): overview renders without horizontal page overflow",
       "passed": true,
-      "ms": 195
+      "ms": 187
     },
     {
       "name": "phone viewport (390px): incidents renders without horizontal page overflow",
       "passed": true,
-      "ms": 123
+      "ms": 177
     },
     {
       "name": "phone viewport (390px): incident renders without horizontal page overflow",
       "passed": true,
-      "ms": 277
+      "ms": 315
     },
     {
       "name": "phone viewport (390px): evaluation renders without horizontal page overflow",
       "passed": true,
-      "ms": 434
+      "ms": 561
     },
     {
       "name": "phone viewport: tabs remain operable",
       "passed": true,
-      "ms": 121
+      "ms": 132
     },
     {
       "name": "no unexpected console errors and no uncaught exceptions",

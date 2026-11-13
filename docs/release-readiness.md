@@ -62,6 +62,30 @@ system is specified to work without an LLM.
 | `e2e_real_llm` | the end-to-end lifecycle and the sampler's runner attribution with the real model |
 | `compose_llm` | `scripts.verify_compose --llm`: Ollama in a container, connectivity, fallback, recovery |
 
+## Result of the last full run
+
+2026-11-13, commit `9cfd559`: **RELEASE READY**. 13 of 13 mandatory gates and 4 of 4 optional
+gates passed, in 2,056 s. Backend: 423 unit, 63 PostgreSQL integration, 18 MLflow, 38 sampler,
+120 adversarial, 142 security and policy, 3 end-to-end tests. Frontend: 51 tests and the build.
+Compose default: 9 of 9 checks. Browser: 24 of 24. Each model: 10 of 10. Real-model end-to-end:
+2 tests. Compose `llm` profile: 17 of 17.
+
+It took five full runs to get there, and the earlier ones are part of the evidence:
+
+| Pass | Outcome | What it found |
+|---|---|---|
+| 1 | 13/13 mandatory, 3/4 optional | With the fallback model, an omitted rule hypothesis was ranked below the model's weaker guess. A real defect; fixed (section C). Report kept as `release-report.pass1-before-ordering-fix.json` |
+| 2 | stopped | An existing adversarial test still asserted the old ordering. The test was updated to the stronger property (decision D24) |
+| 3 | stopped | A unit test of the retriever was flaky: its stub embedder used Python's per-process salted `hash()`. Pre-existing, unrelated to this work, made deterministic and checked under ten hash seeds |
+| 4 | 13/13 mandatory, 3/4 optional | The image rebuild could not reach the container registry, so the `llm` profile did not start. Environmental, but it exposed two defects in the verification scripts themselves: the Compose check crashed instead of reporting, and the release report showed the previous run's check counts next to the failed gate. Both fixed; report kept as `release-report.pass4-registry-fetch-failure.json` |
+| 5 | 13/13 mandatory, 4/4 optional | nothing |
+
+Two things follow. A verdict from this script is a statement about one run on one machine: LLM
+output varies (in pass 5 the primary model returned an unusable ranking once and the
+investigation correctly kept the deterministic one), and the Compose gates need the network.
+And the optional gates earned their place: the two product defects found during verification
+were both found by running a real model, not by the mandatory suite.
+
 ## A. Dashboard: browser verification
 
 **Status: browser verified** in headless Chromium 131 at 1440x900 and 390x844, against the
@@ -100,7 +124,8 @@ dependencies, each for a stated reason: `vitest` (test runner that reuses the Vi
 `@testing-library/user-event` (render and interact as a user would), `playwright` (drives the
 browser check). No runtime dependency was added.
 
-**Limits**: Chromium only; Firefox and Safari were not exercised. Layout is checked for overflow
+**Limits**: on a phone, wide tables scroll sideways inside their card and long evidence
+statements make tall rows: usable, not polished. Chromium only; Firefox and Safari were not exercised. Layout is checked for overflow
 and visibility by the script, and the screenshots were reviewed once by eye; there is no visual
 regression baseline. Accessibility was not audited beyond labels and roles the tests rely on.
 
@@ -156,6 +181,9 @@ profile leaves no headroom for anything else.
 0.40.16 and run through `scripts.verify_llm`, which uses no fake server. Evidence:
 `results/release/llm-llama3.2-3b.json`, `results/release/llm-qwen3-4b.json`.
 
+Figures are from each model's first verification run on 2026-11-12; later runs overwrote the
+JSON files and differ in detail, as noted below the table.
+
 | | `qwen3:4b` (primary) | `llama3.2:3b` (fallback) |
 |---|---|---|
 | Parameters / quantisation / size on disk | 4.0B / Q4_K_M / 2.50 GB | 3.2B / Q4_K_M / 2.02 GB |
@@ -177,8 +205,10 @@ profile leaves no headroom for anything else.
 | Dead endpoint, then the real one | unavailable, then works | same |
 | Same investigation with the LLM unreachable | completes on rules in 2 to 3 s | same |
 
-The table is the first verification run of each model. Small-model output varies between runs,
-and a second run of `llama3.2:3b` behaved differently in a way that exposed a defect:
+Small-model output varies between runs. Across the five passes the primary model's full
+investigation took 225 to 359 s and once returned an unusable ranking (the deterministic ranking
+was kept); the fallback's took 133 to 144 s. A second run of `llama3.2:3b` behaved differently
+in a way that exposed a defect:
 
 **Defect found with the fallback model, and fixed.** In the second run the model ranked a single
 weak guess (concept drift, capped at 0.45 because the rule engine does not support it) and

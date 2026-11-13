@@ -1,6 +1,6 @@
 {
   "model": "qwen3:4b",
-  "generated_at": "2026-11-12T15:23:27+00:00",
+  "generated_at": "2026-11-13T01:20:16+00:00",
   "passed": true,
   "checks": {
     "metadata": {
@@ -18,7 +18,7 @@
     },
     "load": {
       "passed": true,
-      "cold_load_s": 7.1,
+      "cold_load_s": 31.4,
       "detail": ""
     },
     "structured_output": {
@@ -33,7 +33,7 @@
       "error": null,
       "attempts": 1,
       "invalid_outputs": 0,
-      "seconds": 13.7,
+      "seconds": 21.7,
       "prompt_tokens": 107,
       "completion_tokens": 34,
       "cites_only_given_ids": true
@@ -41,49 +41,49 @@
     "investigation": {
       "passed": true,
       "status": "awaiting_approval",
-      "llm_status": "available",
+      "llm_status": "degraded",
       "llm_model": "qwen3:4b",
-      "seconds": 217.3,
+      "seconds": 358.5,
       "llm_calls": [
         {
           "purpose": "plan",
           "ok": true,
           "error": null,
-          "seconds": 75.5,
-          "prompt_tokens": 772,
+          "seconds": 83.8,
+          "prompt_tokens": 771,
           "completion_tokens": 87,
           "invalid_outputs": 0
         },
         {
           "purpose": "rank",
-          "ok": true,
-          "error": null,
-          "seconds": 81.1,
-          "prompt_tokens": 992,
-          "completion_tokens": 227,
-          "invalid_outputs": 0
+          "ok": false,
+          "error": "invalid_output",
+          "seconds": 208.0,
+          "prompt_tokens": 1288,
+          "completion_tokens": 260,
+          "invalid_outputs": 2
         },
         {
           "purpose": "explain",
           "ok": true,
           "error": null,
-          "seconds": 57.6,
+          "seconds": 59.9,
           "prompt_tokens": 737,
           "completion_tokens": 114,
           "invalid_outputs": 0
         }
       ],
-      "llm_calls_ok": 3,
+      "llm_calls_ok": 2,
       "llm_calls_total": 3,
       "top_cause": "scaling_error",
-      "top_ranked_by": "llm",
+      "top_ranked_by": "rules",
       "rule_top_cause": "scaling_error",
       "policy_outcome": "REQUEST_HUMAN_APPROVAL",
       "explanation_source": "llm:qwen3:4b",
       "tools_requested_by_llm": 4,
       "tools_rejected": 0,
       "claim_counters": {
-        "claims_evaluated": 10,
+        "claims_evaluated": 8,
         "causal_claims_generated": 0,
         "causal_claims_supported": 0,
         "causal_claims_rejected": 0,
@@ -95,13 +95,15 @@
         "contradictory_claims_rejected": 0,
         "fabricated_evidence_ids_generated": 0,
         "fabricated_evidence_ids_stripped": 0,
-        "irrelevant_evidence_ids_stripped": 1,
+        "irrelevant_evidence_ids_stripped": 0,
         "untrusted_evidence_ids_stripped": 0,
         "causal_claims_escaped": 0,
         "unsupported_claims_escaped": 0,
         "fabricated_evidence_ids_escaped": 0
       },
-      "errors": []
+      "errors": [
+        "LLM ranking failed (invalid_output); keeping the deterministic ranking"
+      ]
     },
     "fallback_selection": {
       "passed": true,
@@ -142,35 +144,35 @@
       "top_cause": "scaling_error",
       "ranked_by": "rules",
       "policy_outcome": "REQUEST_HUMAN_APPROVAL",
-      "seconds": 2.1
+      "seconds": 2.8
     }
   },
   "resources": {
-    "run_id": "RES-5b0322f6dd5d",
+    "run_id": "RES-5b9c33f54d9e",
     "label": "verify-qwen3:4b",
-    "started_at": "2026-11-12T15:18:57+00:00",
-    "ended_at": "2026-11-12T15:22:56+00:00",
-    "duration_s": 238.2,
+    "started_at": "2026-11-13T01:12:47+00:00",
+    "ended_at": "2026-11-13T01:19:38+00:00",
+    "duration_s": 411.6,
     "sampling_interval_s": 0.5,
-    "samples": 453,
+    "samples": 778,
     "peaks_mb": {
-      "python_rss": 351.1,
-      "aegis_tree_rss": 351.1,
-      "ollama_server_rss": 23.1,
-      "ollama_runner_rss": 3318.7,
-      "process_tree_total_rss": 3690.6,
-      "system_used": 5077.0,
-      "swap_used": 1196.2
+      "python_rss": 319.4,
+      "aegis_tree_rss": 319.4,
+      "ollama_server_rss": 25.0,
+      "ollama_runner_rss": 3365.0,
+      "process_tree_total_rss": 3706.5,
+      "system_used": 5183.2,
+      "swap_used": 1094.7
     },
     "at_start_mb": {
-      "system_available": 6067.6,
-      "system_used": 1768.1,
-      "swap_used": 1156.4
+      "system_available": 5978.0,
+      "system_used": 1857.7,
+      "swap_used": 1039.4
     },
     "cpu_percent": {
-      "mean": 65.2,
-      "p95": 73.0,
-      "max": 82.9
+      "mean": 64.0,
+      "p95": 74.2,
+      "max": 97.9
     },
     "process_counts_max": {
       "ollama_server": 1,

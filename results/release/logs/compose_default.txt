@@ -1,11 +1,11 @@
   ok    compose_config_valid  {"stderr": ""}
-  ok    compose_up  {"seconds": 30.8, "stderr": ""}
+  ok    compose_up  {"seconds": 48.8, "attempts": 1, "first_attempt_error": "", "stderr": ""}
   ok    api_ready  {"waited_s": 4.1, "components": {"database": "ok", "models": "ok", "runbooks": "ok", "llm": "unavailable"}}
-  ok    total_startup  {"seconds": 38.8, "clean_volumes": false}
+  ok    total_startup  {"seconds": 56.8, "clean_volumes": false}
   ok    dashboard_serves_and_proxies  {"index": 200, "proxied_overview": 200}
   ok    mlflow_lists_training_runs  {"experiments": ["aegis-baseline-bank", "aegis-baseline-adult", "Default"]}
   ok    traces_reach_jaeger  {}
-  ok    deterministic_investigation  {"incident_id": "INC-115a824b42e5", "status": "completed", "llm_status": "disabled", "llm_model": null, "seconds": 2.3, "llm_calls": [], "top_cause": "scaling_error", "ranked_by": "rules", "errors": []}
-  ok    all_services_up  {"services": {"api": "Up 52 seconds (healthy)", "dashboard": "Up 51 seconds", "jaeger": "Up 58 seconds", "mlflow": "Up 35 seconds", "postgres": "Up 58 seconds (healthy)"}, "problems": {}}
+  ok    deterministic_investigation  {"incident_id": "INC-c27b56e2ffe9", "status": "completed", "llm_status": "disabled", "llm_model": null, "seconds": 2.4, "llm_calls": [], "top_cause": "scaling_error", "ranked_by": "rules", "errors": []}
+  ok    all_services_up  {"services": {"api": "Up About a minute (healthy)", "dashboard": "Up About a minute", "jaeger": "Up About a minute", "mlflow": "Up 56 seconds", "postgres": "Up About a minute (healthy)"}, "problems": {}}
 
 9/9 checks passed -> results/release/compose.json

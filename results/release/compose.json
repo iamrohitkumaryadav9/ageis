@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-12T15:18:24+00:00",
+  "generated_at": "2026-11-13T01:11:58+00:00",
   "profiles": [
     "tracing"
   ],
@@ -12,7 +12,9 @@
     },
     "compose_up": {
       "passed": true,
-      "seconds": 30.8,
+      "seconds": 48.8,
+      "attempts": 1,
+      "first_attempt_error": "",
       "stderr": ""
     },
     "api_ready": {
@@ -27,7 +29,7 @@
     },
     "total_startup": {
       "passed": true,
-      "seconds": 38.8,
+      "seconds": 56.8,
       "clean_volumes": false
     },
     "dashboard_serves_and_proxies": {
@@ -48,11 +50,11 @@
     },
     "deterministic_investigation": {
       "passed": true,
-      "incident_id": "INC-115a824b42e5",
+      "incident_id": "INC-c27b56e2ffe9",
       "status": "completed",
       "llm_status": "disabled",
       "llm_model": null,
-      "seconds": 2.3,
+      "seconds": 2.4,
       "llm_calls": [],
       "top_cause": "scaling_error",
       "ranked_by": "rules",
@@ -61,16 +63,16 @@
     "all_services_up": {
       "passed": true,
       "services": {
-        "api": "Up 52 seconds (healthy)",
-        "dashboard": "Up 51 seconds",
-        "jaeger": "Up 58 seconds",
-        "mlflow": "Up 35 seconds",
-        "postgres": "Up 58 seconds (healthy)"
+        "api": "Up About a minute (healthy)",
+        "dashboard": "Up About a minute",
+        "jaeger": "Up About a minute",
+        "mlflow": "Up 56 seconds",
+        "postgres": "Up About a minute (healthy)"
       },
       "problems": {}
     }
   },
   "log_tails": {
-    "api": "api-1  | INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)\napi-1  | INFO:     127.0.0.1:43966 - \"GET /health HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:41130 - \"GET /ready HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:41140 - \"GET /ready HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.5:47788 - \"GET /overview HTTP/1.0\" 200 OK\napi-1  | INFO:     172.20.0.5:47792 - \"GET /overview HTTP/1.0\" 401 Unauthorized\napi-1  | INFO:     127.0.0.1:43314 - \"GET /health HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:44442 - \"GET /overview HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:44458 - \"POST /data/current HTTP/1.1\" 201 Created\napi-1  | INFO:     172.20.0.1:44458 - \"POST /monitor/run HTTP/1.1\" 200 OK\napi-1  | INFO:     127.0.0.1:60424 - \"GET /health HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:44458 - \"POST /incidents/INC-115a824b42e5/investigate HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:44458 - \"GET /incidents/INC-115a824b42e5 HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:57436 - \"POST /incidents/INC-115a824b42e5/investigate HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:57446 - \"GET /investigations/INV-fd91ea18fcfe HTTP/1.1\" 200 OK\n"
+    "api": "api-1  | INFO:     127.0.0.1:41196 - \"GET /health HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:60506 - \"GET /ready HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:60510 - \"GET /ready HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.5:59518 - \"GET /overview HTTP/1.0\" 200 OK\napi-1  | INFO:     172.20.0.5:59532 - \"GET /overview HTTP/1.0\" 401 Unauthorized\napi-1  | INFO:     127.0.0.1:55806 - \"GET /health HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:50234 - \"GET /overview HTTP/1.1\" 200 OK\napi-1  | INFO:     127.0.0.1:43128 - \"GET /health HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:36990 - \"POST /data/current HTTP/1.1\" 201 Created\napi-1  | INFO:     172.20.0.1:36990 - \"POST /monitor/run HTTP/1.1\" 200 OK\napi-1  | INFO:     127.0.0.1:36126 - \"GET /health HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:36990 - \"POST /incidents/INC-c27b56e2ffe9/investigate HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:36990 - \"GET /incidents/INC-c27b56e2ffe9 HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:39384 - \"POST /incidents/INC-c27b56e2ffe9/investigate HTTP/1.1\" 200 OK\napi-1  | INFO:     172.20.0.1:39398 - \"GET /investigations/INV-f143f2af9d2f HTTP/1.1\" 200 OK\n"
   }
 }
