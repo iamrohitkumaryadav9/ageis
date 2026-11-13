@@ -31,6 +31,10 @@ API = "http://localhost:8000"
 DASHBOARD = "http://localhost:8080"
 
 
+class StackUnavailable(Exception):
+    """The Compose stack could not be started."""
+
+
 def sh(*args: str, timeout: float = 900, check: bool = False) -> subprocess.CompletedProcess:
     return subprocess.run(args, capture_output=True, text=True, timeout=timeout, check=check)
 
@@ -152,154 +156,180 @@ def main() -> None:
     started = time.time()
     # --build: verify the code in this checkout, not whatever image an earlier build left behind
     up = compose("up", "-d", "--build", profiles=profiles, timeout=3600)
+    attempts = 1
+    if up.returncode != 0:
+        # One bounded retry: an image build needs the registry, and a transient fetch failure
+        # there is not a defect in the stack. A second failure is reported as a failure.
+        first_error = up.stderr[-300:]
+        time.sleep(30)
+        up = compose("up", "-d", "--build", profiles=profiles, timeout=3600)
+        attempts = 2
     record(
         "compose_up",
         up.returncode == 0,
         seconds=round(time.time() - started, 1),
+        attempts=attempts,
+        first_attempt_error=first_error if attempts == 2 else "",
         stderr=up.stderr[-400:] if up.returncode else "",
     )
-    ok, waited = wait_for(lambda: ready()["status"] == "ready", 600)
-    state = ready() if ok else {}
-    record(
-        "api_ready",
-        ok,
-        waited_s=round(waited, 1),
-        components={k: v["status"] for k, v in state.get("components", {}).items()},
-    )
-    record("total_startup", ok, seconds=round(time.time() - started, 1), clean_volumes=args.clean)
-
-    dash = httpx.get(DASHBOARD, timeout=10)
-    proxied = httpx.get(
-        f"{DASHBOARD}/api/overview",
-        timeout=10,
-        headers={"Authorization": f"Bearer {tok['viewer']}"},
-    )
-    record(
-        "dashboard_serves_and_proxies",
-        dash.status_code == 200
-        and proxied.status_code == 200
-        and httpx.get(f"{DASHBOARD}/api/overview", timeout=10).status_code == 401,
-        index=dash.status_code,
-        proxied_overview=proxied.status_code,
-    )
-    mlflow_ok, _ = wait_for(
-        lambda: httpx.get("http://localhost:5000/health", timeout=5).status_code == 200, 120
-    )
-    experiments = []
-    if mlflow_ok:
-        experiments = [
-            e["name"]
-            for e in httpx.post(
-                "http://localhost:5000/api/2.0/mlflow/experiments/search",
-                json={"max_results": 20},
-                timeout=10,
-            )
-            .json()
-            .get("experiments", [])
-        ]
-    record(
-        "mlflow_lists_training_runs",
-        mlflow_ok and "aegis-baseline-adult" in experiments,
-        experiments=experiments,
-    )
-    httpx.get(f"{API}/overview", headers={"Authorization": f"Bearer {tok['viewer']}"}, timeout=10)
-    traced, _ = wait_for(
-        lambda: (
-            "aegis"
-            in (
-                httpx.get("http://localhost:16686/api/services", timeout=5).json().get("data") or []
-            )
-        ),
-        60,
-    )
-    record("traces_reach_jaeger", traced)
-
-    base = investigate(tok["operator"], use_llm=False, timeout=300)
-    record(
-        "deterministic_investigation",
-        base.get("status") == "completed" and base.get("ranked_by") == "rules",
-        **base,
-    )
-
-    if args.llm:
-
-        def pulled() -> bool:
-            status = services(profiles).get("ollama-pull", "")
-            if status.startswith("Exited") and "Exited (0)" not in status:
-                raise SystemExit(
-                    f"ollama-pull failed: {status}\n"
-                    + compose("logs", "--tail", "30", "ollama-pull", profiles=profiles).stdout[
-                        -1500:
-                    ]
-                )
-            return "Exited (0)" in status
-
-        pull_started = time.time()
-        ok, waited = wait_for(pulled, args.pull_timeout, interval=10)
-        listing = compose("exec", "-T", "ollama", "ollama", "list", profiles=profiles).stdout
+    try:
+        if up.returncode != 0:
+            # Nothing further can be verified without a running stack. Say so and stop; do
+            # not carry on into checks that would fail for the same reason.
+            raise StackUnavailable("docker compose up failed; later checks were not run")
+        ok, waited = wait_for(lambda: ready()["status"] == "ready", 600)
+        state = ready() if ok else {}
         record(
-            "model_pulled_in_container",
-            ok,
-            waited_s=round(time.time() - pull_started, 1),
-            ollama_list=listing.strip().splitlines(),
-        )
-        health = services(profiles)
-        record(
-            "ollama_service_healthy",
-            "healthy" in health.get("ollama", ""),
-            status=health.get("ollama"),
-        )
-        ok, waited = wait_for(lambda: ready()["components"]["llm"]["status"] == "ok", 120)
-        record(
-            "api_reaches_ollama_over_compose_network",
-            ok,
-            llm=ready()["components"]["llm"],
-            endpoint="http://ollama:11434 (service name, no host port)",
-        )
-        # `docker compose port` prints ":0" (or nothing, or an error) for an unpublished port.
-        published = compose("port", "ollama", "11434", profiles=profiles).stdout.strip()
-        host_port = published.rsplit(":", 1)[-1] if published else ""
-        record(
-            "ollama_not_published_to_host",
-            host_port in ("", "0"),
-            port_output=published,
-            note="the model server is reachable only from inside the Compose network",
-        )
-
-        with_llm = investigate(tok["operator"], use_llm=True, timeout=args.llm_timeout)
-        record(
-            "llm_investigation_through_api",
-            with_llm.get("status") == "completed"
-            and any(c["ok"] for c in with_llm.get("llm_calls", [])),
-            **with_llm,
-        )
-
-        compose("stop", "ollama", profiles=profiles)
-        ok, _ = wait_for(lambda: ready()["components"]["llm"]["status"] != "ok", 60)
-        degraded = ready()
-        record(
-            "ready_reports_llm_unavailable_but_system_ready",
-            ok and degraded["status"] == "ready",
-            llm=degraded["components"]["llm"],
-            system=degraded["status"],
-        )
-        offline = investigate(tok["operator"], use_llm=True, timeout=300)
-        record(
-            "fallback_to_deterministic_when_ollama_is_down",
-            offline.get("status") == "completed"
-            and offline.get("llm_status") == "unavailable"
-            and offline.get("ranked_by") == "rules",
-            **offline,
-        )
-
-        compose("start", "ollama", profiles=profiles)
-        ok, waited = wait_for(lambda: ready()["components"]["llm"]["status"] == "ok", 180)
-        record(
-            "llm_recovers_after_ollama_restart",
+            "api_ready",
             ok,
             waited_s=round(waited, 1),
-            llm=ready()["components"]["llm"],
+            components={k: v["status"] for k, v in state.get("components", {}).items()},
         )
+        record(
+            "total_startup", ok, seconds=round(time.time() - started, 1), clean_volumes=args.clean
+        )
+
+        dash = httpx.get(DASHBOARD, timeout=10)
+        proxied = httpx.get(
+            f"{DASHBOARD}/api/overview",
+            timeout=10,
+            headers={"Authorization": f"Bearer {tok['viewer']}"},
+        )
+        record(
+            "dashboard_serves_and_proxies",
+            dash.status_code == 200
+            and proxied.status_code == 200
+            and httpx.get(f"{DASHBOARD}/api/overview", timeout=10).status_code == 401,
+            index=dash.status_code,
+            proxied_overview=proxied.status_code,
+        )
+        mlflow_ok, _ = wait_for(
+            lambda: httpx.get("http://localhost:5000/health", timeout=5).status_code == 200, 120
+        )
+        experiments = []
+        if mlflow_ok:
+            experiments = [
+                e["name"]
+                for e in httpx.post(
+                    "http://localhost:5000/api/2.0/mlflow/experiments/search",
+                    json={"max_results": 20},
+                    timeout=10,
+                )
+                .json()
+                .get("experiments", [])
+            ]
+        record(
+            "mlflow_lists_training_runs",
+            mlflow_ok and "aegis-baseline-adult" in experiments,
+            experiments=experiments,
+        )
+        httpx.get(
+            f"{API}/overview", headers={"Authorization": f"Bearer {tok['viewer']}"}, timeout=10
+        )
+        traced, _ = wait_for(
+            lambda: (
+                "aegis"
+                in (
+                    httpx.get("http://localhost:16686/api/services", timeout=5).json().get("data")
+                    or []
+                )
+            ),
+            60,
+        )
+        record("traces_reach_jaeger", traced)
+
+        base = investigate(tok["operator"], use_llm=False, timeout=300)
+        record(
+            "deterministic_investigation",
+            base.get("status") == "completed" and base.get("ranked_by") == "rules",
+            **base,
+        )
+
+        if args.llm:
+
+            def pulled() -> bool:
+                status = services(profiles).get("ollama-pull", "")
+                if status.startswith("Exited") and "Exited (0)" not in status:
+                    raise SystemExit(
+                        f"ollama-pull failed: {status}\n"
+                        + compose("logs", "--tail", "30", "ollama-pull", profiles=profiles).stdout[
+                            -1500:
+                        ]
+                    )
+                return "Exited (0)" in status
+
+            pull_started = time.time()
+            ok, waited = wait_for(pulled, args.pull_timeout, interval=10)
+            listing = compose("exec", "-T", "ollama", "ollama", "list", profiles=profiles).stdout
+            record(
+                "model_pulled_in_container",
+                ok,
+                waited_s=round(time.time() - pull_started, 1),
+                ollama_list=listing.strip().splitlines(),
+            )
+            health = services(profiles)
+            record(
+                "ollama_service_healthy",
+                "healthy" in health.get("ollama", ""),
+                status=health.get("ollama"),
+            )
+            ok, waited = wait_for(lambda: ready()["components"]["llm"]["status"] == "ok", 120)
+            record(
+                "api_reaches_ollama_over_compose_network",
+                ok,
+                llm=ready()["components"]["llm"],
+                endpoint="http://ollama:11434 (service name, no host port)",
+            )
+            # `docker compose port` prints ":0" (or nothing, or an error) for an unpublished port.
+            published = compose("port", "ollama", "11434", profiles=profiles).stdout.strip()
+            host_port = published.rsplit(":", 1)[-1] if published else ""
+            record(
+                "ollama_not_published_to_host",
+                host_port in ("", "0"),
+                port_output=published,
+                note="the model server is reachable only from inside the Compose network",
+            )
+
+            with_llm = investigate(tok["operator"], use_llm=True, timeout=args.llm_timeout)
+            record(
+                "llm_investigation_through_api",
+                with_llm.get("status") == "completed"
+                and any(c["ok"] for c in with_llm.get("llm_calls", [])),
+                **with_llm,
+            )
+
+            compose("stop", "ollama", profiles=profiles)
+            ok, _ = wait_for(lambda: ready()["components"]["llm"]["status"] != "ok", 60)
+            degraded = ready()
+            record(
+                "ready_reports_llm_unavailable_but_system_ready",
+                ok and degraded["status"] == "ready",
+                llm=degraded["components"]["llm"],
+                system=degraded["status"],
+            )
+            offline = investigate(tok["operator"], use_llm=True, timeout=300)
+            record(
+                "fallback_to_deterministic_when_ollama_is_down",
+                offline.get("status") == "completed"
+                and offline.get("llm_status") == "unavailable"
+                and offline.get("ranked_by") == "rules",
+                **offline,
+            )
+
+            compose("start", "ollama", profiles=profiles)
+            ok, waited = wait_for(lambda: ready()["components"]["llm"]["status"] == "ok", 180)
+            record(
+                "llm_recovers_after_ollama_restart",
+                ok,
+                waited_s=round(waited, 1),
+                llm=ready()["components"]["llm"],
+            )
+
+    except StackUnavailable as exc:
+        record("stack_available", False, reason=str(exc))
+    except httpx.HTTPError as exc:
+        # A service stopped answering mid-verification: a failed verification, reported as one.
+        record("services_reachable", False, error=f"{type(exc).__name__}: {str(exc)[:200]}")
 
     status = services(profiles)
     logs = {

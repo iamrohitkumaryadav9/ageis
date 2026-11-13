@@ -1,0 +1,472 @@
+{
+  "generated_at": "2026-11-12T15:41:18+00:00",
+  "started_at": "2026-11-12T15:08:13+00:00",
+  "duration_s": 1985.7,
+  "git": {
+    "commit": "05e9767bb930f196ac5d4c1c41d5b919d07be178",
+    "branch": "main",
+    "uncommitted_files": 31
+  },
+  "platform": "Linux-6.18.58.1-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+  "python": "3.12.16",
+  "partial_run": false,
+  "verdict": "CONDITIONALLY READY",
+  "mandatory": {
+    "total": 13,
+    "passed": 13,
+    "failed": 0,
+    "blocked": 0,
+    "skipped": 0
+  },
+  "optional": {
+    "total": 4,
+    "passed": 3,
+    "failed": 1,
+    "blocked": 0,
+    "skipped": 0
+  },
+  "gates": [
+    {
+      "id": "lint",
+      "title": "Static checks (ruff check, ruff format --check)",
+      "mandatory": true,
+      "status": "passed",
+      "detail": {
+        "check": {
+          "command": "/home/rohit/ageis/.venv/bin/python -m ruff check .",
+          "exit_code": 0,
+          "output_tail": [
+            "All checks passed!"
+          ]
+        },
+        "format": {
+          "command": "/home/rohit/ageis/.venv/bin/python -m ruff format --check .",
+          "exit_code": 0,
+          "output_tail": [
+            "142 files already formatted"
+          ]
+        }
+      },
+      "seconds": 0.1,
+      "log": "results/release/logs/lint.txt"
+    },
+    {
+      "id": "backend_unit",
+      "title": "Backend unit tests",
+      "mandatory": true,
+      "status": "passed",
+      "detail": {
+        "command": "/home/rohit/ageis/.venv/bin/python -m pytest -q -p no:cacheprovider tests/unit",
+        "exit_code": 0,
+        "tests": {
+          "passed": 423
+        },
+        "summary_line": "423 passed in 138.03s (0:02:18)",
+        "output_tail": [
+          "........................................................................ [ 34%]",
+          "........................................................................ [ 51%]",
+          "........................................................................ [ 68%]",
+          "........................................................................ [ 85%]",
+          "...............................................................          [100%]",
+          "423 passed in 138.03s (0:02:18)"
+        ]
+      },
+      "seconds": 143.1,
+      "log": "results/release/logs/backend_unit.txt"
+    },
+    {
+      "id": "postgres_integration",
+      "title": "PostgreSQL integration tests (API, pipeline)",
+      "mandatory": true,
+      "status": "passed",
+      "detail": {
+        "command": "/home/rohit/ageis/.venv/bin/python -m pytest -q -p no:cacheprovider tests/integration/test_api.py tests/integration/test_pipeline.py",
+        "exit_code": 0,
+        "tests": {
+          "passed": 63
+        },
+        "summary_line": "63 passed in 68.19s (0:01:08)",
+        "output_tail": [
+          "...............................................................          [100%]",
+          "63 passed in 68.19s (0:01:08)"
+        ]
+      },
+      "seconds": 72.9,
+      "log": "results/release/logs/postgres_integration.txt"
+    },
+    {
+      "id": "mlflow_tracking",
+      "title": "MLflow tracking tests (SQLite store and a local tracking server)",
+      "mandatory": true,
+      "status": "passed",
+      "detail": {
+        "command": "/home/rohit/ageis/.venv/bin/python -m pytest -q -p no:cacheprovider tests/integration/test_tracking.py",
+        "exit_code": 0,
+        "tests": {
+          "passed": 18
+        },
+        "summary_line": "18 passed, 1 warning in 38.61s",
+        "output_tail": [
+          "tests/integration/test_tracking.py::test_run_is_created_logged_and_terminated",
+          "  /home/rohit/ageis/.venv/lib/python3.12/site-packages/mlflow/store/tracking/utils/sql_trace_metrics_utils.py:155: SADeprecationWarning: The ``noload`` loader strategy is deprecated and will be removed in a future release.  This option produces incorrect results by returning ``None`` for related ite",
+          "    _SESSION_TRACE_METADATA = aliased(SqlTraceMetadata)",
+          "",
+          "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
+          "18 passed, 1 warning in 38.61s"
+        ]
+      },
+      "seconds": 46.5,
+      "log": "results/release/logs/mlflow_tracking.txt"
+    },
+    {
+      "id": "resource_sampler",
+      "title": "Resource sampler tests (fake trees and the real process table)",
+      "mandatory": true,
+      "status": "passed",
+      "detail": {
+        "command": "/home/rohit/ageis/.venv/bin/python -m pytest -q -p no:cacheprovider tests/unit/test_resources.py tests/integration/test_resources_live.py -m not ollama",
+        "exit_code": 0,
+        "tests": {
+          "passed": 38,
+          "deselected": 1
+        },
+        "summary_line": "38 passed, 1 deselected in 1.71s",
+        "output_tail": [
+          "......................................                                   [100%]",
+          "38 passed, 1 deselected in 1.71s"
+        ]
+      },
+      "seconds": 5.4,
+      "log": "results/release/logs/resource_sampler.txt"
+    },
+    {
+      "id": "adversarial",
+      "title": "Adversarial tests (prompt injection, claims, approval bypass)",
+      "mandatory": true,
+      "status": "passed",
+      "detail": {
+        "command": "/home/rohit/ageis/.venv/bin/python -m pytest -q -p no:cacheprovider tests/adversarial",
+        "exit_code": 0,
+        "tests": {
+          "passed": 120
+        },
+        "summary_line": "120 passed in 113.12s (0:01:53)",
+        "output_tail": [
+          "........................................................................ [ 60%]",
+          "................................................                         [100%]",
+          "120 passed in 113.12s (0:01:53)"
+        ]
+      },
+      "seconds": 117.5,
+      "log": "results/release/logs/adversarial.txt"
+    },
+    {
+      "id": "security_policy",
+      "title": "Security and policy checks (approval enforcement, tool allowlist, policy, lifecycle)",
+      "mandatory": true,
+      "status": "passed",
+      "detail": {
+        "command": "/home/rohit/ageis/.venv/bin/python -m pytest -q -p no:cacheprovider tests/adversarial/test_approval_adversarial.py tests/unit/test_tools.py tests/unit/test_remediation.py tests/unit/test_lifecycle_reconciliation.py",
+        "exit_code": 0,
+        "tests": {
+          "passed": 142
+        },
+        "summary_line": "142 passed in 92.10s (0:01:32)",
+        "output_tail": [
+          "........................................................................ [ 50%]",
+          "......................................................................   [100%]",
+          "142 passed in 92.10s (0:01:32)"
+        ]
+      },
+      "seconds": 96.6,
+      "log": "results/release/logs/security_policy.txt"
+    },
+    {
+      "id": "e2e",
+      "title": "End-to-end lifecycle through the HTTP API (deterministic path)",
+      "mandatory": true,
+      "status": "passed",
+      "detail": {
+        "command": "/home/rohit/ageis/.venv/bin/python -m pytest -q -p no:cacheprovider tests/e2e -m not ollama",
+        "exit_code": 0,
+        "tests": {
+          "passed": 3,
+          "deselected": 1
+        },
+        "summary_line": "3 passed, 1 deselected in 18.62s",
+        "output_tail": [
+          "...                                                                      [100%]",
+          "3 passed, 1 deselected in 18.62s"
+        ]
+      },
+      "seconds": 23.1,
+      "log": "results/release/logs/e2e.txt"
+    },
+    {
+      "id": "benchmark_integrity",
+      "title": "Benchmark integrity (raw hash, recomputed metrics, reconciliation)",
+      "mandatory": true,
+      "status": "passed",
+      "detail": {
+        "run": "main",
+        "raw_sha256": "910170c1f1119b6d119b7b361767fcf4b0c8d32d43d3ccde94767c9d715374f5",
+        "recomputed": {
+          "overall_fault_detection_f1": 0.9958,
+          "drift_detection_f1": 0.9565
+        },
+        "populations": {
+          "overall_fault_detection": 120,
+          "drift_detection": 36
+        },
+        "lifecycle_reconciled": true,
+        "other_runs": {
+          "v2": {
+            "lifecycle_reconciled": true,
+            "overall_fault_detection_f1": 0.9958,
+            "drift_detection_f1": 0.9565
+          }
+        },
+        "problems": [],
+        "tests": {
+          "passed": 56
+        }
+      },
+      "seconds": 9.9,
+      "log": "results/release/logs/benchmark_integrity.txt"
+    },
+    {
+      "id": "frontend_tests",
+      "title": "Frontend tests (Vitest, Testing Library)",
+      "mandatory": true,
+      "status": "passed",
+      "detail": {
+        "command": "npm test --silent",
+        "exit_code": 0,
+        "tests": {
+          "passed": 51,
+          "failed": 0
+        },
+        "output_tail": [
+          "   \u2713 incident detail > renders findings and evidence, labelled as measurements rather than causes 315ms",
+          "",
+          " Test Files  5 passed (5)",
+          "      Tests  51 passed (51)",
+          "   Start at  15:17:05",
+          "   Duration  5.04s (transform 930ms, setup 2.38s, collect 1.82s, tests 4.35s, environment 7.28s, prepare 1.13s)"
+        ]
+      },
+      "seconds": 5.8,
+      "log": "results/release/logs/frontend_tests.txt"
+    },
+    {
+      "id": "frontend_build",
+      "title": "Frontend type-check and production build",
+      "mandatory": true,
+      "status": "passed",
+      "detail": {
+        "command": "npm run build --silent",
+        "exit_code": 0,
+        "output_tail": [
+          "rendering chunks...",
+          "computing gzip size...",
+          "dist/index.html                   0.41 kB \u2502 gzip:  0.28 kB",
+          "dist/assets/index-BplKSql6.css    8.27 kB \u2502 gzip:  2.39 kB",
+          "dist/assets/index-DbVOH8kj.js   182.77 kB \u2502 gzip: 56.50 kB",
+          "\u2713 built in 1.30s"
+        ]
+      },
+      "seconds": 6.5,
+      "log": "results/release/logs/frontend_build.txt"
+    },
+    {
+      "id": "compose_default",
+      "title": "Docker Compose: default services + tracing (API, dashboard, MLflow, Jaeger)",
+      "mandatory": true,
+      "status": "passed",
+      "detail": {
+        "command": "/home/rohit/ageis/.venv/bin/python -m scripts.verify_compose --keep",
+        "exit_code": 0,
+        "passed": true,
+        "checks": {
+          "compose_config_valid": true,
+          "compose_up": true,
+          "api_ready": true,
+          "total_startup": true,
+          "dashboard_serves_and_proxies": true,
+          "mlflow_lists_training_runs": true,
+          "traces_reach_jaeger": true,
+          "deterministic_investigation": true,
+          "all_services_up": true
+        },
+        "report": "results/release/compose.json",
+        "output_tail": [
+          "  ok    mlflow_lists_training_runs  {\"experiments\": [\"aegis-baseline-bank\", \"aegis-baseline-adult\", \"Default\"]}",
+          "  ok    traces_reach_jaeger  {}",
+          "  ok    deterministic_investigation  {\"incident_id\": \"INC-115a824b42e5\", \"status\": \"completed\", \"llm_status\": \"disabled\", \"llm_model\": null, \"seconds\": 2.3, \"llm_calls\": [], \"top_cause\": \"scaling_error\", \"ranked_by\": \"rules\", \"errors\": []}",
+          "  ok    all_services_up  {\"services\": {\"api\": \"Up 52 seconds (healthy)\", \"dashboard\": \"Up 51 seconds\", \"jaeger\": \"Up 58 seconds\", \"mlflow\": \"Up 35 seconds\", \"postgres\": \"Up 58 seconds (healthy)\"}, \"problems\": {}}",
+          "",
+          "9/9 checks passed -> results/release/compose.json"
+        ]
+      },
+      "seconds": 66.7,
+      "log": "results/release/logs/compose_default.txt"
+    },
+    {
+      "id": "browser",
+      "title": "Dashboard in a real browser (interactions, error states, phone viewport)",
+      "mandatory": true,
+      "status": "passed",
+      "detail": {
+        "command": "node e2e/browser-check.mjs",
+        "exit_code": 0,
+        "passed": true,
+        "checks_total": 24,
+        "checks_failed": 0,
+        "browser": "chromium 131.0.6778.33 (headless)",
+        "viewports": [
+          "1440x900",
+          "390x844"
+        ],
+        "report": "results/release/browser/browser-report.json",
+        "output_tail": [
+          "  ok    phone viewport (390px): incident renders without horizontal page overflow",
+          "  ok    phone viewport (390px): evaluation renders without horizontal page overflow",
+          "  ok    phone viewport: tabs remain operable",
+          "  ok    no unexpected console errors and no uncaught exceptions",
+          "",
+          "24/24 checks passed -> /home/rohit/ageis/results/release/browser/browser-report.json"
+        ]
+      },
+      "seconds": 19.8,
+      "log": "results/release/logs/browser.txt"
+    },
+    {
+      "id": "ollama_qwen3_4b",
+      "title": "Local LLM qwen3:4b: structured output, full investigation, failure handling",
+      "mandatory": false,
+      "status": "passed",
+      "detail": {
+        "command": "/home/rohit/ageis/.venv/bin/python -m scripts.verify_llm --model qwen3:4b",
+        "exit_code": 0,
+        "passed": true,
+        "checks": {
+          "metadata": true,
+          "load": true,
+          "structured_output": true,
+          "investigation": true,
+          "fallback_selection": true,
+          "timeout": true,
+          "malformed_output": true,
+          "unavailable_model": true,
+          "unreachable_server": true,
+          "deterministic_path": true
+        },
+        "report": "results/release/llm-qwen3-4b.json",
+        "output_tail": [
+          "  ok    unavailable_model  {\"health_detail\": \"neither aegis-no-such-model:0b nor aegis-none:0b is pulled\", \"error\": \"unavailable\"}",
+          "2026-11-12 15:23:18 [warning  ] llm_request_failed             attempts=1 detail=ConnectError error=unavailable model=qwen3:4b purpose=verify-dead",
+          "  ok    unreachable_server  {\"dead_health\": \"ConnectError\", \"dead_error\": \"unavailable\", \"real_endpoint_ok_afterwards\": true}",
+          "  ok    deterministic_path  {\"status\": \"awaiting_approval\", \"llm_status\": \"unavailable\", \"top_cause\": \"scaling_error\", \"ranked_by\": \"rules\", \"policy_outcome\": \"REQUEST_HUMAN_APPROVAL\", \"seconds\": 2.1}",
+          "",
+          "10/10 checks passed -> results/release/llm-qwen3-4b.json"
+        ]
+      },
+      "seconds": 276.2,
+      "log": "results/release/logs/ollama_qwen3_4b.txt"
+    },
+    {
+      "id": "ollama_llama3_2_3b",
+      "title": "Fallback LLM llama3.2:3b: structured output, full investigation, failure handling",
+      "mandatory": false,
+      "status": "passed",
+      "detail": {
+        "command": "/home/rohit/ageis/.venv/bin/python -m scripts.verify_llm --model llama3.2:3b",
+        "exit_code": 0,
+        "passed": true,
+        "checks": {
+          "metadata": true,
+          "load": true,
+          "structured_output": true,
+          "investigation": true,
+          "fallback_selection": true,
+          "timeout": true,
+          "malformed_output": true,
+          "unavailable_model": true,
+          "unreachable_server": true,
+          "deterministic_path": true
+        },
+        "report": "results/release/llm-llama3.2-3b.json",
+        "output_tail": [
+          "  ok    unavailable_model  {\"health_detail\": \"neither aegis-no-such-model:0b nor aegis-none:0b is pulled\", \"error\": \"unavailable\"}",
+          "2026-11-12 15:26:27 [warning  ] llm_request_failed             attempts=1 detail=ConnectError error=unavailable model=llama3.2:3b purpose=verify-dead",
+          "  ok    unreachable_server  {\"dead_health\": \"ConnectError\", \"dead_error\": \"unavailable\", \"real_endpoint_ok_afterwards\": true}",
+          "  ok    deterministic_path  {\"status\": \"awaiting_approval\", \"llm_status\": \"unavailable\", \"top_cause\": \"scaling_error\", \"ranked_by\": \"rules\", \"policy_outcome\": \"REQUEST_HUMAN_APPROVAL\", \"seconds\": 3.1}",
+          "",
+          "10/10 checks passed -> results/release/llm-llama3.2-3b.json"
+        ]
+      },
+      "seconds": 190.0,
+      "log": "results/release/logs/ollama_llama3_2_3b.txt"
+    },
+    {
+      "id": "e2e_real_llm",
+      "title": "End-to-end lifecycle with the real local model",
+      "mandatory": false,
+      "status": "passed",
+      "detail": {
+        "command": "/home/rohit/ageis/.venv/bin/python -m pytest -q -p no:cacheprovider tests/e2e tests/integration/test_resources_live.py -m ollama",
+        "exit_code": 0,
+        "tests": {
+          "passed": 2,
+          "deselected": 5
+        },
+        "summary_line": "2 passed, 5 deselected in 243.44s (0:04:03)",
+        "output_tail": [
+          "..                                                                       [100%]",
+          "2 passed, 5 deselected in 243.44s (0:04:03)"
+        ]
+      },
+      "seconds": 247.9,
+      "log": "results/release/logs/e2e_real_llm.txt"
+    },
+    {
+      "id": "compose_llm",
+      "title": "Docker Compose `llm` profile: in-container Ollama, connectivity, fallback, recovery",
+      "mandatory": false,
+      "status": "failed",
+      "detail": {
+        "command": "/home/rohit/ageis/.venv/bin/python -m scripts.verify_compose --llm",
+        "exit_code": 1,
+        "passed": true,
+        "checks": {
+          "compose_config_valid": true,
+          "compose_up": true,
+          "api_ready": true,
+          "total_startup": true,
+          "dashboard_serves_and_proxies": true,
+          "mlflow_lists_training_runs": true,
+          "traces_reach_jaeger": true,
+          "deterministic_investigation": true,
+          "model_pulled_in_container": true,
+          "ollama_service_healthy": true,
+          "api_reaches_ollama_over_compose_network": true,
+          "ollama_not_published_to_host": true,
+          "llm_investigation_through_api": true,
+          "ready_reports_llm_unavailable_but_system_ready": true,
+          "fallback_to_deterministic_when_ollama_is_down": true,
+          "llm_recovers_after_ollama_restart": true,
+          "all_services_up": true
+        },
+        "report": "results/release/compose-llm.json",
+        "output_tail": [
+          "ok    compose_config_valid  {\"stderr\": \"\"}",
+          "  FAIL  compose_up  {\"seconds\": 22.2, \"stderr\": \"OM python:3.12-slim-bookworm\\n\\n   3 |     \\n\\n   4 | >>> COPY --from=ghcr.io/astral-sh/uv:0.13.7 /uv /usr/local/bin/uv\\n\\n   5 |     ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy UV_PYTHON_DOWNLOADS=never \\\\\\n\\n   6 |         PYTHON",
+          "  FAIL  api_ready  {\"waited_s\": 602.1, \"components\": {}}",
+          "  FAIL  total_startup  {\"seconds\": 624.4, \"clean_volumes\": false}"
+        ]
+      },
+      "seconds": 625.2,
+      "log": "results/release/logs/compose_llm.txt"
+    }
+  ]
+}

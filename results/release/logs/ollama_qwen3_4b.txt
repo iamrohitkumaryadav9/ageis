@@ -1,19 +1,19 @@
 verifying qwen3:4b at http://localhost:11434
   ok    metadata  {"name": "qwen3:4b", "available": true, "digest": "359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7", "size_bytes": 2497293931, "family": "qwen3", "parameter_size": "4.0B", "quantization_level": "Q4_K_M", "format":
-2026-11-12 14:13:03 [info     ] llm_model_loaded               model=qwen3:4b seconds=12.7
-  ok    load  {"cold_load_s": 12.7, "detail": ""}
-  ok    structured_output  {"parsed": {"root_cause": "scaling_error", "confidence": 0.95, "evidence_ids": ["EV-1"]}, "error": null, "attempts": 1, "invalid_outputs": 0, "seconds": 21.0, "prompt_tokens": 107, "completion_tokens": 34, "cites_only_given_ids": 
-2026-11-12 14:13:25 [info     ] llm_model_loaded               model=qwen3:4b seconds=0.0
-  ok    investigation  {"status": "awaiting_approval", "llm_status": "available", "llm_model": "qwen3:4b", "seconds": 237.5, "llm_calls": [{"purpose": "plan", "ok": true, "error": null, "seconds": 81.3, "prompt_tokens": 772, "completion_tokens": 87, "in
+2026-11-12 15:19:04 [info     ] llm_model_loaded               model=qwen3:4b seconds=7.1
+  ok    load  {"cold_load_s": 7.1, "detail": ""}
+  ok    structured_output  {"parsed": {"root_cause": "scaling_error", "confidence": 0.95, "evidence_ids": ["EV-1"]}, "error": null, "attempts": 1, "invalid_outputs": 0, "seconds": 13.7, "prompt_tokens": 107, "completion_tokens": 34, "cites_only_given_ids": 
+2026-11-12 15:19:19 [info     ] llm_model_loaded               model=qwen3:4b seconds=0.0
+  ok    investigation  {"status": "awaiting_approval", "llm_status": "available", "llm_model": "qwen3:4b", "seconds": 217.3, "llm_calls": [{"purpose": "plan", "ok": true, "error": null, "seconds": 75.5, "prompt_tokens": 772, "completion_tokens": 87, "in
   ok    fallback_selection  {"active_model": "qwen3:4b", "health_detail": "primary model aegis-no-such-model:0b not pulled; using fallback qwen3:4b", "answered_by": "qwen3:4b", "ok": true, "error": null}
-2026-11-12 14:17:33 [warning  ] llm_request_failed             attempts=1 detail='no reply within 1s' error=timeout model=qwen3:4b purpose=verify-timeout
+2026-11-12 15:23:05 [warning  ] llm_request_failed             attempts=1 detail='no reply within 1s' error=timeout model=qwen3:4b purpose=verify-timeout
   ok    timeout  {"error": "timeout", "detail": "no reply within 1s", "returned_after_s": 1.0}
-2026-11-12 14:17:45 [warning  ] llm_request_failed             attempts=2 detail='not valid JSON (Unterminated string starting at)' error=invalid_output model=qwen3:4b purpose=verify-malformed
+2026-11-12 15:23:18 [warning  ] llm_request_failed             attempts=2 detail='not valid JSON (Unterminated string starting at)' error=invalid_output model=qwen3:4b purpose=verify-malformed
   ok    malformed_output  {"error": "invalid_output", "attempts": 2, "invalid_outputs": 2, "raw": "{\n  \"root_cause\": \""}
-2026-11-12 14:17:45 [warning  ] llm_request_failed             attempts=0 detail='model aegis-none:0b is not pulled' error=unavailable model=aegis-none:0b purpose=verify-missing
+2026-11-12 15:23:18 [warning  ] llm_request_failed             attempts=0 detail='model aegis-none:0b is not pulled' error=unavailable model=aegis-none:0b purpose=verify-missing
   ok    unavailable_model  {"health_detail": "neither aegis-no-such-model:0b nor aegis-none:0b is pulled", "error": "unavailable"}
-2026-11-12 14:17:45 [warning  ] llm_request_failed             attempts=1 detail=ConnectError error=unavailable model=qwen3:4b purpose=verify-dead
+2026-11-12 15:23:18 [warning  ] llm_request_failed             attempts=1 detail=ConnectError error=unavailable model=qwen3:4b purpose=verify-dead
   ok    unreachable_server  {"dead_health": "ConnectError", "dead_error": "unavailable", "real_endpoint_ok_afterwards": true}
-  ok    deterministic_path  {"status": "awaiting_approval", "llm_status": "unavailable", "top_cause": "scaling_error", "ranked_by": "rules", "policy_outcome": "REQUEST_HUMAN_APPROVAL", "seconds": 2.2}
+  ok    deterministic_path  {"status": "awaiting_approval", "llm_status": "unavailable", "top_cause": "scaling_error", "ranked_by": "rules", "policy_outcome": "REQUEST_HUMAN_APPROVAL", "seconds": 2.1}
 
 10/10 checks passed -> results/release/llm-qwen3-4b.json

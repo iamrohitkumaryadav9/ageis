@@ -1,19 +1,73 @@
   ok    compose_config_valid  {"stderr": ""}
-  ok    compose_up  {"seconds": 49.5, "stderr": ""}
-  ok    api_ready  {"waited_s": 0.2, "components": {"database": "ok", "models": "ok", "runbooks": "ok", "llm": "ok"}}
-  ok    total_startup  {"seconds": 49.8, "clean_volumes": false}
-  ok    dashboard_serves_and_proxies  {"index": 200, "proxied_overview": 200}
-  ok    mlflow_lists_training_runs  {"experiments": ["aegis-baseline-bank", "aegis-baseline-adult", "Default"]}
-  ok    traces_reach_jaeger  {}
-  ok    deterministic_investigation  {"incident_id": "INC-1e8f9b9ec409", "status": "completed", "llm_status": "disabled", "llm_model": null, "seconds": 2.0, "llm_calls": [], "top_cause": "scaling_error", "ranked_by": "rules", "errors": []}
-  ok    model_pulled_in_container  {"waited_s": 1.0, "ollama_list": ["NAME           ID              SIZE      MODIFIED           ", "llama3.2:3b    a80c4f17acd5    2.0 GB    About a minute ago    ", "qwen3:4b       359d7dd4bcda    2.5 GB    About a minute ago"]}
-  ok    ollama_service_healthy  {"status": "Up About a minute (healthy)"}
-  ok    api_reaches_ollama_over_compose_network  {"llm": {"status": "ok", "required": false, "detail": "qwen3:4b via Ollama 0.40.16"}, "endpoint": "http://ollama:11434 (service name, no host port)"}
-  ok    ollama_not_published_to_host  {"port_output": ":0", "note": "the model server is reachable only from inside the Compose network"}
-  ok    llm_investigation_through_api  {"incident_id": "INC-ed391ad5ab25", "status": "completed", "llm_status": "available", "llm_model": "qwen3:4b", "seconds": 372.9, "llm_calls": [{"purpose": "plan", "ok": true, "error": null, "seconds": 165.2}, {"purpose": "rank", "ok": true, "error": null, "sec
-  ok    ready_reports_llm_unavailable_but_system_ready  {"llm": {"status": "unavailable", "required": false, "detail": "ConnectError; deterministic diagnosis remains available"}, "system": "ready"}
-  ok    fallback_to_deterministic_when_ollama_is_down  {"incident_id": "INC-f2939c24fabe", "status": "completed", "llm_status": "unavailable", "llm_model": null, "seconds": 6.0, "llm_calls": [], "top_cause": "scaling_error", "ranked_by": "rules", "errors": ["LLM investigation unavailable: ConnectError; continuing 
-  ok    llm_recovers_after_ollama_restart  {"waited_s": 3.1, "llm": {"status": "ok", "required": false, "detail": "qwen3:4b via Ollama 0.40.16"}}
-  ok    all_services_up  {"services": {"api": "Up 8 minutes (healthy)", "dashboard": "Up 8 minutes", "jaeger": "Up 8 minutes", "mlflow": "Up 7 minutes", "ollama": "Up 3 seconds (health: starting)", "ollama-pull": "Exited (0) 7 minutes ago", "postgres": "Up 8 minutes (healthy)"}, "prob
+  FAIL  compose_up  {"seconds": 22.2, "stderr": "OM python:3.12-slim-bookworm\n\n   3 |     \n\n   4 | >>> COPY --from=ghcr.io/astral-sh/uv:0.13.7 /uv /usr/local/bin/uv\n\n   5 |     ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy UV_PYTHON_DOWNLOADS=never \\\n\n   6 |         PYTHON
+  FAIL  api_ready  {"waited_s": 602.1, "components": {}}
+  FAIL  total_startup  {"seconds": 624.4, "clean_volumes": false}
 
-17/17 checks passed -> results/release/compose-llm.json
+--- stderr ---
+Traceback (most recent call last):
+  File "/home/rohit/ageis/.venv/lib/python3.12/site-packages/httpx/_transports/default.py", line 101, in map_httpcore_exceptions
+    yield
+  File "/home/rohit/ageis/.venv/lib/python3.12/site-packages/httpx/_transports/default.py", line 250, in handle_request
+    resp = self._pool.handle_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rohit/ageis/.venv/lib/python3.12/site-packages/httpcore/_sync/connection_pool.py", line 256, in handle_request
+    raise exc from None
+  File "/home/rohit/ageis/.venv/lib/python3.12/site-packages/httpcore/_sync/connection_pool.py", line 236, in handle_request
+    response = connection.handle_request(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rohit/ageis/.venv/lib/python3.12/site-packages/httpcore/_sync/connection.py", line 101, in handle_request
+    raise exc
+  File "/home/rohit/ageis/.venv/lib/python3.12/site-packages/httpcore/_sync/connection.py", line 78, in handle_request
+    stream = self._connect(request)
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rohit/ageis/.venv/lib/python3.12/site-packages/httpcore/_sync/connection.py", line 124, in _connect
+    stream = self._network_backend.connect_tcp(**kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rohit/ageis/.venv/lib/python3.12/site-packages/httpcore/_backends/sync.py", line 207, in connect_tcp
+    with map_exceptions(exc_map):
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rohit/.local/share/uv/python/cpython-3.12.16-linux-x86_64-gnu/lib/python3.12/contextlib.py", line 158, in __exit__
+    self.gen.throw(value)
+  File "/home/rohit/ageis/.venv/lib/python3.12/site-packages/httpcore/_exceptions.py", line 14, in map_exceptions
+    raise to_exc(exc) from exc
+httpcore.ConnectError: [Errno 111] Connection refused
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/rohit/ageis/scripts/verify_compose.py", line 341, in <module>
+    main()
+  File "/home/rohit/ageis/scripts/verify_compose.py", line 171, in main
+    dash = httpx.get(DASHBOARD, timeout=10)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rohit/ageis/.venv/lib/python3.12/site-packages/httpx/_api.py", line 195, in get
+    return request(
+           ^^^^^^^^
+  File "/home/rohit/ageis/.venv/lib/python3.12/site-packages/httpx/_api.py", line 109, in request
+    return client.request(
+           ^^^^^^^^^^^^^^^
+  File "/home/rohit/ageis/.venv/lib/python3.12/site-packages/httpx/_client.py", line 825, in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rohit/ageis/.venv/lib/python3.12/site-packages/httpx/_client.py", line 914, in send
+    response = self._send_handling_auth(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rohit/ageis/.venv/lib/python3.12/site-packages/httpx/_client.py", line 942, in _send_handling_auth
+    response = self._send_handling_redirects(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rohit/ageis/.venv/lib/python3.12/site-packages/httpx/_client.py", line 979, in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rohit/ageis/.venv/lib/python3.12/site-packages/httpx/_client.py", line 1014, in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rohit/ageis/.venv/lib/python3.12/site-packages/httpx/_transports/default.py", line 249, in handle_request
+    with map_httpcore_exceptions():
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rohit/.local/share/uv/python/cpython-3.12.16-linux-x86_64-gnu/lib/python3.12/contextlib.py", line 158, in __exit__
+    self.gen.throw(value)
+  File "/home/rohit/ageis/.venv/lib/python3.12/site-packages/httpx/_transports/default.py", line 118, in map_httpcore_exceptions
+    raise mapped_exc(message) from exc
+httpx.ConnectError: [Errno 111] Connection refused

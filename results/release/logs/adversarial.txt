@@ -1,30 +1,3 @@
-............F........................................................... [ 60%]
-...............................................                          [100%]
-=================================== FAILURES ===================================
-_ test_llm_only_cause_is_capped_below_the_action_threshold_and_policy_blocks_it _
-
-ctx = <tests.conftest.MonitorContext object at 0x7584e681afc0>
-
-    def test_llm_only_cause_is_capped_below_the_action_threshold_and_policy_blocks_it(ctx):
-        """The LLM insists on a cause the rules do not support, citing a real anomaly."""
-    
-        def stubborn(body):
-            return ranking_from_prompt("artifact_mismatch", 0.99)(body)
-    
-        fake = FakeOllama({"plan": good_plan(), "rank": stubborn})
-        final, tools, _, _ = investigate(
-            ctx, ctx.scenario("F04", "high", seed=4), llm=fake.client(), use_llm_explain=False
-        )
-        top = final["diagnosis"]["hypotheses"][0]
->       assert top["root_cause"] == "artifact_mismatch" and top["confidence"] <= 0.45
-E       AssertionError: assert ('scaling_error' == 'artifact_mismatch'
-E         
-E         - artifact_mismatch
-E         + scaling_error)
-
-tests/adversarial/test_agent_adversarial.py:248: AssertionError
------------------------------ Captured stdout call -----------------------------
-2026-11-12 14:40:14 [info     ] llm_model_loaded               model=qwen3:4b seconds=0.0
-=========================== short test summary info ============================
-FAILED tests/adversarial/test_agent_adversarial.py::test_llm_only_cause_is_capped_below_the_action_threshold_and_policy_blocks_it
-1 failed, 118 passed in 108.79s (0:01:48)
+........................................................................ [ 60%]
+................................................                         [100%]
+120 passed in 113.12s (0:01:53)

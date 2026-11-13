@@ -49,6 +49,8 @@ REFERENCE_SHA256 = "910170c1f1119b6d119b7b361767fcf4b0c8d32d43d3ccde94767c9d7153
 REFERENCE_HEADLINE = {"overall_fault_detection_f1": 0.9958, "drift_detection_f1": 0.9565}
 PY = [sys.executable, "-m"]
 PYTEST = [*PY, "pytest", "-q", "-p", "no:cacheprovider"]
+#: When this process started; reports older than this were not produced by this run.
+RUN_STARTED = time.time()
 
 
 @dataclass
@@ -205,9 +207,17 @@ def vitest_counts(stdout: str) -> dict[str, Any]:
 
 
 def json_report(path: Path, keys: tuple[str, ...] = ("passed",)):
+    """Read the report a gate's command wrote. A file left over from an earlier run is not
+    evidence for this one: only a report written after this gate started is used."""
+
     def parse(_: str) -> dict[str, Any]:
         if not path.exists():
             return {"report": "not written"}
+        if path.stat().st_mtime < RUN_STARTED - 1:
+            return {
+                "report": "not written by this run "
+                f"(an older {path.name} exists and was ignored; the command did not finish)"
+            }
         data = json.loads(path.read_text())
         out = {k: data.get(k) for k in keys}
         if "checks" in data and isinstance(data["checks"], dict):

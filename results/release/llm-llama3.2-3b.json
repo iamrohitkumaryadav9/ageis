@@ -1,7 +1,7 @@
 {
   "model": "llama3.2:3b",
-  "generated_at": "2026-11-12T14:21:05+00:00",
-  "passed": false,
+  "generated_at": "2026-11-12T15:26:37+00:00",
+  "passed": true,
   "checks": {
     "metadata": {
       "passed": true,
@@ -18,7 +18,7 @@
     },
     "load": {
       "passed": true,
-      "cold_load_s": 12.5,
+      "cold_load_s": 6.6,
       "detail": ""
     },
     "structured_output": {
@@ -34,24 +34,24 @@
       "error": null,
       "attempts": 1,
       "invalid_outputs": 0,
-      "seconds": 12.0,
+      "seconds": 11.5,
       "prompt_tokens": 116,
       "completion_tokens": 34,
       "cites_only_given_ids": true
     },
     "investigation": {
       "passed": true,
-      "status": "completed",
+      "status": "awaiting_approval",
       "llm_status": "available",
       "llm_model": "llama3.2:3b",
-      "seconds": 132.9,
+      "seconds": 139.7,
       "llm_calls": [
         {
           "purpose": "plan",
           "ok": true,
           "error": null,
-          "seconds": 45.8,
-          "prompt_tokens": 719,
+          "seconds": 40.6,
+          "prompt_tokens": 717,
           "completion_tokens": 20,
           "invalid_outputs": 0
         },
@@ -59,27 +59,27 @@
           "purpose": "rank",
           "ok": true,
           "error": null,
-          "seconds": 54.0,
-          "prompt_tokens": 912,
-          "completion_tokens": 199,
+          "seconds": 56.8,
+          "prompt_tokens": 909,
+          "completion_tokens": 208,
           "invalid_outputs": 0
         },
         {
           "purpose": "explain",
           "ok": true,
           "error": null,
-          "seconds": 32.0,
-          "prompt_tokens": 649,
-          "completion_tokens": 80,
+          "seconds": 40.2,
+          "prompt_tokens": 722,
+          "completion_tokens": 100,
           "invalid_outputs": 0
         }
       ],
       "llm_calls_ok": 3,
       "llm_calls_total": 3,
-      "top_cause": "concept_drift",
+      "top_cause": "scaling_error",
       "top_ranked_by": "llm",
       "rule_top_cause": "scaling_error",
-      "policy_outcome": "INVESTIGATE_MORE",
+      "policy_outcome": "REQUEST_HUMAN_APPROVAL",
       "explanation_source": "llm:llama3.2:3b",
       "tools_requested_by_llm": 1,
       "tools_rejected": 0,
@@ -92,11 +92,11 @@
         "unsupported_claims_generated": 0,
         "unsupported_claims_rejected": 0,
         "invalid_cause_labels_rejected": 0,
-        "contradictory_claims_generated": 0,
-        "contradictory_claims_rejected": 0,
+        "contradictory_claims_generated": 1,
+        "contradictory_claims_rejected": 1,
         "fabricated_evidence_ids_generated": 0,
         "fabricated_evidence_ids_stripped": 0,
-        "irrelevant_evidence_ids_stripped": 1,
+        "irrelevant_evidence_ids_stripped": 4,
         "untrusted_evidence_ids_stripped": 0,
         "causal_claims_escaped": 0,
         "unsupported_claims_escaped": 0,
@@ -137,7 +137,7 @@
       "real_endpoint_ok_afterwards": true
     },
     "deterministic_path": {
-      "passed": false,
+      "passed": true,
       "status": "awaiting_approval",
       "llm_status": "unavailable",
       "top_cause": "scaling_error",
@@ -147,31 +147,31 @@
     }
   },
   "resources": {
-    "run_id": "RES-383ad3646d1c",
+    "run_id": "RES-b8c3967567b6",
     "label": "verify-llama3.2:3b",
-    "started_at": "2026-11-12T14:18:02+00:00",
-    "ended_at": "2026-11-12T14:20:40+00:00",
-    "duration_s": 157.4,
+    "started_at": "2026-11-12T15:23:33+00:00",
+    "ended_at": "2026-11-12T15:26:11+00:00",
+    "duration_s": 157.9,
     "sampling_interval_s": 0.5,
     "samples": 301,
     "peaks_mb": {
-      "python_rss": 315.0,
-      "aegis_tree_rss": 315.0,
-      "ollama_server_rss": 26.1,
-      "ollama_runner_rss": 3471.0,
-      "process_tree_total_rss": 3754.1,
-      "system_used": 5453.1,
-      "swap_used": 998.4
+      "python_rss": 331.7,
+      "aegis_tree_rss": 331.7,
+      "ollama_server_rss": 22.1,
+      "ollama_runner_rss": 3468.2,
+      "process_tree_total_rss": 3748.0,
+      "system_used": 5169.6,
+      "swap_used": 1192.2
     },
     "at_start_mb": {
-      "system_available": 2382.6,
-      "system_used": 5453.1,
-      "swap_used": 975.4
+      "system_available": 2666.0,
+      "system_used": 5169.6,
+      "swap_used": 1176.9
     },
     "cpu_percent": {
-      "mean": 63.6,
-      "p95": 72.6,
-      "max": 81.9
+      "mean": 65.3,
+      "p95": 75.4,
+      "max": 85.4
     },
     "process_counts_max": {
       "ollama_server": 1,
