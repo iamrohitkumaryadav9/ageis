@@ -1,5 +1,12 @@
 # AEGIS — Autonomous ML Incident Commander
 
+[![CI](https://github.com/iamrohitkumaryadav9/ageis/actions/workflows/ci.yml/badge.svg)](https://github.com/iamrohitkumaryadav9/ageis/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+![An incident awaiting approval: sandbox validation checks, policy decision, and an approver-only Approve button](results/release/browser/desktop-incident-remediation-pending.png)
+
+<sub>A scaling fault (`education_num` x 100) caught, diagnosed, fixed in a sandbox and waiting for a human. Screenshot from the real-browser release check. More: [overview](results/release/browser/desktop-overview.png), [investigation](results/release/browser/desktop-incident-investigation.png), [benchmark page](results/release/browser/desktop-evaluation.png).</sub>
+
 AEGIS watches a deployed machine-learning model, opens an incident when data or model behaviour
 departs from a reference window, investigates it, ranks root-cause hypotheses from evidence,
 proposes a remediation, validates that remediation in a sandbox, and executes it only after an
@@ -179,10 +186,23 @@ uv run python -m aegis.evaluation.report --name myrun       # summary.json, repo
 
 Methodology, limitations and results: [docs/benchmark.md](docs/benchmark.md).
 
-AEGIS achieved 0.996 overall fault-detection F1 across ten injected ML failure categories and
-0.9565 drift-detection F1 across numerical, categorical, and scaling drift scenarios.
+On this benchmark AEGIS reached 0.996 overall fault-detection F1 across ten injected ML failure
+categories and 0.9565 drift-detection F1 across numerical, categorical, and scaling drift scenarios.
 
-Those are two different metrics and are never interchangeable:
+**Read these numbers with their caveats** (full list in [docs/benchmark.md](docs/benchmark.md#limitations)):
+
+- The faults are synthetic and single, and were written by the same author as the rules that
+  diagnose them. High rule-based accuracy shows internal consistency, not performance on incidents
+  the rules were not designed around. No scenario contains two simultaneous faults.
+- F10 (model artifact mismatch) is detected by construction (a hash comparison) and F08 (schema
+  change) nearly so.
+- Quarantine counts as a remediation and is always valid when its grounds are present, which lifts
+  the supported-fault remediation success rate.
+- The local LLM did not improve diagnostic accuracy over the rule engine, and the LLM
+  configurations were run on only 20 scenarios, so their confidence intervals are wide.
+- One machine, one run, two tabular datasets, one model family each.
+
+The two detection metrics are different and are never interchangeable:
 
 | Metric | Positives | Clean controls | A detection is | TP / FP / TN / FN | F1 |
 |---|---|---|---|---|---|
